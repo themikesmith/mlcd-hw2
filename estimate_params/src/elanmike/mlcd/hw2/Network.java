@@ -38,6 +38,8 @@ public class Network {
 	private static final Pattern _regexObserveWall = Pattern.compile("ObserveWall_(N|S|E|W)_\\d+");
 	/** Matcher for observe landmark variable name -- 2 groups: landmark number, direction */
 	private static final Pattern _regexObserveLandmark = Pattern.compile("ObserveLandmark(\\d+)_(N|S|E|W)_\\d+");
+	/** Matcher for time step in variable name -- 1 group: time step number */
+	private static final Pattern _regexVarTimeStep = Pattern.compile(".+_(\\d+)");
 	private int _biggestRow, _biggestCol, _numTimeSteps, _numLandmarks;
 	/**
 	 * Given a 'network-gridAxB-tC.txt' input file,
@@ -106,6 +108,14 @@ public class Network {
 					int landmarkNum = new Integer(m.group(1));
 					if(landmarkNum > _numLandmarks) {
 						_numLandmarks = landmarkNum;
+					}
+				}
+				// and finally get the time step, and increment our max value
+				m = _regexVarTimeStep.matcher(varName);
+				if(m.matches()) {
+					int timeStep = new Integer(m.group(1));
+					if(timeStep > _numTimeSteps) {
+						_numTimeSteps = timeStep;
 					}
 				}
 				numVariables--; // and decrement our number left to read
