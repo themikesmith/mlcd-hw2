@@ -182,6 +182,7 @@ public class Network {
 				continue; // skip line and continue counting
 			}
 			else {
+				// get row value
 				String[] rowValue = data[2].split("=");
 				Matcher m = Constants._regexPosition.matcher(rowValue[0]);
 				if(!m.matches() && !m.group(1).equals(Constants.ROW)) {
@@ -190,6 +191,7 @@ public class Network {
 				}
 				prevRow = currRow;
 				currRow = Integer.parseInt(rowValue[1]);
+				// get col value
 				String[] colValue = data[3].split("=");
 				m = Constants._regexPosition.matcher(colValue[0]);
 				if(!m.matches() && !m.group(1).equals(Constants.COL)) {
@@ -198,6 +200,7 @@ public class Network {
 				}
 				prevCol = currCol;
 				currCol = Integer.parseInt(colValue[1]);
+				// get action value
 				String[] actionValue = data[4].split("=");
 				m = Constants._regexAction.matcher(actionValue[0]);
 				Matcher n = Constants._regexMove.matcher(actionValue[1]);
@@ -211,6 +214,10 @@ public class Network {
 				// remember previous (i,j) and previous action
 				// TODO add 1 to count of the applicable motion parameters, if prevAction not null
 				if(prevAction != null) {
+					if(currAction == null) {
+						System.err.printf("error parsing action:%s\n",data[4]);
+						continue; // skip line and continue counting
+					}
 					// p(row i | row i-1, prev action moving in direction d)
 					// p(row i | row i+1, prev action moving in direction d)
 					// p(row i | row i, prev action moving in direction d)
