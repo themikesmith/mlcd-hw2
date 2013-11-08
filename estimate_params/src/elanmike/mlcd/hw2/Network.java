@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * This class, a singleton in our Estimate Parameters framework, 
@@ -29,11 +30,11 @@ import java.util.List;
  */
 public class Network {
 	// 1 group: row or col
-	private static final String _regexPosition = "Position(Row|Col)\\d+";
+	private static final Pattern _regexPosition = Pattern.compile("Position(Row|Col)\\d+");
 	// 1 group: direction
-	private static final String _regexObserveWall = "ObserveWall_(N|S|E|W)_\\d+";
+	private static final Pattern _regexObserveWall = Pattern.compile("ObserveWall_(N|S|E|W)_\\d+");
 	// 2 groups: landmark number, direction 
-	private static final String _regexObserveLandmark = "ObserveLandmark(\\d+)_(N|S|E|W)_\\d+";
+	private static final Pattern _regexObserveLandmark = Pattern.compile("ObserveLandmark(\\d+)_(N|S|E|W)_\\d+");
 	private int _numLandmarks, _i, _j;
 	/**
 	 * Given a 'network-gridAxB-tC.txt' input file,
