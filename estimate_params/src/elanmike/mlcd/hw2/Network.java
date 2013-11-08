@@ -248,6 +248,9 @@ public class Network {
 			// compute motion model, and observation model at the same time
 			for(int i = 1; i <= _biggestRow; i++) {
 				for(int j = 1; j <= _biggestCol; j++) {
+					// for each i,j cell
+					// compute motion model
+					// TODO 6 functions
 					// compute observation model at each point
 					for(DIR d : DIR.values()) {
 						String varName = VARTYPES.OBSERVE_WALL.makeVarName("",d.toString(),Integer.toString(t));
@@ -260,9 +263,6 @@ public class Network {
 						}
 					}
 				}
-			}
-			for(int j = 1; j <= _biggestCol; j++) {
-				
 			}
 		}
 	}
