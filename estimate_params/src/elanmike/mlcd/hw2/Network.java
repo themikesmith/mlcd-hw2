@@ -32,11 +32,11 @@ import java.util.regex.Pattern;
 public class Network {
 	// static final values
 	private static final String ROW = "Row", COL = "Col", NORTH = "N", SOUTH = "S", EAST = "E", WEST = "W"; 
-	// 1 group: row or col
+	/** Matcher for position variable name -- 1 group: row or col */
 	private static final Pattern _regexPosition = Pattern.compile("Position(Row|Col)\\d+");
-	// 1 group: direction
+	/** Matcher for observe wall variable name -- 1 group: direction */
 	private static final Pattern _regexObserveWall = Pattern.compile("ObserveWall_(N|S|E|W)_\\d+");
-	// 2 groups: landmark number, direction 
+	/** Matcher for observe landmark variable name -- 2 groups: landmark number, direction */
 	private static final Pattern _regexObserveLandmark = Pattern.compile("ObserveLandmark(\\d+)_(N|S|E|W)_\\d+");
 	private int _biggestRow, _biggestCol, _numTimeSteps, _numLandmarks;
 	/**
@@ -57,7 +57,7 @@ public class Network {
 	 * 
 	 * @param networkFilename the name of the network file
 	 * @throws IOException if cannot find the network file, or can't read a line in the file
-	 * @throws NumberFormatException if cannot format the first number
+	 * @throws NumberFormatException if cannot format a number
 	 */
 	public void read(String networkFilename) throws IOException {
 		// variables to store info about the network
@@ -81,6 +81,7 @@ public class Network {
 				String[] varInfo = line.split("\\s");
 				String varName = varInfo[0];
 				String[] varValues = varInfo[1].split(",");
+				// if it's a position variable, take the max value for I or J
 				Matcher m = _regexPosition.matcher(varName);
 				if(m.matches()) {
 					if(m.group(1).equals(ROW)) {
@@ -99,7 +100,14 @@ public class Network {
 						throw new IOException("error parsing position variable name! fix me");
 					}
 				}
-				// TODO if it's observe landmark, take max value for N
+				// if it's observe landmark, take max value for N
+				m = _regexObserveLandmark.matcher(varName);
+				if(m.matches()) {
+					int landmarkNum = new Integer(m.group(1));
+					if(landmarkNum > _numLandmarks) {
+						_numLandmarks = landmarkNum;
+					}
+				}
 				numVariables--; // and decrement our number left to read
 			}
 			else { // reading edges
