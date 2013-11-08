@@ -14,8 +14,13 @@ public class Constants {
 			this.shortName = s;
 			this.longName = t;
 		}
+		/** @return the short name of the direction */
 		public String toString() {return shortName;}
+		/** @return the long name of the direction */
 		public String getLongName() {return longName;}
+		/**
+		 * @return the value of the move action when moving in the direction, eg "MoveNorth"
+		 */
 		public String getMoveAction() {return "Move"+longName;}
 		/**
 		 * @return a string '(x|y|...|z)' such that it's a regex for a grouped OR matcher
@@ -35,7 +40,8 @@ public class Constants {
 	 * @author mcs
 	 */
 	public enum VARTYPES {
-		POSITION("Position"), OBSERVE_WALL("ObserveWall"), OBSERVE_LANDMARK("ObserveLandmark"), ACTION("Action");
+		POSITION("Position"), OBSERVE_WALL("ObserveWall"), 
+			OBSERVE_LANDMARK("ObserveLandmark"), ACTION("Action");
 		private String s;
 		VARTYPES(String s) {
 			this.s = s;

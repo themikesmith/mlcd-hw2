@@ -139,7 +139,7 @@ public class Network {
 	public void train(String trainingFilename) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(trainingFilename));
 		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1, totalEvents = 0;
-		DIR prevAction = null;
+		DIR prevAction = null; // we can represent action by direction of move
 		String line;
 		while ((line = br.readLine()) != null) {
 			String[] data = line.split(" ");
