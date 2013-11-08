@@ -195,7 +195,7 @@ public class Network {
 	 * @param contextVars list of context variables, Yi=yi
 	 * @return float probability
 	 */
-	private float getProbability(VariablePair lhsVar, VariablePair[] contextVars) {
+	private float getProbability(VariablePair lhsVar, VariablePair... contextVars) {
 		// TODO implement
 		return -1;
 	}
