@@ -176,6 +176,14 @@ public class Network {
 			}
 		}
 		br.close();
+		// smooth
+		smoothCounts();
+	}
+	/**
+	 * Compute our smoothed counts
+	 */
+	private void smoothCounts() {
+		// TODO implement smoothing counts
 	}
 
 	/**
