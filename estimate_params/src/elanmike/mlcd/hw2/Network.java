@@ -33,7 +33,7 @@ public class Network {
 	// static final values
 	private static final String ROW = "Row", COL = "Col", NORTH = "N", SOUTH = "S", EAST = "E", WEST = "W"; 
 	/** Matcher for position variable name -- 1 group: row or col */
-	private static final Pattern _regexPosition = Pattern.compile("Position(Row|Col)\\d+");
+	private static final Pattern _regexPosition = Pattern.compile("Position(Row|Col)_\\d+");
 	/** Matcher for observe wall variable name -- 1 group: direction */
 	private static final Pattern _regexObserveWall = Pattern.compile("ObserveWall_(N|S|E|W)_\\d+");
 	/** Matcher for observe landmark variable name -- 2 groups: landmark number, direction */
@@ -67,8 +67,7 @@ public class Network {
 		String line;
 		// on the first line is the number of following lines that describe variables
 		int numVariables = -1;
-		// after the first line, we either are reading variables, or edges.
-		boolean readingVariables = true;
+		// after the first line, we either are reading variables, or edges. check if we have any variables left
 		// init our known values
 		_biggestRow = -1;
 		_biggestCol = -1;
@@ -78,7 +77,7 @@ public class Network {
 			if(numVariables == -1) { // set the number of variables
 				numVariables = new Integer(line); // throws number format exception
 			}
-			else if(readingVariables) {
+			else if(numVariables > 0) {
 				// read variable
 				String[] varInfo = line.split("\\s");
 				String varName = varInfo[0];
@@ -99,6 +98,7 @@ public class Network {
 						}
 					}
 					else {
+						br.close();
 						throw new IOException("error parsing position variable name! fix me");
 					}
 				}
@@ -169,8 +169,8 @@ public class Network {
 	 * @param string the cpd filename (to be created / overwritten)
 	 */
 	public void writeCPD(String string) {
-		// TODO Auto-generated method stub
-		
+		// print out our read network parameters
+		System.out.printf("I:%d J:%d T:%d L:%d\n", _biggestRow, _biggestCol, _numTimeSteps, _numLandmarks);
 	}
 
 }
