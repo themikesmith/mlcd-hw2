@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -29,13 +30,15 @@ import java.util.regex.Pattern;
  *
  */
 public class Network {
+	// static final values
+	private static final String ROW = "Row", COL = "Col", NORTH = "N", SOUTH = "S", EAST = "E", WEST = "W"; 
 	// 1 group: row or col
 	private static final Pattern _regexPosition = Pattern.compile("Position(Row|Col)\\d+");
 	// 1 group: direction
 	private static final Pattern _regexObserveWall = Pattern.compile("ObserveWall_(N|S|E|W)_\\d+");
 	// 2 groups: landmark number, direction 
 	private static final Pattern _regexObserveLandmark = Pattern.compile("ObserveLandmark(\\d+)_(N|S|E|W)_\\d+");
-	private int _numLandmarks, _i, _j;
+	private int _biggestRow, _biggestCol, _numTimeSteps, _numLandmarks;
 	/**
 	 * Given a 'network-gridAxB-tC.txt' input file,
 	 * where A indicates the number of rows, B indicates the number of columns, 
@@ -54,15 +57,21 @@ public class Network {
 	 * 
 	 * @param networkFilename the name of the network file
 	 * @throws IOException if cannot find the network file, or can't read a line in the file
-	 * @throws NumberNotFoundException if cannot format the first number
+	 * @throws NumberFormatException if cannot format the first number
 	 */
 	public void read(String networkFilename) throws IOException {
+		// variables to store info about the network
 		BufferedReader br = new BufferedReader(new FileReader(networkFilename));
 		String line;
 		// on the first line is the number of following lines that describe variables
 		int numVariables = -1;
 		// after the first line, we either are reading variables, or edges.
 		boolean readingVariables = true;
+		// init our known values
+		_biggestRow = -1;
+		_biggestCol = -1;
+		_numTimeSteps = -1;
+		_numLandmarks = -1;
 		while ((line = br.readLine()) != null) {
 			if(numVariables == -1) { // set the number of variables
 				numVariables = new Integer(line); // throws number format exception
@@ -72,8 +81,21 @@ public class Network {
 				String[] varInfo = line.split("\\s");
 				String varName = varInfo[0];
 				String[] varValues = varInfo[1].split(",");
-				// TODO if it's a position row, take max value for I
-				// TODO if it's a position col, take max value for J
+				Matcher m = _regexPosition.matcher(varName);
+				if(m.matches()) {
+					if(m.group(1).equals(ROW)) {
+						int currBiggestRow = new Integer(varValues[varValues.length-1]);
+						if(currBiggestRow > _biggestRow) {
+							_biggestRow = currBiggestRow;
+						}
+					}
+					else if(m.group(1).equals(COL)) {
+						int currBiggestCol = new Integer(varValues[varValues.length-1]);
+						if(currBiggestCol > _biggestCol) {
+							_biggestCol = currBiggestCol;
+						}
+					}
+				}
 				// TODO if it's observe landmark, take max value for N
 				numVariables--; // and decrement our number left to read
 			}
