@@ -185,6 +185,19 @@ public class Network {
 	private void smoothCounts() {
 		// TODO implement smoothing counts
 	}
+	/**
+	 * Gets our probability of X given context variables Y1, Y2, ... Yn
+	 * aka P(X | Y1, ... Yn)
+	 * One may pass no contexts.
+	 * 
+	 * @param lhsVar left hand side of query, X
+	 * @param contextVars list of context variables, Yi
+	 * @return float probability
+	 */
+	private float getProbability(String lhsVar, String[] contextVars) {
+		// TODO implement
+		return -1;
+	}
 
 	/**
 	 * Writing the CPD:
