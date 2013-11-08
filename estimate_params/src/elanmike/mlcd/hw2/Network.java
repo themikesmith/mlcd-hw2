@@ -95,6 +95,9 @@ public class Network {
 							_biggestCol = currBiggestCol;
 						}
 					}
+					else {
+						throw new IOException("error parsing position variable name! fix me");
+					}
 				}
 				// TODO if it's observe landmark, take max value for N
 				numVariables--; // and decrement our number left to read
