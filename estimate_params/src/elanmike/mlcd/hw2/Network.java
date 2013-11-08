@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import elanmike.mlcd.hw2.Constants.DIR;
+import elanmike.mlcd.hw2.Constants.VARTYPES;
 
 /**
  * This class, a singleton in our Estimate Parameters framework, 
@@ -28,40 +30,7 @@ import java.util.regex.Pattern;
  *
  */
 public class Network {
-	// static final values
-	private static final String ROW = "Row", COL = "Col"; 
-	/**
-	 * Enum for directions.
-	 * @author mcs
-	 *
-	 */
-	enum DIR {
-		NORTH("N"), SOUTH("S"), EAST("E"), WEST("W");
-		private String s;
-		DIR(String s) {
-			this.s = s;
-		}
-		public String toString() {
-			return s;
-		}
-		static String getRegexGroup() {
-			StringBuilder sb = new StringBuilder("(");
-			for(DIR d : DIR.values()) { 
-				sb.append(d.toString()).append('|');
-			}
-			sb.deleteCharAt(sb.length()-1);
-			sb.append(")");
-			return sb.toString();
-		}
-	}
-	/** Matcher for position variable name -- 1 group: row or col */
-	private static final Pattern _regexPosition = Pattern.compile("Position(Row|Col)_\\d+");
-	/** Matcher for observe wall variable name -- 1 group: direction */
-	private static final Pattern _regexObserveWall = Pattern.compile("ObserveWall_"+DIR.getRegexGroup()+"_\\d+");
-	/** Matcher for observe landmark variable name -- 2 groups: landmark number, direction */
-	private static final Pattern _regexObserveLandmark = Pattern.compile("ObserveLandmark(\\d+)_"+DIR.getRegexGroup()+"_\\d+");
-	/** Matcher for time step in variable name -- 1 group: time step number */
-	private static final Pattern _regexVarTimeStep = Pattern.compile(".+_(\\d+)");
+	
 	private int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
 	/**
 	 * Given a 'network-gridAxB-tC.txt' input file,
@@ -105,15 +74,15 @@ public class Network {
 				String varName = varInfo[0];
 				String[] varValues = varInfo[1].split(",");
 				// if it's a position variable, take the max value for I or J
-				Matcher m = _regexPosition.matcher(varName);
+				Matcher m = Constants._regexPosition.matcher(varName);
 				if(m.matches()) {
-					if(m.group(1).equals(ROW)) {
+					if(m.group(1).equals(Constants.ROW)) {
 						int currBiggestRow = new Integer(varValues[varValues.length-1]);
 						if(currBiggestRow > _biggestRow) {
 							_biggestRow = currBiggestRow;
 						}
 					}
-					else if(m.group(1).equals(COL)) {
+					else if(m.group(1).equals(Constants.COL)) {
 						int currBiggestCol = new Integer(varValues[varValues.length-1]);
 						if(currBiggestCol > _biggestCol) {
 							_biggestCol = currBiggestCol;
@@ -125,7 +94,7 @@ public class Network {
 					}
 				}
 				// if it's observe landmark, take max value for N
-				m = _regexObserveLandmark.matcher(varName);
+				m = Constants._regexObserveLandmark.matcher(varName);
 				if(m.matches()) {
 					int landmarkNum = new Integer(m.group(1));
 					if(landmarkNum > _numLandmarks) {
@@ -133,7 +102,7 @@ public class Network {
 					}
 				}
 				// and finally get the time step, and increment our max value
-				m = _regexVarTimeStep.matcher(varName);
+				m = Constants._regexVarTimeStep.matcher(varName);
 				if(m.matches()) {
 					int timeStep = new Integer(m.group(1));
 					if(timeStep > _biggestTimeStep) {
@@ -156,14 +125,56 @@ public class Network {
 	}
 
 	/**
-	 * Reads the training file, and maintain counts.
+	 * Reads the training file, and maintain counts of events.
 	 * When finished with training data, smooth with add-1 smoothing.
+	 * 
+	 * Each line:
+	 * TrajectoryNumber TimeStep Variable1=Value1 Variable2=Value2 ...
+	 * 
+	 * (The position and action variables are always given.)
 	 * 
 	 * @param trainingFilename training file name
 	 * @throws IOException 
 	 */
 	public void train(String trainingFilename) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(trainingFilename));
+		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1, totalEvents = 0;
+		DIR prevAction = null;
+		String line;
+		while ((line = br.readLine()) != null) {
+			String[] data = line.split(" ");
+			// data[0] is trajectory number, meaningless
+			// data[1] is time step, meaningless
+			// assume first two variables data[2] and data[3] are positions, i, j
+			if(data.length <= 4) {
+				System.err.printf("error parsing training line - too short:%s",line);
+				continue; // skip line and continue counting
+			}
+			else {
+				String[] rowValue = data[2].split("=");
+				Matcher m = Constants._regexPosition.matcher(rowValue[0]);
+				if(!m.matches() && !m.group(1).equals(Constants.ROW)) {
+					System.err.printf("error parsing row position:%s",data[2]);
+				}
+				prevRow = currRow;
+				currRow = Integer.parseInt(rowValue[1]);
+				String[] colValue = data[3].split("=");
+				m = Constants._regexPosition.matcher(colValue[0]);
+				if(!m.matches() && !m.group(1).equals(Constants.COL)) {
+					System.err.printf("error parsing col position:%s",data[3]);
+				}
+				prevCol = currCol;
+				currCol = Integer.parseInt(colValue[1]);
+				// all subsequent values are variable specifications
+				// for each (i,j) given: (ie, for each row)
+				// remember previous (i,j) and previous action
+				// go through all subsequent variables
+				// TODO add 1 to count of observation_x at (i,j)
+				// TODO add 1 to count of our 6 motion parameters
+				// TODO how store counts?
+				totalEvents++;
+			}
+		}
 		br.close();
 	}
 
@@ -195,6 +206,10 @@ public class Network {
 	 * 
 	 * where (i,j) is in our grid
 	 * 
+	 * Note we need to print with 13 sig figs
+	 * double x = 1.0 / 7.0
+	 * System.out.printf("%.13e", x);
+	 * 
 	 * @param cpdOutputFilename the cpd filename (to be created / overwritten)
 	 * @throws IOException if cannot create file, delete file, write to file
 	 */
@@ -208,9 +223,25 @@ public class Network {
 		}
 		outfile.createNewFile();
 		for(int t = 1; t <= _biggestTimeStep; t++) { // for each time point...
-			// compute observation model
-			// compute motion model
+			// compute motion model, and observation model at the same time
+			for(int i = 1; i <= _biggestRow; i++) {
+				for(int j = 1; j <= _biggestCol; j++) {
+					// compute observation model at each point
+					for(DIR d : DIR.values()) {
+						String varName = VARTYPES.OBSERVE_WALL.makeVarName("",d.toString(),Integer.toString(t));
+						// TODO compute 'yes' | i,j
+						// TODO and compute 'no' = 1-'yes' | i,j
+						for(int l = 1; l <= _numLandmarks; l++) {
+							varName = VARTYPES.OBSERVE_LANDMARK.makeVarName(Integer.toString(l),d.toString(),Integer.toString(t));
+							// TODO compute 'yes' | i,j
+							// TODO and compute 'no' = 1-'yes' | i,j
+						}
+					}
+				}
+			}
+			for(int j = 1; j <= _biggestCol; j++) {
+				
+			}
 		}
 	}
-
 }
