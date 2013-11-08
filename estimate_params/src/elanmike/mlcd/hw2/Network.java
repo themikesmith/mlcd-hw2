@@ -200,7 +200,7 @@ public class Network {
 				}
 				prevCol = currCol;
 				currCol = Integer.parseInt(colValue[1]);
-				// get action value
+				// get action value-
 				String[] actionValue = data[4].split("=");
 				m = Constants._regexAction.matcher(actionValue[0]);
 				Matcher n = Constants._regexMove.matcher(actionValue[1]);
@@ -227,7 +227,9 @@ public class Network {
 				}
 				// all subsequent values are observation variable 'yes' values
 				// go through all subsequent variables
-				// TODO add 1 to count of observation_x at (i,j)
+				for(int v = 5; v < data.length; v++) {
+					// TODO add 1 to count of observation_x at (i,j)	
+				}
 				totalEvents++;
 			}
 		}
