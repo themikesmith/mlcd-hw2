@@ -125,6 +125,12 @@ public class Network {
 			}
 		}
 		br.close();
+		// check we have valid values for our network parameters
+		if(_biggestRow == -1 || _biggestCol == -1 || _numTimeSteps == -1
+				|| _numLandmarks == -1) {
+			throw new IOException("error reading network!"
+				+_biggestRow+'_'+_biggestCol+'_'+_numTimeSteps+'_'+_numLandmarks);
+		}
 	}
 
 	public void train(String string) {
