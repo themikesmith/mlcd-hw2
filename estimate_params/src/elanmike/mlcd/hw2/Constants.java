@@ -23,12 +23,24 @@ public class Constants {
 		 */
 		public String getMoveAction() {return "Move"+longName;}
 		/**
-		 * @return a string '(x|y|...|z)' such that it's a regex for a grouped OR matcher
+		 * @return a string '(x|y|...|z)' such that it's a regex for a grouped OR matcher, using short names
 		 */
-		static String getRegexGroup() {
+		static String getRegexGroupShort() {
 			StringBuilder sb = new StringBuilder("(");
 			for(DIR d : DIR.values()) { 
 				sb.append(d.toString()).append('|');
+			}
+			sb.deleteCharAt(sb.length()-1);
+			sb.append(")");
+			return sb.toString();
+		}
+		/**
+		 * @return a string '(x|y|...|z)' such that it's a regex for a grouped OR matcher, using long names
+		 */
+		static String getRegexGroupLong() {
+			StringBuilder sb = new StringBuilder("(");
+			for(DIR d : DIR.values()) { 
+				sb.append(d.getLongName()).append('|');
 			}
 			sb.deleteCharAt(sb.length()-1);
 			sb.append(")");
@@ -80,15 +92,15 @@ public class Constants {
 	/** Matcher for position variable name -- 1 group: row or col */
 	public static final Pattern _regexPosition = Pattern.compile("Position("+ROW+"|"+COL+")_\\d+");
 	/** Matcher for observe wall variable name -- 1 group: direction */
-	public static final Pattern _regexObserveWall = Pattern.compile("ObserveWall_"+DIR.getRegexGroup()+"_\\d+");
+	public static final Pattern _regexObserveWall = Pattern.compile("ObserveWall_"+DIR.getRegexGroupShort()+"_\\d+");
 	/** Matcher for observe landmark variable name -- 2 groups: landmark number, direction */
-	public static final Pattern _regexObserveLandmark = Pattern.compile("ObserveLandmark(\\d+)_"+DIR.getRegexGroup()+"_\\d+");
+	public static final Pattern _regexObserveLandmark = Pattern.compile("ObserveLandmark(\\d+)_"+DIR.getRegexGroupShort()+"_\\d+");
 	/** Matcher for action variable name -- no groups */
 	public static final Pattern _regexAction = Pattern.compile("Action_\\d+");
 	/** Matcher for action variable value -- 1 group: direction */
-	public static final Pattern _regexMove = Pattern.compile("Move"+DIR.getRegexGroup());
+	public static final Pattern _regexMove = Pattern.compile("Move"+DIR.getRegexGroupLong());
 	/** Matcher for time step in variable name -- 1 group: time step number */
-	public static final Pattern _regexVarTimeStep = Pattern.compile(".+_(\\d+)");
+	public static final Pattern _regexVarTimeStep = Pattern.compile(".+_(\\d+)$");
 	/**
 	 * Small class to hold variable name / value pairs
 	 * 
@@ -107,5 +119,13 @@ public class Constants {
 		String getValue() {return value;}
 		/** @return a string representation "name=value" */
 		public String toString() {return name + "=" +value;}
+	}
+	/**
+	 * Given a variable name, replace the '_t' time step section with literally '_t'
+	 * @param varName
+	 * @return the varName, with the literal '_t' replacing '_T'
+	 */
+	public String removeTimeStep(String varName) {
+		return _regexVarTimeStep.matcher(varName).replaceFirst("_t");
 	}
 }

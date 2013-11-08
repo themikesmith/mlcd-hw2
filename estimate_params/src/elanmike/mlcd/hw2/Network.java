@@ -228,7 +228,7 @@ public class Network {
 				// all subsequent values are observation variable 'yes' values
 				// go through all subsequent variables
 				for(int v = 5; v < data.length; v++) {
-					// TODO add 1 to count of observation_x at (i,j)	
+					// TODO add 1 to count of observation_x at (i,j)
 				}
 				totalEvents++;
 			}
