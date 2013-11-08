@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 import elanmike.mlcd.hw2.Constants.DIR;
@@ -31,8 +33,21 @@ import elanmike.mlcd.hw2.Constants.VariablePair;
  *
  */
 public class Network {
-	
-	private int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
+	private static Map<String, Integer> trainedCounts = new HashMap<String, Integer>();
+	/**
+	 * Make a string key out of a list of string keys
+	 * @param words a list of key strings
+	 * @return the concatenated words separated by spaces
+	 */
+	private static String makeKey(String... words) { 
+		StringBuilder sb = new StringBuilder();
+		for(String word : words) {
+			sb.append(word).append(' ');
+		}
+		sb.deleteCharAt(sb.length()-1);
+		return sb.toString();
+	}
+	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
 	/**
 	 * Given a 'network-gridAxB-tC.txt' input file,
 	 * where A indicates the number of rows, B indicates the number of columns, 
@@ -67,7 +82,7 @@ public class Network {
 		_numLandmarks = -1;
 		while ((line = br.readLine()) != null) {
 			if(numVariables == -1) { // set the number of variables
-				numVariables = new Integer(line); // throws number format exception
+				numVariables = new Integer(line); // throws number format exceptioncompute 
 			}
 			else if(numVariables > 0) {
 				// read variable
@@ -140,38 +155,56 @@ public class Network {
 	public void train(String trainingFilename) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(trainingFilename));
 		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1, totalEvents = 0;
-		DIR prevAction = null; // we can represent action by direction of move
+		DIR currAction = null, prevAction = null; // we can represent action by direction of move
 		String line;
 		while ((line = br.readLine()) != null) {
 			String[] data = line.split(" ");
 			// data[0] is trajectory number, meaningless
 			// data[1] is time step, meaningless
 			// assume first two variables data[2] and data[3] are positions, i, j
-			if(data.length <= 4) {
-				System.err.printf("error parsing training line - too short:%s",line);
+			// assume data[4] is action variable
+			if(data.length <= 5) {
+				System.err.printf("error parsing training line - too short:%s\n",line);
 				continue; // skip line and continue counting
 			}
 			else {
 				String[] rowValue = data[2].split("=");
 				Matcher m = Constants._regexPosition.matcher(rowValue[0]);
 				if(!m.matches() && !m.group(1).equals(Constants.ROW)) {
-					System.err.printf("error parsing row position:%s",data[2]);
+					System.err.printf("error parsing row position:%s\n",data[2]);
+					continue; // skip line and continue counting
 				}
 				prevRow = currRow;
 				currRow = Integer.parseInt(rowValue[1]);
 				String[] colValue = data[3].split("=");
 				m = Constants._regexPosition.matcher(colValue[0]);
 				if(!m.matches() && !m.group(1).equals(Constants.COL)) {
-					System.err.printf("error parsing col position:%s",data[3]);
+					System.err.printf("error parsing col position:%s\n",data[3]);
+					continue; // skip line and continue counting
 				}
 				prevCol = currCol;
 				currCol = Integer.parseInt(colValue[1]);
-				// all subsequent values are variable specifications
+				String[] actionValue = data[4].split("=");
+				m = Constants._regexAction.matcher(actionValue[0]);
+				Matcher n = Constants._regexMove.matcher(actionValue[1]);
+				if(!m.matches() && !n.matches()) {
+					System.err.printf("error parsing action:%s\n",data[4]);
+					continue; // skip line and continue counting
+				}
+				prevAction = currAction; // could be null if first line
+				currAction = DIR.getDirValue(n.group(1)); // could be null if error in dir
+				// all subsequent values are observation variable 'yes' values
 				// for each (i,j) given: (ie, for each row)
 				// remember previous (i,j) and previous action
 				// go through all subsequent variables
 				// TODO add 1 to count of observation_x at (i,j)
-				// TODO add 1 to count of the applicable one of the 6 motion parameters
+				// TODO add 1 to count of the applicable motion parameters
+				// p(row i | row i-1, prev action moving in direction d)
+				// p(row i | row i+1, prev action moving in direction d)
+				// p(row i | row i, prev action moving in direction d)
+				// p(col j | row j-1, prev action moving in direction d)
+				// p(col j | row j+1, prev action moving in direction d)
+				// p(col j | row j, prev action moving in direction d)
 				// TODO how store counts?
 				totalEvents++;
 			}

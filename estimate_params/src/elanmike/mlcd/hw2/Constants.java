@@ -34,6 +34,19 @@ public class Constants {
 			sb.append(")");
 			return sb.toString();
 		}
+		/**
+		 * Given a string long name, output the direction value
+		 * @param dirLongName
+		 * @return dir value, or null if invalid long name specified
+		 */
+		static DIR getDirValue(String dirLongName) {
+			for(DIR d : DIR.values()) {
+				if(dirLongName.equals(d.longName)) {
+					return d;
+				}
+			}
+			return null;
+		}
 	}
 	/**
 	 * Enum for action types.
@@ -70,6 +83,10 @@ public class Constants {
 	public static final Pattern _regexObserveWall = Pattern.compile("ObserveWall_"+DIR.getRegexGroup()+"_\\d+");
 	/** Matcher for observe landmark variable name -- 2 groups: landmark number, direction */
 	public static final Pattern _regexObserveLandmark = Pattern.compile("ObserveLandmark(\\d+)_"+DIR.getRegexGroup()+"_\\d+");
+	/** Matcher for action variable name -- no groups */
+	public static final Pattern _regexAction = Pattern.compile("Action_\\d+");
+	/** Matcher for action variable value -- 1 group: direction */
+	public static final Pattern _regexMove = Pattern.compile("Move"+DIR.getRegexGroup());
 	/** Matcher for time step in variable name -- 1 group: time step number */
 	public static final Pattern _regexVarTimeStep = Pattern.compile(".+_(\\d+)");
 	/**
