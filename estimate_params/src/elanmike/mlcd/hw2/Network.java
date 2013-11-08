@@ -249,14 +249,24 @@ public class Network {
 			for(int i = 1; i <= _biggestRow; i++) {
 				for(int j = 1; j <= _biggestCol; j++) {
 					// for each i,j cell
-					// compute motion model
-					// TODO 6 functions
-					// compute observation model at each point
+					// compute observation model and motion model at each point
 					for(DIR d : DIR.values()) {
+						// motion model:
+						// TODO 6 functions
+						// compute p(row i | row i-1, prev action moving in direction d)
+						// compute p(row i | row i+1, prev action moving in direction d)
+						// compute p(row i | row i, prev action moving in direction d)
+						// compute p(col j | row j-1, prev action moving in direction d)
+						// compute p(col j | row j+1, prev action moving in direction d)
+						// compute p(col j | row j, prev action moving in direction d)
+						
+						// observation model:
+						// compute p(observe wall in that direction | current position)
 						String varName = VARTYPES.OBSERVE_WALL.makeVarName("",d.toString(),Integer.toString(t));
 						// TODO compute 'yes' | i,j
 						// TODO and compute 'no' = 1-'yes' | i,j
 						for(int l = 1; l <= _numLandmarks; l++) {
+							// compute p(observe landmark L in that direction | current position)
 							varName = VARTYPES.OBSERVE_LANDMARK.makeVarName(Integer.toString(l),d.toString(),Integer.toString(t));
 							// TODO compute 'yes' | i,j
 							// TODO and compute 'no' = 1-'yes' | i,j
