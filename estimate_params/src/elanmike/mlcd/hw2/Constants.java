@@ -2,7 +2,7 @@ package elanmike.mlcd.hw2;
 
 import java.util.regex.Pattern;
 
-public class Constants { 
+public class Constants {
 	/**
 	 * Enum for directions.
 	 * @author mcs
@@ -72,5 +72,23 @@ public class Constants {
 	public static final Pattern _regexObserveLandmark = Pattern.compile("ObserveLandmark(\\d+)_"+DIR.getRegexGroup()+"_\\d+");
 	/** Matcher for time step in variable name -- 1 group: time step number */
 	public static final Pattern _regexVarTimeStep = Pattern.compile(".+_(\\d+)");
-	
+	/**
+	 * Small class to hold variable name / value pairs
+	 * 
+	 * @author mcs
+	 *
+	 */
+	class VariablePair {
+		private String name, value;
+		VariablePair(String name, String value) {
+			this.name = name;
+			this.value = value;
+		}
+		/** @return the name */
+		String getName() {return name;}
+		/** @return the value */
+		String getValue() {return value;}
+		/** @return a string representation "name=value" */
+		public String toString() {return name + "=" +value;}
+	}
 }
