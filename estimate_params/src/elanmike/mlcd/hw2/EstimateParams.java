@@ -18,24 +18,24 @@ public class EstimateParams {
 		try {
 			n.read(args[0]);
 		} catch (IOException e) {
-			System.err.printf("error reading from file:",args[0]);
+			System.err.printf("error reading from file: ",args[0]);
 			e.printStackTrace();
 		} catch(NumberFormatException e) {
-			System.err.printf("error reading from file:",args[0]);
+			System.err.printf("error reading from file: ",args[0]);
 			e.printStackTrace();
 		}
 		// train using the MAP estimate, given our training data
 		try {
 			n.train(args[1]);
 		} catch (IOException e) {
-			System.err.printf("error training from file:",args[1]);
+			System.err.printf("error training from file: ",args[1]);
 			e.printStackTrace();
 		}
 		// and write our CPD to the designated output file
 		try {
 			n.writeCPD(args[2]);
 		} catch (IOException e) {
-			System.err.printf("error writing cpd to file:",args[2]);
+			System.err.printf("error writing cpd to file: ",args[2]);
 			e.printStackTrace();
 		}
 		// done!
