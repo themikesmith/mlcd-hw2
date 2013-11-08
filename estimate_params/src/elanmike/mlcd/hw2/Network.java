@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+import com.sun.corba.se.spi.ior.MakeImmutable;
+
 import elanmike.mlcd.hw2.Constants.DIR;
 import elanmike.mlcd.hw2.Constants.VARTYPES;
 import elanmike.mlcd.hw2.Constants.VariablePair;
@@ -33,19 +35,31 @@ import elanmike.mlcd.hw2.Constants.VariablePair;
  *
  */
 public class Network {
-	private static Map<String, Integer> trainedCounts = new HashMap<String, Integer>();
+	private static Map<String, Integer> _trainedCounts = new HashMap<String, Integer>();
 	/**
 	 * Make a string key out of a list of string keys
-	 * @param words a list of key strings
+	 * @param keywords a list of key strings
 	 * @return the concatenated words separated by spaces
 	 */
-	private static String makeKey(String... words) { 
+	private static String makeKey(String... keywords) { 
 		StringBuilder sb = new StringBuilder();
-		for(String word : words) {
+		for(String word : keywords) {
 			sb.append(word).append(' ');
 		}
 		sb.deleteCharAt(sb.length()-1);
 		return sb.toString();
+	}
+	/**
+	 * Increments the count of a key.
+	 * Calls {@code makeKey} to create a single string key
+	 * @param keywords a list of key strings
+	 */
+	private static void increment(String... keywords) {
+		String key = makeKey(keywords);
+		if(!_trainedCounts.containsKey(key)) {
+			_trainedCounts.put(key, 0);
+		}
+		_trainedCounts.put(key, _trainedCounts.get(key) + 1);
 	}
 	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
 	/**
@@ -193,19 +207,20 @@ public class Network {
 				}
 				prevAction = currAction; // could be null if first line
 				currAction = DIR.getDirValue(n.group(1)); // could be null if error in dir
-				// all subsequent values are observation variable 'yes' values
-				// for each (i,j) given: (ie, for each row)
+				// for each (i,j) given: (for each data point)
 				// remember previous (i,j) and previous action
+				// TODO add 1 to count of the applicable motion parameters, if prevAction not null
+				if(prevAction != null) {
+					// p(row i | row i-1, prev action moving in direction d)
+					// p(row i | row i+1, prev action moving in direction d)
+					// p(row i | row i, prev action moving in direction d)
+					// p(col j | row j-1, prev action moving in direction d)
+					// p(col j | row j+1, prev action moving in direction d)
+					// p(col j | row j, prev action moving in direction d)					
+				}
+				// all subsequent values are observation variable 'yes' values
 				// go through all subsequent variables
 				// TODO add 1 to count of observation_x at (i,j)
-				// TODO add 1 to count of the applicable motion parameters
-				// p(row i | row i-1, prev action moving in direction d)
-				// p(row i | row i+1, prev action moving in direction d)
-				// p(row i | row i, prev action moving in direction d)
-				// p(col j | row j-1, prev action moving in direction d)
-				// p(col j | row j+1, prev action moving in direction d)
-				// p(col j | row j, prev action moving in direction d)
-				// TODO how store counts?
 				totalEvents++;
 			}
 		}
