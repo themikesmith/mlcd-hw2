@@ -171,7 +171,7 @@ public class Network {
 				// remember previous (i,j) and previous action
 				// go through all subsequent variables
 				// TODO add 1 to count of observation_x at (i,j)
-				// TODO add 1 to count of our 6 motion parameters
+				// TODO add 1 to count of the applicable one of the 6 motion parameters
 				// TODO how store counts?
 				totalEvents++;
 			}
