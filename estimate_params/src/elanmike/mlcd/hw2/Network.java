@@ -1,11 +1,9 @@
 package elanmike.mlcd.hw2;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -133,9 +131,16 @@ public class Network {
 		}
 	}
 
-	public void train(String string) {
-		// TODO Auto-generated method stub
-		
+	/**
+	 * Reads the training file, and maintain counts.
+	 * When finished with training data, smooth with add-1 smoothing.
+	 * 
+	 * @param trainingFilename training file name
+	 * @throws IOException 
+	 */
+	public void train(String trainingFilename) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(trainingFilename));
+		br.close();
 	}
 
 	/**
@@ -166,11 +171,18 @@ public class Network {
 	 * 
 	 * where (i,j) is in our grid
 	 * 
-	 * @param string the cpd filename (to be created / overwritten)
+	 * @param cpdOutputFilename the cpd filename (to be created / overwritten)
+	 * @throws IOException if cannot create file, delete file, write to file
 	 */
-	public void writeCPD(String string) {
+	public void writeCPD(String cpdOutputFilename) throws IOException {
 		// print out our read network parameters
 		System.out.printf("I:%d J:%d T:%d L:%d\n", _biggestRow, _biggestCol, _numTimeSteps, _numLandmarks);
+		// create and open the cpd file
+		File outfile = new File(cpdOutputFilename);
+		if(outfile.exists()) {
+			outfile.delete();
+		}
+		outfile.createNewFile();
 	}
 
 }
