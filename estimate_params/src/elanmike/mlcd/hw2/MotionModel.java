@@ -58,13 +58,12 @@ public class MotionModel {
 	 * @param moveAttempted
 	 */
 	public void processMove(int prevRow, int prevCol, int currRow, int currCol, DIR moveAttempted) {
-		System.err.printf("process: prev:%d,%d curr:%d,%d dir:%s\n", prevRow, prevCol, currRow, currCol, moveAttempted);
-		if(moveAttempted.equals(DIR.NORTH) || moveAttempted.equals(DIR.SOUTH)) {
+		if(moveAttempted.equals(DIR.EAST) || moveAttempted.equals(DIR.WEST)) {
 			if(prevCol == currCol && prevRow == currRow) { // unsuccessful
 				addFailedMove(moveAttempted);
 			}
 			else if(prevRow == currRow && 
-				prevCol == currCol + (moveAttempted.equals(DIR.NORTH) ? -1 : 1)) {
+				prevCol == currCol + (moveAttempted.equals(DIR.EAST) ? -1 : 1)) {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
@@ -72,12 +71,12 @@ public class MotionModel {
 					moveAttempted, prevRow, prevCol, currRow, currCol);
 			}
 		}
-		else if(moveAttempted.equals(DIR.EAST) || moveAttempted.equals(DIR.WEST)) {
+		else if(moveAttempted.equals(DIR.NORTH) || moveAttempted.equals(DIR.SOUTH)) {
 			if(prevRow == currRow && prevCol == currCol) { // unsuccessful
 				addFailedMove(moveAttempted);
 			}
 			else if(prevCol == currCol && 
-				prevRow == currRow + (moveAttempted.equals(DIR.EAST) ? -1 : 1)) {
+				prevRow == currRow + (moveAttempted.equals(DIR.NORTH) ? -1 : 1)) {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
