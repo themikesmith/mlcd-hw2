@@ -157,5 +157,16 @@ public class MotionModel {
 			System.err.printf("i:%s c:%d\n", DIR.values()[i], successfulMoves[i]);
 		}
 	}
-	//public void 
+	public int incrementRow(int row) { 
+		return (row + 1) % numRows;
+	}
+	public int decrementRow(int row) { 
+		return (row - 1) % numRows;
+	}
+	public int incrementCol(int col) { 
+		return (col + 1) % numCols;
+	}
+	public int decrementCol(int col) { 
+		return (col - 1) % numCols;
+	}
 }
