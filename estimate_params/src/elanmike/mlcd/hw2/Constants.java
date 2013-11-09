@@ -4,28 +4,16 @@ import java.util.regex.Pattern;
 
 public class Constants {
 	/**
-	 * Represents horizonal or vertical movement
-	 * @author mcs
-	 */
-	public enum AXIS {
-		H,V;
-	}
-	/**
 	 * Enum for directions. 
 	 * @author mcs
 	 */
 	public enum DIR {
-		NORTH("N", "North", AXIS.V), SOUTH("S", "South", AXIS.V), 
-			EAST("E","East", AXIS.H), WEST("W","West", AXIS.H);
+		NORTH("N", "North"), SOUTH("S", "South"), EAST("E","East"), WEST("W","West");
 		private String shortName, longName;
-		private AXIS axis;
-		DIR(String s, String t, AXIS a) {
+		DIR(String s, String t) {
 			this.shortName = s;
 			this.longName = t;
-			this.axis = a;
 		}
-		/** @return the direction's axis */
-		public AXIS getAxis() {return axis;}
 		/** @return the short name of the direction */
 		public String toString() {return shortName;}
 		/** @return the long name of the direction */
@@ -63,9 +51,22 @@ public class Constants {
 		 * @param dirLongName
 		 * @return dir value, or null if invalid long name specified
 		 */
-		static DIR getDirValue(String dirLongName) {
+		static DIR getDirValueFromLongName(String dirLongName) {
 			for(DIR d : DIR.values()) {
 				if(dirLongName.equals(d.longName)) {
+					return d;
+				}
+			}
+			return null;
+		}
+		/**
+		 * Given a string long name, output the direction value
+		 * @param dirShortName
+		 * @return dir value, or null if invalid long name specified
+		 */
+		static DIR getDirValueFromShortName(String dirShortName) {
+			for(DIR d : DIR.values()) {
+				if(dirShortName.equals(d.shortName)) {
 					return d;
 				}
 			}
@@ -113,25 +114,6 @@ public class Constants {
 	public static final Pattern _regexMove = Pattern.compile("Move"+DIR.getRegexGroupLong());
 	/** Matcher for time step in variable name -- 1 group: time step number */
 	public static final Pattern _regexVarTimeStep = Pattern.compile(".+_(\\d+)$");
-	/**
-	 * Small class to hold variable name / value pairs
-	 * 
-	 * @author mcs
-	 *
-	 */
-	class VariablePair {
-		private String name, value;
-		VariablePair(String name, String value) {
-			this.name = name;
-			this.value = value;
-		}
-		/** @return the name */
-		String getName() {return name;}
-		/** @return the value */
-		String getValue() {return value;}
-		/** @return a string representation "name=value" */
-		public String toString() {return name + "=" +value;}
-	}
 	/**
 	 * Given a variable name, replace the '_t' time step section with literally '_t'
 	 * @param varName
