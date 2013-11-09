@@ -35,7 +35,6 @@ public class Network {
 	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
 	private static ObservationModel _obsMod;
 	
-	
 	/**
 	 * Given a 'network-gridAxB-tC.txt' input file,
 	 * where A indicates the number of rows, B indicates the number of columns, 
@@ -216,7 +215,7 @@ public class Network {
 						System.out.println(s);
 					
 					
-					int dir = Constants.DIR.getDirValue(observationValue[1]).ordinal();
+					int dir = Constants.DIR.getDirValueFromShortName(observationValue[1]).ordinal();
 					if(observationValue[0].contains("Wall")){
 						System.out.println("Wall - " + observationValue[1] + "("+dir+")");
 					}else if(observationValue[0].contains("Landmark")){
@@ -283,7 +282,7 @@ public class Network {
 		}
 		outfile.createNewFile();
 		PrintWriter out = new PrintWriter(outfile);
-		for(int t = 1; t <= _biggestTimeStep; t++) { // for each time point...
+		for(int t = 0; t < _biggestTimeStep; t++) { // for each time point...
 			// compute motion model, and observation model at the same time
 			for(int i = 1; i <= _biggestRow; i++) {
 				for(int j = 1; j <= _biggestCol; j++) {
@@ -292,18 +291,22 @@ public class Network {
 						colj = VARTYPES.POSITION.makeVarName(Constants.COL, Integer.toString(t));
 					// compute observation model and motion model at each point
 					for(DIR d : DIR.values()) {
-						// motion model - only compute possible probabilities given our model
-						float f = _motion.getProbability(i, j, i-1, j, d);
-						if(f != 0) {
-							out.printf("%.13e", f);
+						if(t > 0) {
+							// motion model - only compute possible probabilities given our model
+							// compute p(row i _t | row i-1 _t-1, prev action _t-1 moving in direction d)
+							float f = _motion.getProbability(i, j, i-1, j, d);
+							if(f != 0) {
+								String lhs = concatVarNameValue(rowi, Integer.toString(i));
+								//String contexts = 
+								//out.printf("%.13e", f);
+							}
+							
+							// compute p(row i _t | row i+1 _t-1, prev action _t-1 moving in direction d)
+							// compute p(row i _t | row i _t-1, prev action _t-1 moving in direction d)
+							// compute p(col j _t | row j-1 _t-1, prev action _t-1 moving in direction d)
+							// compute p(col j _t | row j+1 _t-1, prev action _t-1 moving in direction d)
+							// compute p(col j _t | row j _t-1, prev action _t-1moving in direction d)	
 						}
-						// compute p(row i | row i-1, prev action moving in direction d)
-						// compute p(row i | row i+1, prev action moving in direction d)
-						// compute p(row i | row i, prev action moving in direction d)
-						// compute p(col j | row j-1, prev action moving in direction d)
-						// compute p(col j | row j+1, prev action moving in direction d)
-						// compute p(col j | row j, prev action moving in direction d)
-						
 						// observation model:
 						// compute p(observe wall in that direction | current position)
 						String varName = VARTYPES.OBSERVE_WALL.makeVarName("",d.toString(),Integer.toString(t));
@@ -319,6 +322,7 @@ public class Network {
 				}
 			}
 		}
+		out.close();
 	}
 	/**
 	 * Given a variable name, and a value, concatenate them and return var=value'
@@ -326,15 +330,7 @@ public class Network {
 	 * @param value
 	 * @return varName=value
 	 */
-	private static String addValueToVarName(String varName, String value) {
+	private static String concatVarNameValue(String varName, String value) {
 		return varName + "=" + value;
-	}
-	/**
-	 * Given a variable name, replace the '_t' time step section with literally '_t'
-	 * @param varName
-	 * @return the varName, with the literal '_t' replacing '_T'
-	 */
-	public String removeTimeStep(String varName) {
-		return Constants._regexVarTimeStep.matcher(varName).replaceFirst("_t");
 	}
 }
