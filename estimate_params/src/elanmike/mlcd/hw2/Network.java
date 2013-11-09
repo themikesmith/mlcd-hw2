@@ -297,7 +297,7 @@ public class Network {
 							float f = _motion.getProbability(i, j, i-1, j, d);
 							if(f != 0) {
 								String lhs = concatVarNameValue(rowi, Integer.toString(i));
-								//String contexts = 
+								//String contexts = concatVarNameValue(VARTYPES.POSITION.makeVarName(Constants.ROW, Integer.toString(t-1)), i-1);
 								//out.printf("%.13e", f);
 							}
 							

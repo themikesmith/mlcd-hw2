@@ -157,4 +157,5 @@ public class MotionModel {
 			System.err.printf("i:%s c:%d\n", DIR.values()[i], successfulMoves[i]);
 		}
 	}
+	//public void 
 }
