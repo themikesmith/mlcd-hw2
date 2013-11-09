@@ -200,7 +200,7 @@ public class Network {
 				}
 				prevCol = currCol;
 				currCol = Integer.parseInt(colValue[1]);
-				// get action value-
+				// get action value
 				String[] actionValue = data[4].split("=");
 				m = Constants._regexAction.matcher(actionValue[0]);
 				Matcher n = Constants._regexMove.matcher(actionValue[1]);
@@ -229,6 +229,18 @@ public class Network {
 				// go through all subsequent variables
 				for(int v = 5; v < data.length; v++) {
 					// TODO add 1 to count of observation_x at (i,j)
+					String[] obsValue = data[v].split("=");
+					m = Constants._regexObserveWall.matcher(obsValue[0]);
+					n = Constants._regexObserveLandmark.matcher(obsValue[0]);
+					if(m.matches()) { // it's a wall observation
+						
+					}
+					else if(n.matches()) { // it's a landmark observation
+						
+					}
+					else {
+						System.err.printf("error parsing observation:%s\n", data[v]);
+					}
 				}
 				totalEvents++;
 			}
