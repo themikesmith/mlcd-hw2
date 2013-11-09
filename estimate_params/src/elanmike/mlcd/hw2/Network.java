@@ -198,8 +198,6 @@ public class Network {
 			}
 		}
 		br.close();
-		// smooth
-		motion.smooth();
 		motion.printInfoDebug();
 	}
 

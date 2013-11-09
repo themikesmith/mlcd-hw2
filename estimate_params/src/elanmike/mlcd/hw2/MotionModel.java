@@ -13,11 +13,11 @@ public class MotionModel {
 	public MotionModel() {
 		attemptedMoves = new int[DIR.values().length];
 		for(int i = 0; i < attemptedMoves.length; i++) {
-			attemptedMoves[i] = 0;
+			attemptedMoves[i] = 2;
 		}
 		successfulMoves = new int[DIR.values().length];
 		for(int i = 0; i < successfulMoves.length; i++) {
-			successfulMoves[i] = 0;
+			successfulMoves[i] = 1;
 		}
 		smoothed = false;
 	}
@@ -88,25 +88,6 @@ public class MotionModel {
 		}
 		else {
 			System.err.printf("invalid direction!:%s\n",moveAttempted);
-		}
-	}
-	/**
-	 * Given our current counts, smooth by add-1 smoothing.
-	 */
-	public void smooth() {
-		if(!smoothed) {
-			// add 1 to every bucket of successful moves
-			for(int i = 0; i < attemptedMoves.length; i++) {
-				attemptedMoves[i]++;
-			}
-			// add 2 to every bucked of attempted moves
-			for(int i = 0; i < successfulMoves.length; i++) {
-				successfulMoves[i] += 2;
-			}
-			smoothed = true; // only smooth once
-		}
-		else {
-			System.err.println("already smoothed motion model! don't call me twice!");
 		}
 	}
 	/**
