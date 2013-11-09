@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
 
+import elanmike.mlcd.hw2.Constants.AXIS;
 import elanmike.mlcd.hw2.Constants.DIR;
 import elanmike.mlcd.hw2.Constants.VARTYPES;
 
@@ -299,7 +300,7 @@ public class Network {
 						if(t > 0) {
 							// motion model - only compute possible probabilities given our model
 							// compute p(row i _t | row i-1 _t-1, prev action _t-1 moving in direction d)
-							float f = _motion.getProbability(i, j, i-1, j, d);
+							float f = _motion.getProbability(i, i-1, AXIS.H, d);
 							if(f != 0) {
 								String lhs = concatVarNameValue(rowi, Integer.toString(i));
 								//String contexts = concatVarNameValue(VARTYPES.POSITION.makeVarName(Constants.ROW, Integer.toString(t-1)), i-1);
