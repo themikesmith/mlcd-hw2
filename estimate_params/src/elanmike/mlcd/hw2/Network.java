@@ -32,6 +32,9 @@ import elanmike.mlcd.hw2.Constants.VariablePair;
  */
 public class Network {
 	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
+	private static ObservationModel _obsMod;
+	
+	
 	/**
 	 * Given a 'network-gridAxB-tC.txt' input file,
 	 * where A indicates the number of rows, B indicates the number of columns, 
@@ -122,6 +125,10 @@ public class Network {
 			throw new IOException("error reading network!"
 				+_biggestRow+'_'+_biggestCol+'_'+_biggestTimeStep+'_'+_numLandmarks);
 		}
+		
+		
+		
+		_obsMod = new ObservationModel(_biggestRow,_biggestCol,_numLandmarks);
 	}
 
 	/**
@@ -193,9 +200,18 @@ public class Network {
 				}
 				// all subsequent values are observation variable 'yes' values
 				// go through all subsequent variables
+				boolean[] obsers  = new boolean[4*(1+_numLandmarks)];
 				for(int v = 5; v < data.length; v++) {
-					// TODO add 1 to count of observation_x at (i,j)	
+					// TODO add 1 to count of observation_x at (i,j)
+					
+					String[] observationValue = data[v].split("=");
+					observationValue = observationValue[0].split("_");
+					
+					System.out.println(observationValue);
 				}
+				_obsMod.addObservation(currRow, currCol, obsers);
+				
+				
 			}
 		}
 		br.close();
