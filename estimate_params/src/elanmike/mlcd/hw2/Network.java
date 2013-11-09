@@ -168,7 +168,7 @@ public class Network {
 					continue; // skip line and continue counting
 				}
 				prevRow = currRow;
-				currRow = Integer.parseInt(rowValue[1]) - 1;
+				currRow = Integer.parseInt(rowValue[1]);
 				// get col value
 				String[] colValue = data[3].split("=");
 				m = Constants._regexPosition.matcher(colValue[0]);
@@ -177,7 +177,7 @@ public class Network {
 					continue; // skip line and continue counting
 				}
 				prevCol = currCol;
-				currCol = Integer.parseInt(colValue[1]) - 1;
+				currCol = Integer.parseInt(colValue[1]);
 				// get action value
 				String[] actionValue = data[4].split("=");
 				m = Constants._regexAction.matcher(actionValue[0]);

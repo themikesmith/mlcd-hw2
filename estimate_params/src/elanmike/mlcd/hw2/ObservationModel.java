@@ -35,6 +35,7 @@ public class ObservationModel {
 	}
 	
 	public void addObservation(int row, int col, boolean[] observations){
+		
 		if(observations.length != observationEntries[row][col].first.size())
 			System.err.println("Error length of observation array != " + observationEntries[row][col].first.size() );
 		else{
