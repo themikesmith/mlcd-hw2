@@ -188,7 +188,6 @@ public class Network {
 				}
 				// for each (i,j) given: (for each data point)
 				// remember previous (i,j) and previous action
-				// TODO add 1 to count of the applicable motion parameters, if prevAction not null
 				if(prevAction != null) {
 					if(currAction == null) {
 						System.err.printf("error parsing action:%s\n",data[4]);
