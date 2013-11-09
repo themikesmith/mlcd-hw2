@@ -26,8 +26,8 @@ public class ObservationModel {
 		
 		for(int i=0; i<num_row;i++){
 			for(int j=0; j<num_col;j++){
-				Pair<ArrayList<Integer>,Integer> newEntry =  new Pair<ArrayList<Integer>,Integer>(new ArrayList<Integer>(4*(1+num_landmarks)), 0);
-				for(int k=0; k<4*(1+num_landmarks); k++){newEntry.first.add(0);}
+				Pair<ArrayList<Integer>,Integer> newEntry =  new Pair<ArrayList<Integer>,Integer>(new ArrayList<Integer>(4*(1+num_landmarks)), 2);
+				for(int k=0; k<4*(1+num_landmarks); k++){newEntry.first.add(1);}
 				
 				observationEntries[i][j] = newEntry;
 			}
@@ -49,11 +49,68 @@ public class ObservationModel {
 	}	
 	
 	public double getWallObservation(int row, int col, int dir){		
-		return observationEntries[row][col].first.get(dir)/observationEntries[row][col].second;
+		return (double)observationEntries[row][col].first.get(dir)/(double)observationEntries[row][col].second;
 	}
 	
 	public double getLandmarkObservation(int row, int col, int land_num, int dir){		
-		return observationEntries[row][col].first.get(4*land_num+dir)/observationEntries[row][col].second;
+		return (double)observationEntries[row][col].first.get(4*land_num+dir)/(double)observationEntries[row][col].second;
 	}
+	
+	/*
+	public void addLambdaSmoothing(int lambda){
+		for(int i=0; i<num_row;i++){
+			for(int j=0; j<num_col;j++){
+				
+			}
+		}
+	}*/
+	
+	public void printWallDebug(){
+		
+		System.out.println("===NorthWallObs===");
+		for(int i=0; i<num_row;i++){
+			for(int j=0; j<num_col;j++){
+				System.out.printf("%.2f   ", getWallObservation(i,j,Constants.DIR.NORTH.ordinal()));;
+			}
+			System.out.println();
+		}
+		System.out.println();
+		System.out.println("===SouthWallObs===");
+		for(int i=0; i<num_row;i++){
+			for(int j=0; j<num_col;j++){
+				System.out.printf("%.2f   ", getWallObservation(i,j,Constants.DIR.SOUTH.ordinal()));;
+			}
+			System.out.println();
+		}
+		System.out.println();
+		System.out.println("===EastWallObs===");
+		for(int i=0; i<num_row;i++){
+			for(int j=0; j<num_col;j++){
+				System.out.printf("%.2f   ", getWallObservation(i,j,Constants.DIR.EAST.ordinal()));;
+			}
+			System.out.println();
+		}
+		System.out.println();
+		System.out.println("===WestWallObs===");
+		for(int i=0; i<num_row;i++){
+			for(int j=0; j<num_col;j++){
+				System.out.printf("%.2f   ", getWallObservation(i,j,Constants.DIR.WEST.ordinal()));;
+			}
+			System.out.println();
+		}
+	}
+	
+	/*
+	public static void main(String[] args){
+		ObservationModel obsmod = new ObservationModel(5,5,2);
+		obsmod.printWallDebug();
+		
+		boolean[] obs = new boolean[4*(1+2)];
+		obs[1] = true;
+		obsmod.addObservation(0, 0, obs);
+		
+		obsmod.printWallDebug();
+	}
+	*/
 	
 }
