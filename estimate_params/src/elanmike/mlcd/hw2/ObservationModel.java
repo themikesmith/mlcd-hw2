@@ -35,25 +35,31 @@ public class ObservationModel {
 	}
 	
 	public void addObservation(int row, int col, boolean[] observations){
-		if(observations.length != observationEntries[row][col].first.size())
-			System.err.println("Error length of observation array != " + observationEntries[row][col].first.size() );
+		int r = row-1;
+		int c = col-1;
+		if(observations.length != observationEntries[r][c].first.size())
+			System.err.println("Error length of observation array != " + observationEntries[r][c].first.size() );
 		else{
 			
 			for(int i=0; i<observations.length; i++){
 				if(observations[i])
-					observationEntries[row][col].first.set(i, observationEntries[row][col].first.get(i)+1); 
+					observationEntries[r][c].first.set(i, observationEntries[r][c].first.get(i)+1); 
 			}
-			observationEntries[row][col].second++;
+			observationEntries[r][c].second++;
 			
 		}
 	}	
 	
-	public double getWallObservation(int row, int col, int dir){		
-		return (double)observationEntries[row][col].first.get(dir)/(double)observationEntries[row][col].second;
+	public double getWallObservation(int row, int col, int dir){
+		int r = row-1;
+		int c = col-1;
+		return (double)observationEntries[r][c].first.get(dir)/(double)observationEntries[r][c].second;
 	}
 	
-	public double getLandmarkObservation(int row, int col, int land_num, int dir){		
-		return (double)observationEntries[row][col].first.get(4*land_num+dir)/(double)observationEntries[row][col].second;
+	public double getLandmarkObservation(int row, int col, int land_num, int dir){	
+		int r = row-1;
+		int c = col-1;
+		return (double)observationEntries[r][c].first.get(4*land_num+dir)/(double)observationEntries[r][c].second;
 	}
 	
 	/*
@@ -68,32 +74,32 @@ public class ObservationModel {
 	public void printWallDebug(){
 		
 		System.out.println("===NorthWallObs===");
-		for(int i=0; i<num_row;i++){
-			for(int j=0; j<num_col;j++){
+		for(int i=1; i<num_row+1;i++){
+			for(int j=1; j<num_col+1;j++){
 				System.out.printf("%.2f   ", getWallObservation(i,j,Constants.DIR.NORTH.ordinal()));;
 			}
 			System.out.println();
 		}
 		System.out.println();
 		System.out.println("===SouthWallObs===");
-		for(int i=0; i<num_row;i++){
-			for(int j=0; j<num_col;j++){
+		for(int i=1; i<num_row+1;i++){
+			for(int j=1; j<num_col+1;j++){
 				System.out.printf("%.2f   ", getWallObservation(i,j,Constants.DIR.SOUTH.ordinal()));;
 			}
 			System.out.println();
 		}
 		System.out.println();
 		System.out.println("===EastWallObs===");
-		for(int i=0; i<num_row;i++){
-			for(int j=0; j<num_col;j++){
+		for(int i=1; i<num_row+1;i++){
+			for(int j=1; j<num_col+1;j++){
 				System.out.printf("%.2f   ", getWallObservation(i,j,Constants.DIR.EAST.ordinal()));;
 			}
 			System.out.println();
 		}
 		System.out.println();
 		System.out.println("===WestWallObs===");
-		for(int i=0; i<num_row;i++){
-			for(int j=0; j<num_col;j++){
+		for(int i=1; i<num_row+1;i++){
+			for(int j=1; j<num_col+1;j++){
 				System.out.printf("%.2f   ", getWallObservation(i,j,Constants.DIR.WEST.ordinal()));;
 			}
 			System.out.println();
