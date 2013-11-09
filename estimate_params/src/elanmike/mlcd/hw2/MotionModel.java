@@ -4,12 +4,14 @@ import elanmike.mlcd.hw2.Constants.DIR;
 
 public class MotionModel {
 	private int[] attemptedMoves, successfulMoves;
+	private int numRows, numCols;
 	/**
 	 * Create a MotionModel.
 	 * Instantiates and initializes our counting arrays.
-	 * Sets smoothed to false.
+	 * @param numRows
+	 * @param numCols
 	 */
-	public MotionModel() {
+	public MotionModel(int numRows, int numCols) {
 		attemptedMoves = new int[DIR.values().length];
 		for(int i = 0; i < attemptedMoves.length; i++) {
 			attemptedMoves[i] = 2;
@@ -18,6 +20,8 @@ public class MotionModel {
 		for(int i = 0; i < successfulMoves.length; i++) {
 			successfulMoves[i] = 1;
 		}
+		this.numRows = numRows;
+		this.numCols = numCols;
 	}
 	/**
 	 * Increment the count corresponding to a successful move in direction d
@@ -63,7 +67,7 @@ public class MotionModel {
 				addFailedMove(moveAttempted);
 			}
 			else if(prevRow == currRow && 
-				prevCol == currCol + (moveAttempted.equals(DIR.EAST) ? -1 : 1)) {
+				prevCol == (currCol + (moveAttempted.equals(DIR.EAST) ? -1 : 1) % numCols)) {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
@@ -76,7 +80,7 @@ public class MotionModel {
 				addFailedMove(moveAttempted);
 			}
 			else if(prevCol == currCol && 
-				prevRow == currRow + (moveAttempted.equals(DIR.NORTH) ? -1 : 1)) {
+				prevRow == currRow + (moveAttempted.equals(DIR.NORTH) ? -1 : 1) % numRows) {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
@@ -98,15 +102,15 @@ public class MotionModel {
 	 * if move failed (remained in place) returns 1-(S/A)
 	 * else return 0 for impossible move
 	 * 
-	 * @param prevRow
-	 * @param prevCol
 	 * @param currRow
 	 * @param currCol
+	 * @param prevRow
+	 * @param prevCol
 	 * @param moveAttempted
 	 * @return the probability
 	 * @throws IllegalArgumentException
 	 */
-	public float getProbability(int prevRow, int prevCol, int currRow, int currCol, 
+	public float getProbability(int currRow, int currCol, int prevRow, int prevCol, 
 			DIR moveAttempted) throws IllegalArgumentException {
 		float value = (float) successfulMoves[moveAttempted.ordinal()] 
 			/ attemptedMoves[moveAttempted.ordinal()];

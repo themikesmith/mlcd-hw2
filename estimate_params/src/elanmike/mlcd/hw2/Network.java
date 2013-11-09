@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.regex.Matcher;
 
 import elanmike.mlcd.hw2.Constants.DIR;
@@ -30,7 +31,7 @@ import elanmike.mlcd.hw2.Constants.VARTYPES;
  *
  */
 public class Network {
-	private static MotionModel _motion = new MotionModel();
+	private static MotionModel _motion;
 	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
 	/**
 	 * Given a 'network-gridAxB-tC.txt' input file,
@@ -137,6 +138,7 @@ public class Network {
 	 * @throws IOException 
 	 */
 	public void train(String trainingFilename) throws IOException {
+		_motion = new MotionModel(_biggestRow, _biggestCol);
 		BufferedReader br = new BufferedReader(new FileReader(trainingFilename));
 		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1;
 		DIR currAction = null, prevAction = null; // we can represent action by direction of move
@@ -181,7 +183,7 @@ public class Network {
 				prevAction = currAction; // could be null if first line
 				try {
 					n.matches();
-					currAction = DIR.getDirValue(n.group(1)); // could be null if error in dir	
+					currAction = DIR.getDirValueFromLongName(n.group(1)); // could be null if error in dir	
 				}
 				catch(IllegalStateException ex) {
 					ex.printStackTrace();
@@ -250,17 +252,22 @@ public class Network {
 			outfile.delete();
 		}
 		outfile.createNewFile();
+		PrintWriter out = new PrintWriter(outfile);
 		for(int t = 1; t <= _biggestTimeStep; t++) { // for each time point...
 			// compute motion model, and observation model at the same time
 			for(int i = 1; i <= _biggestRow; i++) {
 				for(int j = 1; j <= _biggestCol; j++) {
 					// for each i,j cell
+					String rowi = VARTYPES.POSITION.makeVarName(Constants.ROW, Integer.toString(t)),
+						colj = VARTYPES.POSITION.makeVarName(Constants.COL, Integer.toString(t));
 					// compute observation model and motion model at each point
 					for(DIR d : DIR.values()) {
-						// motion model:
-						// TODO 6 functions
+						// motion model - only compute possible probabilities given our model
+						float f = _motion.getProbability(i, j, i-1, j, d);
+						if(f != 0) {
+							out.printf("%.13e", f);
+						}
 						// compute p(row i | row i-1, prev action moving in direction d)
-						//System.err.println(""+_motion.getProbability(i-1, j, i, j, d));
 						// compute p(row i | row i+1, prev action moving in direction d)
 						// compute p(row i | row i, prev action moving in direction d)
 						// compute p(col j | row j-1, prev action moving in direction d)
