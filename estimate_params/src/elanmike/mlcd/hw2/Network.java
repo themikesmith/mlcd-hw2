@@ -320,4 +320,21 @@ public class Network {
 			}
 		}
 	}
+	/**
+	 * Given a variable name, and a value, concatenate them and return var=value'
+	 * @param varName
+	 * @param value
+	 * @return varName=value
+	 */
+	private static String addValueToVarName(String varName, String value) {
+		return varName + "=" + value;
+	}
+	/**
+	 * Given a variable name, replace the '_t' time step section with literally '_t'
+	 * @param varName
+	 * @return the varName, with the literal '_t' replacing '_T'
+	 */
+	public String removeTimeStep(String varName) {
+		return Constants._regexVarTimeStep.matcher(varName).replaceFirst("_t");
+	}
 }

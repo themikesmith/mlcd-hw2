@@ -114,12 +114,4 @@ public class Constants {
 	public static final Pattern _regexMove = Pattern.compile("Move"+DIR.getRegexGroupLong());
 	/** Matcher for time step in variable name -- 1 group: time step number */
 	public static final Pattern _regexVarTimeStep = Pattern.compile(".+_(\\d+)$");
-	/**
-	 * Given a variable name, replace the '_t' time step section with literally '_t'
-	 * @param varName
-	 * @return the varName, with the literal '_t' replacing '_T'
-	 */
-	public String removeTimeStep(String varName) {
-		return _regexVarTimeStep.matcher(varName).replaceFirst("_t");
-	}
 }
