@@ -112,6 +112,7 @@ public class MotionModel {
 	/**
 	 * Calculates and returns the probability of currPos,
 	 * given previous move action direction d and prevPos.
+	 * p(current i,j | prev i,j ^ move)
 	 * Let S be the number of successful moves in direction d,
 	 * and A be the number of attempted moves in direction d.
 	 * If move successful, returns S/A.
