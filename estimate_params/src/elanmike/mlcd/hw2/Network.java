@@ -33,6 +33,9 @@ import elanmike.mlcd.hw2.Constants.VARTYPES;
 public class Network {
 	private static MotionModel _motion;
 	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
+	private static ObservationModel _obsMod;
+	
+	
 	/**
 	 * Given a 'network-gridAxB-tC.txt' input file,
 	 * where A indicates the number of rows, B indicates the number of columns, 
@@ -123,6 +126,10 @@ public class Network {
 			throw new IOException("error reading network!"
 				+_biggestRow+'_'+_biggestCol+'_'+_biggestTimeStep+'_'+_numLandmarks);
 		}
+		
+		
+		
+		_obsMod = new ObservationModel(_biggestRow,_biggestCol,_numLandmarks);
 	}
 
 	/**
@@ -199,9 +206,32 @@ public class Network {
 				}
 				// all subsequent values are observation variable 'yes' values
 				// go through all subsequent variables
+				boolean[] obsers  = new boolean[4*(1+_numLandmarks)];
 				for(int v = 5; v < data.length; v++) {
 					// TODO add 1 to count of observation_x at (i,j)
+					
+					String[] observationValue = data[v].split("=");
+					observationValue = observationValue[0].split("_");
+					for(String s:observationValue)
+						System.out.println(s);
+					
+					
+					int dir = Constants.DIR.getDirValue(observationValue[1]).ordinal();
+					if(observationValue[0].contains("Wall")){
+						System.out.println("Wall - " + observationValue[1] + "("+dir+")");
+					}else if(observationValue[0].contains("Landmark")){
+						int landmark_val = Integer.valueOf(observationValue[0].charAt(observationValue[0].length()-1));
+						
+						System.out.println("Landmark("+landmark_val+") - " + observationValue[1] + "("+dir+")");
+					}else{
+						//Hmm...
+					}
+					
+
 				}
+				_obsMod.addObservation(currRow, currCol, obsers);
+				
+				
 			}
 		}
 		br.close();
