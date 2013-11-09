@@ -211,17 +211,19 @@ public class Network {
 					
 					String[] observationValue = data[v].split("=");
 					observationValue = observationValue[0].split("_");
-					for(String s:observationValue)
-						System.out.println(s);
+					
+					//for(String s:observationValue)
+					//	System.out.println(s);
 					
 					
 					int dir = Constants.DIR.getDirValueFromShortName(observationValue[1]).ordinal();
 					if(observationValue[0].contains("Wall")){
-						System.out.println("Wall - " + observationValue[1] + "("+dir+")");
+						//System.out.println("Wall - " + observationValue[1] + "("+dir+")");
+						obsers[dir] = true;
 					}else if(observationValue[0].contains("Landmark")){
-						int landmark_val = Integer.valueOf(observationValue[0].charAt(observationValue[0].length()-1));
-						
-						System.out.println("Landmark("+landmark_val+") - " + observationValue[1] + "("+dir+")");
+						int landmark_val = Integer.parseInt(observationValue[0].substring(observationValue[0].length()-1));
+						obsers[dir+4*landmark_val] = true;
+						//System.out.println("Landmark("+landmark_val+") - " + observationValue[1] + "("+dir+")");
 					}else{
 						//Hmm...
 					}
