@@ -4,17 +4,6 @@ import elanmike.mlcd.hw2.Constants.AXIS;
 import elanmike.mlcd.hw2.Constants.DIR;
 
 public class MotionModel {
-	/**
-	 * Represents a kind of probability we need to maintain under this model.
-	 * @author mcs
-	 */
-	public enum PROBS {
-		rowEast(AXIS.H),rowWest(AXIS.H),sameRow(AXIS.H),
-			sameCol(AXIS.V),colNorth(AXIS.V),colSouth(AXIS.V);
-		private AXIS a;
-		PROBS(AXIS a) {this.a = a;}
-		AXIS getAxis() {return a;}
-	}
 	private int[] attemptedMoves, successfulMoves;
 	private boolean smoothed;
 	/**
@@ -76,7 +65,8 @@ public class MotionModel {
 			if(prevCol == currCol && prevRow == currRow) { // unsuccessful
 				addFailedMove(moveAttempted);
 			}
-			else if(prevRow == currRow) {
+			else if(prevRow == currRow && 
+				prevCol == currCol + (moveAttempted.equals(DIR.NORTH) ? -1 : 1)) {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
@@ -88,7 +78,8 @@ public class MotionModel {
 			if(prevRow == currRow && prevCol == currCol) { // unsuccessful
 				addFailedMove(moveAttempted);
 			}
-			else if(prevCol == currCol) {
+			else if(prevCol == currCol && 
+				prevRow == currRow + (moveAttempted.equals(DIR.EAST) ? -1 : 1)) {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
@@ -124,37 +115,50 @@ public class MotionModel {
 	 * given previous move action direction d and prevPos.
 	 * Let S be the number of successful moves in direction d,
 	 * and A be the number of attempted moves in direction d.
-	 * If currPos != prevPos, returns S/A.
-	 * Else returns 1-(S/A) // if currPos == prevPos
-	 * @param currPos current position
-	 * @param d previous move action direction
-	 * @param prevPos previous position
+	 * If move successful, returns S/A.
+	 * if move failed (remained in place) returns 1-(S/A)
+	 * else return 0 for impossible move
+	 * 
+	 * @param prevRow
+	 * @param prevCol
+	 * @param currRow
+	 * @param currCol
+	 * @param moveAttempted
 	 * @return the probability
-	 * @throws IllegalArgumentException if currPos, prevPos, d are invalid arguments
+	 * @throws IllegalArgumentException
 	 */
-	public float getProbability(PROBS currPos, DIR d, PROBS prevPos) 
-			throws IllegalArgumentException {
-		if(!checkLegalMotionQuery(currPos, d, prevPos)) {
-			throw new IllegalArgumentException(
-				"invalid motion query! currPos:"+currPos+" d:"+d+" prevPos:"+prevPos);
+	public float getProbability(int prevRow, int prevCol, int currRow, int currCol, 
+			DIR moveAttempted) throws IllegalArgumentException {
+		float value = (float) successfulMoves[moveAttempted.ordinal()] 
+			/ attemptedMoves[moveAttempted.ordinal()];
+		if(moveAttempted.equals(DIR.NORTH) || moveAttempted.equals(DIR.SOUTH)) {
+			if(prevCol == currCol && prevRow == currRow) { // unsuccessful
+				return 1 - value;
+			}
+			else if(prevRow == currRow && // successful
+				prevCol == currCol + (moveAttempted.equals(DIR.NORTH) ? -1 : 1)) {
+				return value;
+			}
+			else { // impossible
+				return 0;
+			}
 		}
-		float value = (float) successfulMoves[d.ordinal()] / attemptedMoves[d.ordinal()];
-		if(currPos != prevPos) {
-			return value;
+		else if(moveAttempted.equals(DIR.EAST) || moveAttempted.equals(DIR.WEST)) {
+			if(prevRow == currRow && prevCol == currCol) { // unsuccessful
+				return 1 - value;
+			}
+			else if(prevCol == currCol && // successful
+				prevRow == currRow + (moveAttempted.equals(DIR.EAST) ? -1 : 1)) {
+				return value;
+			}
+			else { // impossible
+				return 0;
+			}
 		}
 		else {
-			return 1 - value;
+			String error = "invalid direction!:"+moveAttempted;
+			System.err.println(error);
+			throw new IllegalArgumentException(error);
 		}
-	}
-	/**
-	 * Given arguments to a motion query, check if it's valid.
-	 * A query is valid if it asks about the same axis of motion.
-	 * @param currPos
-	 * @param d
-	 * @param prevPos
-	 * @return true if valid, false otherwise
-	 */
-	private boolean checkLegalMotionQuery(PROBS currPos, DIR d, PROBS prevPos) {
-		return currPos.getAxis().equals(d.getAxis()) && prevPos.getAxis().equals(d.getAxis());
 	}
 }
