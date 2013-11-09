@@ -210,8 +210,21 @@ public class Network {
 					
 					String[] observationValue = data[v].split("=");
 					observationValue = observationValue[0].split("_");
+					for(String s:observationValue)
+						System.out.println(s);
 					
-					System.out.println(observationValue);
+					
+					int dir = Constants.DIR.getDirValue(observationValue[1]).ordinal();
+					if(observationValue[0].contains("Wall")){
+						System.out.println("Wall - " + observationValue[1] + "("+dir+")");
+					}else if(observationValue[0].contains("Landmark")){
+						int landmark_val = Integer.valueOf(observationValue[0].charAt(observationValue[0].length()-1));
+						
+						System.out.println("Landmark("+landmark_val+") - " + observationValue[1] + "("+dir+")");
+					}else{
+						//Hmm...
+					}
+					
 
 				}
 				_obsMod.addObservation(currRow, currCol, obsers);
