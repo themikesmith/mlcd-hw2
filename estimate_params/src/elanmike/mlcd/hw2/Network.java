@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 
 import elanmike.mlcd.hw2.Constants.DIR;
@@ -33,32 +31,6 @@ import elanmike.mlcd.hw2.Constants.VariablePair;
  *
  */
 public class Network {
-	private static Map<String, Integer> _trainedCounts = new HashMap<String, Integer>();
-	/**
-	 * Make a string key out of a list of string keys
-	 * @param keywords a list of key strings
-	 * @return the concatenated words separated by spaces
-	 */
-	private static String makeKey(String... keywords) { 
-		StringBuilder sb = new StringBuilder();
-		for(String word : keywords) {
-			sb.append(word).append(' ');
-		}
-		sb.deleteCharAt(sb.length()-1);
-		return sb.toString();
-	}
-	/**
-	 * Increments the count of a key.
-	 * Calls {@code makeKey} to create a single string key
-	 * @param keywords a list of key strings
-	 */
-	private static void increment(String... keywords) {
-		String key = makeKey(keywords);
-		if(!_trainedCounts.containsKey(key)) {
-			_trainedCounts.put(key, 0);
-		}
-		_trainedCounts.put(key, _trainedCounts.get(key) + 1);
-	}
 	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
 	/**
 	 * Given a 'network-gridAxB-tC.txt' input file,
@@ -166,7 +138,8 @@ public class Network {
 	 */
 	public void train(String trainingFilename) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(trainingFilename));
-		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1, totalEvents = 0;
+		MotionModel motion = new MotionModel();
+		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1;
 		DIR currAction = null, prevAction = null; // we can represent action by direction of move
 		String line;
 		while ((line = br.readLine()) != null) {
@@ -221,14 +194,13 @@ public class Network {
 					// p(row i | row i, prev action moving in direction d)
 					// p(col j | row j-1, prev action moving in direction d)
 					// p(col j | row j+1, prev action moving in direction d)
-					// p(col j | row j, prev action moving in direction d)					
+					// p(col j | row j, prev action moving in direction d)
 				}
 				// all subsequent values are observation variable 'yes' values
 				// go through all subsequent variables
 				for(int v = 5; v < data.length; v++) {
 					// TODO add 1 to count of observation_x at (i,j)	
 				}
-				totalEvents++;
 			}
 		}
 		br.close();
