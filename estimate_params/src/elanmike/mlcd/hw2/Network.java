@@ -8,7 +8,6 @@ import java.util.regex.Matcher;
 
 import elanmike.mlcd.hw2.Constants.DIR;
 import elanmike.mlcd.hw2.Constants.VARTYPES;
-import elanmike.mlcd.hw2.Constants.VariablePair;
 
 /**
  * This class, a singleton in our Estimate Parameters framework, 
