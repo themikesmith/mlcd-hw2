@@ -4,6 +4,10 @@ import elanmike.mlcd.hw2.Constants.AXIS;
 import elanmike.mlcd.hw2.Constants.DIR;
 
 public class MotionModel {
+	/** Row axis is vertical */
+	public static final AXIS ROW_AXIS = AXIS.V;
+	/** Col axis is horizontal */
+	public static final AXIS COL_AXIS = AXIS.H;
 	private int[] attemptedMoves, successfulMoves;
 	private int numRows, numCols;
 	/**
@@ -103,65 +107,44 @@ public class MotionModel {
 	/**
 	 * Calculates and returns the probability of currPos,
 	 * given previous move action direction d and prevPos.
-	 * p(current i,j | prev i,j ^ move)
+	 * p(current i|j | prev i|j , prev move)
 	 * Let S be the number of successful moves in direction d,
 	 * and A be the number of attempted moves in direction d.
-	 * If move successful, returns S/A.
-	 * if move failed (remained in place) returns 1-(S/A)
+	 * if axis parallel to move and move succeeded, return S/A.
+	 * else if axis parallel and move failed (remained in place), return 1-(S/A)
+	 * else if remained in place along perpendicular axis, return 1
 	 * else return 0 for impossible move
 	 * 
-	 * @param currRow
-	 * @param currCol
-	 * @param prevRow
-	 * @param prevCol
+	 * @param currPos current position
+	 * @param prevPos previous position
+	 * @param a the axis along which the positions exist
+	 * 		(may not be the same as the move's axis)
 	 * @param moveAttempted
-	 * @return the probability
+	 * @return
 	 * @throws IllegalArgumentException
 	 */
 	public float getProbability(int currPos, int prevPos, AXIS a, DIR moveAttempted) 
 			throws IllegalArgumentException {
-		float value = (float) successfulMoves[moveAttempted.ordinal()] 
-			/ attemptedMoves[moveAttempted.ordinal()];
-		if(!moveAttempted.getAxis().equals(a)) {
-			// if the axis of movement specified is perpendicular to the movement...
-			if(currPos == prevPos) {
-				// and we didn't move in the perpendicular axis (read: always will happen)
-				return 1;
+		if(a.equals(moveAttempted.getAxis())) { // parallel
+			float value = (float) successfulMoves[moveAttempted.ordinal()] 
+					/ attemptedMoves[moveAttempted.ordinal()];
+			if(currPos == getPositionOfSuccessfulMove(moveAttempted, prevPos, a)) {
+				return value; // move successful
 			}
-			else { // and we did move in the perpendicular axis! uh oh
-				System.err.println("change in position in axis perpendicular to movement");
-				String error = String.format("curr:%d prev:%d axis:%s dir:%s", currPos, prevPos, a, moveAttempted);
-				System.err.println(error);
-				throw new IllegalArgumentException(error);
-			}
-		}
-		else { // else the axis of movement is parallel to change in position
-			if(prevPos == currPos) { // unsuccessful
+			else {// move failed, we remained in the same position
 				return 1 - value;
 			}
+		}
+		else { // perpendicular
+			if(currPos == prevPos) {
+				// remained in position along a perpendicular axis - always!
+				return 1;
+			}
 			else {
-				if(moveAttempted.equals(DIR.NORTH) || moveAttempted.equals(DIR.SOUTH)) {
-					if(prevPos == (moveAttempted.equals(DIR.NORTH)
-							? decrementRow(currPos) : incrementRow(currPos))) {
-						return value;
-					}
-				}
-				else if(moveAttempted.equals(DIR.EAST) || moveAttempted.equals(DIR.WEST)) {
-					if(prevPos == (moveAttempted.equals(DIR.EAST)
-							? decrementCol(currPos) : incrementCol(currPos))) {
-						return value;
-					}
-				}
-				else {
-					String error = "invalid direction!:"+moveAttempted;
-					System.err.println(error);
-					throw new IllegalArgumentException(error);
-				}
+				// moved along a perpendicular axis - impossible!
+				return 0;
 			}
 		}
-		String error = prevPos+" differs from "+currPos+" by more than 1 on axis:"+a;
-		System.err.println(error);
-		throw new IllegalArgumentException(error);
 	}
 	/**
 	 * 
@@ -177,18 +160,55 @@ public class MotionModel {
 		}
 	}
 	/**
-	 * Calculate and assemble the line for the CPD given the following:
+	 * Assemble the line for the CPD given the following:
 	 * @param t time step value
 	 * @param currPos current position (i or j depending on axis specified)
 	 * @param prevPos previous position (i or j, depending on axis specified)
-	 * @param a axis specified
+	 * @param a the axis specified by positions (row or col)
 	 * @param d previous action specified by movement
+	 * @param f the probability result
 	 * @return the string formatted as required for the CPD
 	 */
-	public String calculateAssembleCPDEntry(int t, int currPos, int prevPos, AXIS a, DIR d) {
-		float f = getProbability(currPos, prevPos, a, d);
-		return String.format("PositionRow_%d=%d PositionRow_%d=%d,Action_%d=Move%s %.13e",
-			t, currPos, t, prevPos, t, d.getLongName(), f);
+	public String assembleCPDEntry(int t, int currPos, int prevPos, AXIS a, DIR d, float f) {
+		String axis = Constants.COL;
+		if(a.equals(ROW_AXIS)) {
+			axis = Constants.ROW;	
+		}
+		return String.format("Position%s_%d=%d Position%s_%d=%d,Action_%d=Move%s %.13e",
+			axis, t, currPos+1, axis, t, prevPos+1, t, d.getLongName(), f);
+	}
+	/**
+	 * Given a direction of a move, a previous position, 
+	 * and an axis we're considering relative to the position,
+	 * output what would be the current position if the move succeeded.
+	 * @param move the move direction
+	 * @param prevPos the previous position
+	 * @param a the axis to consider when computing the position,
+	 * 		which is not necessarily along the same axis as the move
+	 * @return the current position along the axis a if the move succeeded
+	 */
+	public int getPositionOfSuccessfulMove(DIR move, int prevPos, AXIS a) {
+		if(!move.getAxis().equals(a)) {// if the move's axis is perpendicular to a
+			return prevPos; // we wouldn't have moved along the axis
+		}
+		else { // increment or decrement row or col
+			if(a.equals(AXIS.H)) { // horizontal
+				if(move.equals(DIR.EAST)) {
+					return incrementRow(prevPos);
+				}
+				else { // west
+					return decrementRow(prevPos);
+				}
+			}
+			else { // vertical
+				if(move.equals(DIR.NORTH)) {
+					return incrementCol(prevPos);
+				}
+				else { // south
+					return decrementCol(prevPos);
+				}
+			}
+		}
 	}
 	/**
 	 * 
