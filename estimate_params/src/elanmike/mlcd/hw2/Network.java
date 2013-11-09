@@ -146,16 +146,29 @@ public class Network {
 	public void train(String trainingFilename) throws IOException {
 		_motion = new MotionModel(_biggestRow, _biggestCol);
 		BufferedReader br = new BufferedReader(new FileReader(trainingFilename));
-		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1;
-		DIR currAction = null, prevAction = null; // we can represent action by direction of move
-		String line;
+		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1,
+			currTrajectory = -1, prevTrajectory = -1;
+		// we can represent action by the direction of move
+		DIR currAction = null, prevAction = null;
+		String line, prevLine = "";
 		while ((line = br.readLine()) != null) {
 			String[] data = line.split(" ");
-			// data[0] is trajectory number, meaningless
+			// data[0] is trajectory number
+			prevTrajectory = currTrajectory;
+			currTrajectory = Integer.parseInt(data[0]);
+			if(currTrajectory != prevTrajectory) {
+				// begin new trajectory
+				prevRow = -1;
+				prevCol = -1;
+				currRow = -1;
+				currCol = -1;
+				currAction = null;
+				prevAction = null;
+			} // else: curr trajectory = prev, continue as usual 
 			// data[1] is time step, meaningless
 			// assume first two variables data[2] and data[3] are positions, i, j
 			// assume data[4] is action variable
-			if(data.length <= 5) {
+			if(data.length < 5) {
 				System.err.printf("error parsing training line - too short:%s\n",line);
 				continue; // skip line and continue counting
 			}
@@ -186,7 +199,7 @@ public class Network {
 					System.err.printf("error parsing action:%s\n",data[4]);
 					continue; // skip line and continue counting
 				}
-				prevAction = currAction; // could be null if first line
+				prevAction = currAction; // could be null if first item of trajectory
 				try {
 					n.matches();
 					currAction = DIR.getDirValueFromLongName(n.group(1)); // could be null if error in dir	
@@ -201,7 +214,10 @@ public class Network {
 						System.err.printf("error parsing action:%s\n",data[4]);
 						continue; // skip line and continue counting
 					}
-					_motion.processMove(prevRow, prevCol, currRow, currCol, prevAction);
+					if(!_motion.processMove(prevRow, prevCol, currRow, currCol, prevAction)) {
+						System.err.println("p:"+prevLine);
+						System.err.println("l:"+line);
+					}
 				}
 				// all subsequent values are observation variable 'yes' values
 				// go through all subsequent variables
@@ -234,12 +250,13 @@ public class Network {
 				
 				
 			}
+			prevLine = line;
 		}
 		br.close();
-		_motion.printInfoDebug();
-		_obsMod.printWallDebug();
-		_obsMod.printLandmarkDebug();
-		System.out.println(_obsMod.formattedCpdOutput(0));
+		//_motion.printInfoDebug();
+		//_obsMod.printWallDebug();
+		//_obsMod.printLandmarkDebug();
+		//System.out.println(_obsMod.formattedCpdOutput(0));
 	}
 
 	/**
@@ -289,8 +306,8 @@ public class Network {
 		PrintWriter out = new PrintWriter(outfile);
 		for(int t = 0; t < _biggestTimeStep; t++) { // for each time point...
 			// compute motion model, and observation model at the same time
-			for(int i = 1; i <= _biggestRow; i++) {
-				for(int j = 1; j <= _biggestCol; j++) {
+			for(int i = 0; i < _biggestRow; i++) {
+				for(int j = 0; j < _biggestCol; j++) {
 					// for each i,j cell
 					// compute observation model and motion model at each point
 					for(DIR d : DIR.values()) {

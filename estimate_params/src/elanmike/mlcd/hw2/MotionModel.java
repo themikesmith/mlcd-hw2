@@ -61,19 +61,22 @@ public class MotionModel {
 	 * @param currRow
 	 * @param currCol
 	 * @param moveAttempted
+	 * @return true if successful, false otherwise
 	 */
-	public void processMove(int prevRow, int prevCol, int currRow, int currCol, DIR moveAttempted) {
+	public boolean processMove(int prevRow, int prevCol, int currRow, int currCol, DIR moveAttempted) {
 		if(moveAttempted.equals(DIR.EAST) || moveAttempted.equals(DIR.WEST)) {
 			if(prevCol == currCol && prevRow == currRow) { // unsuccessful
 				addFailedMove(moveAttempted);
 			}
-			else if(prevRow == currRow && 
+			else if(prevRow == currRow &&
 				prevCol == (moveAttempted.equals(DIR.EAST) ? decrementCol(currCol) : incrementCol(currCol))) {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
-				System.err.printf("invalid positions specified for vert movement %s!prev:(%d,%d) curr(%d,%d)\n",
-					moveAttempted, prevRow, prevCol, currRow, currCol);
+				System.err.printf("invalid positions specified for vert movement %s!prev:(%d,%d) curr(%d,%d)" +
+						"changed:%d\n",
+					moveAttempted, prevRow, prevCol, currRow, currCol, (moveAttempted.equals(DIR.EAST) ? decrementCol(currCol) : incrementCol(currCol)));
+				return false;
 			}
 		}
 		else if(moveAttempted.equals(DIR.NORTH) || moveAttempted.equals(DIR.SOUTH)) {
@@ -85,13 +88,17 @@ public class MotionModel {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
-				System.err.printf("invalid positions specified for horiz movement %s!prev:(%d,%d) curr(%d,%d)\n",
-					moveAttempted, prevRow, prevCol, currRow, currCol);
+				System.err.printf("invalid positions specified for horiz movement %s!prev:(%d,%d) curr(%d,%d)" +
+						"changed:%d\n",
+					moveAttempted, prevRow, prevCol, currRow, currCol, (moveAttempted.equals(DIR.NORTH) ? decrementRow(currRow) : incrementRow(currRow)));
+				return false;
 			}
 		}
 		else {
 			System.err.printf("invalid direction!:%s\n",moveAttempted);
+			return false;
 		}
+		return true;
 	}
 	/**
 	 * Calculates and returns the probability of currPos,
@@ -197,7 +204,7 @@ public class MotionModel {
 	 * @return row-1 % numRows
 	 */
 	public int decrementRow(int row) { 
-		return (row - 1) % numRows;
+		return (row - 1 + numRows) % numRows;
 	}
 	/**
 	 * 
@@ -213,6 +220,6 @@ public class MotionModel {
 	 * @return col-1 % numCols
 	 */
 	public int decrementCol(int col) { 
-		return (col - 1) % numCols;
+		return ((col - 1 + numCols) % numCols);
 	}
 }
