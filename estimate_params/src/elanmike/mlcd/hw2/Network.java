@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Time;
 import java.util.regex.Matcher;
 
 import elanmike.mlcd.hw2.Constants.AXIS;
@@ -293,25 +294,30 @@ public class Network {
 			for(int i = 1; i <= _biggestRow; i++) {
 				for(int j = 1; j <= _biggestCol; j++) {
 					// for each i,j cell
-					String rowi = VARTYPES.POSITION.makeVarName(Constants.ROW, Integer.toString(t)),
-						colj = VARTYPES.POSITION.makeVarName(Constants.COL, Integer.toString(t));
 					// compute observation model and motion model at each point
 					for(DIR d : DIR.values()) {
 						if(t > 0) {
 							// motion model - only compute possible probabilities given our model
-							// compute p(row i _t | row i-1 _t-1, prev action _t-1 moving in direction d)
-							float f = _motion.getProbability(i, i-1, AXIS.H, d);
-							if(f != 0) {
-								String lhs = concatVarNameValue(rowi, Integer.toString(i));
-								//String contexts = concatVarNameValue(VARTYPES.POSITION.makeVarName(Constants.ROW, Integer.toString(t-1)), i-1);
-								//out.printf("%.13e", f);
+							if(d.equals(DIR.NORTH)) {
+								// compute p(row i _t | row i-1 _t-1, prev action _t-1 moving in direction d)
+								out.println(_motion.calculateAssembleCPDEntry(t, i, _motion.decrementRow(i), AXIS.V, d));
 							}
-							
-							// compute p(row i _t | row i+1 _t-1, prev action _t-1 moving in direction d)
+							if(d.equals(DIR.SOUTH)) {
+								// compute p(row i _t | row i+1 _t-1, prev action _t-1 moving in direction d)
+								out.println(_motion.calculateAssembleCPDEntry(t, i, _motion.incrementRow(i), AXIS.V, d));
+							}
+							if(d.equals(DIR.EAST)) {
+								// compute p(col j _t | row j-1 _t-1, prev action _t-1 moving in direction d)
+								out.println(_motion.calculateAssembleCPDEntry(t, j, _motion.decrementCol(j), AXIS.H, d));
+							}
+							if(d.equals(DIR.WEST)) {
+								// compute p(col j _t | row j+1 _t-1, prev action _t-1 moving in direction d)
+								out.println(_motion.calculateAssembleCPDEntry(t, j, _motion.incrementCol(j), AXIS.H, d));
+							}
 							// compute p(row i _t | row i _t-1, prev action _t-1 moving in direction d)
-							// compute p(col j _t | row j-1 _t-1, prev action _t-1 moving in direction d)
-							// compute p(col j _t | row j+1 _t-1, prev action _t-1 moving in direction d)
-							// compute p(col j _t | row j _t-1, prev action _t-1moving in direction d)	
+							out.println(_motion.calculateAssembleCPDEntry(t, i, i, AXIS.V, d));
+							// compute p(col j _t | row j _t-1, prev action _t-1moving in direction d)
+							out.println(_motion.calculateAssembleCPDEntry(t, j, j, AXIS.H, d));
 						}
 						// observation model:
 						// compute p(observe wall in that direction | current position)
@@ -329,14 +335,5 @@ public class Network {
 			}
 		}
 		out.close();
-	}
-	/**
-	 * Given a variable name, and a value, concatenate them and return var=value'
-	 * @param varName
-	 * @param value
-	 * @return varName=value
-	 */
-	private static String concatVarNameValue(String varName, String value) {
-		return varName + "=" + value;
 	}
 }

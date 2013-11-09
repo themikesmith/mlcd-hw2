@@ -123,8 +123,9 @@ public class MotionModel {
 			}
 			else { // and we did move in the perpendicular axis! uh oh
 				System.err.println("change in position in axis perpendicular to movement");
-				System.err.printf("curr:%d prev:%d axis:%s dir:%s\n", currPos, prevPos, a, moveAttempted);
-				return 0;
+				String error = String.format("curr:%d prev:%d axis:%s dir:%s", currPos, prevPos, a, moveAttempted);
+				System.err.println(error);
+				throw new IllegalArgumentException(error);
 			}
 		}
 		else { // else the axis of movement is parallel to change in position
@@ -167,6 +168,20 @@ public class MotionModel {
 		for(int i = 0; i < successfulMoves.length; i++) {
 			System.err.printf("i:%s c:%d\n", DIR.values()[i], successfulMoves[i]);
 		}
+	}
+	/**
+	 * Calculate and assemble the line for the CPD given the following:
+	 * @param t time step value
+	 * @param currPos current position (i or j depending on axis specified)
+	 * @param prevPos previous position (i or j, depending on axis specified)
+	 * @param a axis specified
+	 * @param d previous action specified by movement
+	 * @return the string formatted as required for the CPD
+	 */
+	public String calculateAssembleCPDEntry(int t, int currPos, int prevPos, AXIS a, DIR d) {
+		float f = getProbability(currPos, prevPos, a, d);
+		return String.format("PositionRow_%d=%d PositionRow_%d=%d,Action_%d=Move%s %.13e",
+			t, currPos, t, prevPos, t, d.getLongName(), f);
 	}
 	/**
 	 * 
