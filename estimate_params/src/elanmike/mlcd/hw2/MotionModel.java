@@ -4,7 +4,6 @@ import elanmike.mlcd.hw2.Constants.DIR;
 
 public class MotionModel {
 	private int[] attemptedMoves, successfulMoves;
-	private boolean smoothed;
 	/**
 	 * Create a MotionModel.
 	 * Instantiates and initializes our counting arrays.
@@ -19,7 +18,6 @@ public class MotionModel {
 		for(int i = 0; i < successfulMoves.length; i++) {
 			successfulMoves[i] = 1;
 		}
-		smoothed = false;
 	}
 	/**
 	 * Increment the count corresponding to a successful move in direction d
