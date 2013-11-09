@@ -86,33 +86,6 @@ public class Constants {
 			return null;
 		}
 	}
-	/**
-	 * Enum for action types.
-	 * @author mcs
-	 */
-	public enum VARTYPES {
-		POSITION("Position"), OBSERVE_WALL("ObserveWall"), 
-			OBSERVE_LANDMARK("ObserveLandmark"), ACTION("Action");
-		private String s;
-		VARTYPES(String s) {
-			this.s = s;
-		}
-		/**
-		 * Creates a variable name given the parameters.
-		 * Eg, passing '1','N','1' would add '1_N_1' to the end of the variable name.
-		 * 
-		 * @param params the list of parameters
-		 * @return the string variable name
-		 */
-		public String makeVarName(String... params) {
-			StringBuilder sb = new StringBuilder(s);
-			for(String p : params) {
-				sb.append(p).append('_');
-			}
-			sb.deleteCharAt(sb.length()-1);
-			return sb.toString();
-		}
-	}
 	// static final values for row and col
 	public static final String ROW = "Row", COL = "Col";
 	/** Matcher for position variable name -- 1 group: row or col */

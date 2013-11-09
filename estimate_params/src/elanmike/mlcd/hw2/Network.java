@@ -5,12 +5,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Time;
 import java.util.regex.Matcher;
 
 import elanmike.mlcd.hw2.Constants.AXIS;
 import elanmike.mlcd.hw2.Constants.DIR;
-import elanmike.mlcd.hw2.Constants.VARTYPES;
 
 /**
  * This class, a singleton in our Estimate Parameters framework, 
@@ -321,12 +319,10 @@ public class Network {
 						}
 						// observation model:
 						// compute p(observe wall in that direction | current position)
-						String varName = VARTYPES.OBSERVE_WALL.makeVarName("",d.toString(),Integer.toString(t));
 						// TODO compute 'yes' | i,j
 						// TODO and compute 'no' = 1-'yes' | i,j
 						for(int l = 1; l <= _numLandmarks; l++) {
 							// compute p(observe landmark L in that direction | current position)
-							varName = VARTYPES.OBSERVE_LANDMARK.makeVarName(Integer.toString(l),d.toString(),Integer.toString(t));
 							// TODO compute 'yes' | i,j
 							// TODO and compute 'no' = 1-'yes' | i,j
 						}
