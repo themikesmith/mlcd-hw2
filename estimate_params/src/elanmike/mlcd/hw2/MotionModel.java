@@ -161,4 +161,17 @@ public class MotionModel {
 			throw new IllegalArgumentException(error);
 		}
 	}
+	/**
+	 * 
+	 */
+	public void printInfoDebug() {
+		System.err.println("attempted moves:");
+		for(int i = 0; i < attemptedMoves.length; i++) {
+			System.err.printf("i:%s c:%d\n", DIR.values()[i], attemptedMoves[i]);
+		}
+		System.err.println("successful moves:");
+		for(int i = 0; i < successfulMoves.length; i++) {
+			System.err.printf("i:%s c:%d\n", DIR.values()[i], successfulMoves[i]);
+		}
+	}
 }
