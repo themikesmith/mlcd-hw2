@@ -182,7 +182,13 @@ public class Network {
 					continue; // skip line and continue counting
 				}
 				prevAction = currAction; // could be null if first line
-				currAction = DIR.getDirValue(n.group(1)); // could be null if error in dir
+				try {
+					currAction = DIR.getDirValue(n.group(1)); // could be null if error in dir	
+				}
+				catch(IllegalStateException ex) {
+					System.err.println(actionValue[0]+"="+actionValue[1]);
+					ex.printStackTrace();
+				}
 				// for each (i,j) given: (for each data point)
 				// remember previous (i,j) and previous action
 				// TODO add 1 to count of the applicable motion parameters, if prevAction not null
