@@ -237,6 +237,9 @@ public class Network {
 		}
 		br.close();
 		_motion.printInfoDebug();
+		_obsMod.printWallDebug();
+		_obsMod.printLandmarkDebug();
+		System.out.println(_obsMod.formattedCpdOutput(0));
 	}
 
 	/**
