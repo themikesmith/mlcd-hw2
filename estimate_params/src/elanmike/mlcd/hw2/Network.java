@@ -1,12 +1,9 @@
 package elanmike.mlcd.hw2;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.regex.Matcher;
 
 import elanmike.mlcd.hw2.Constants.DIR;
@@ -183,10 +180,10 @@ public class Network {
 				}
 				prevAction = currAction; // could be null if first line
 				try {
+					n.matches();
 					currAction = DIR.getDirValue(n.group(1)); // could be null if error in dir	
 				}
 				catch(IllegalStateException ex) {
-					System.err.println(actionValue[0]+"="+actionValue[1]);
 					ex.printStackTrace();
 				}
 				// for each (i,j) given: (for each data point)
@@ -264,7 +261,7 @@ public class Network {
 						// motion model:
 						// TODO 6 functions
 						// compute p(row i | row i-1, prev action moving in direction d)
-						System.err.println(""+_motion.getProbability(i-1, j, i, j, d));
+						//System.err.println(""+_motion.getProbability(i-1, j, i, j, d));
 						// compute p(row i | row i+1, prev action moving in direction d)
 						// compute p(row i | row i, prev action moving in direction d)
 						// compute p(col j | row j-1, prev action moving in direction d)

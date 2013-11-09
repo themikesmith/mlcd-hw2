@@ -58,6 +58,7 @@ public class MotionModel {
 	 * @param moveAttempted
 	 */
 	public void processMove(int prevRow, int prevCol, int currRow, int currCol, DIR moveAttempted) {
+		System.err.printf("process: prev:%d,%d curr:%d,%d dir:%s\n", prevRow, prevCol, currRow, currCol, moveAttempted);
 		if(moveAttempted.equals(DIR.NORTH) || moveAttempted.equals(DIR.SOUTH)) {
 			if(prevCol == currCol && prevRow == currRow) { // unsuccessful
 				addFailedMove(moveAttempted);
