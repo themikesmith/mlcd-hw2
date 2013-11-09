@@ -1,9 +1,12 @@
 package elanmike.mlcd.hw2;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.regex.Matcher;
 
 import elanmike.mlcd.hw2.Constants.DIR;
@@ -30,6 +33,7 @@ import elanmike.mlcd.hw2.Constants.VARTYPES;
  *
  */
 public class Network {
+	private static MotionModel _motion = new MotionModel();
 	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
 	/**
 	 * Given a 'network-gridAxB-tC.txt' input file,
@@ -137,7 +141,6 @@ public class Network {
 	 */
 	public void train(String trainingFilename) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(trainingFilename));
-		MotionModel motion = new MotionModel();
 		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1;
 		DIR currAction = null, prevAction = null; // we can represent action by direction of move
 		String line;
@@ -188,7 +191,7 @@ public class Network {
 						System.err.printf("error parsing action:%s\n",data[4]);
 						continue; // skip line and continue counting
 					}
-					motion.processMove(prevRow, prevCol, currRow, currCol, prevAction);
+					_motion.processMove(prevRow, prevCol, currRow, currCol, prevAction);
 				}
 				// all subsequent values are observation variable 'yes' values
 				// go through all subsequent variables
@@ -198,7 +201,7 @@ public class Network {
 			}
 		}
 		br.close();
-		motion.printInfoDebug();
+		_motion.printInfoDebug();
 	}
 
 	/**
@@ -255,6 +258,7 @@ public class Network {
 						// motion model:
 						// TODO 6 functions
 						// compute p(row i | row i-1, prev action moving in direction d)
+						System.err.println(""+_motion.getProbability(i-1, j, i, j, d));
 						// compute p(row i | row i+1, prev action moving in direction d)
 						// compute p(row i | row i, prev action moving in direction d)
 						// compute p(col j | row j-1, prev action moving in direction d)
