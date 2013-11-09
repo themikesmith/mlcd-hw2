@@ -8,7 +8,6 @@ import java.util.regex.Matcher;
 
 import elanmike.mlcd.hw2.Constants.DIR;
 import elanmike.mlcd.hw2.Constants.VARTYPES;
-import elanmike.mlcd.hw2.Constants.VariablePair;
 
 /**
  * This class, a singleton in our Estimate Parameters framework, 
@@ -31,6 +30,7 @@ import elanmike.mlcd.hw2.Constants.VariablePair;
  *
  */
 public class Network {
+	private static MotionModel _motion = new MotionModel();
 	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
 	private static ObservationModel _obsMod;
 	
@@ -145,7 +145,6 @@ public class Network {
 	 */
 	public void train(String trainingFilename) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(trainingFilename));
-		MotionModel motion = new MotionModel();
 		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1;
 		DIR currAction = null, prevAction = null; // we can represent action by direction of move
 		String line;
@@ -178,7 +177,7 @@ public class Network {
 				}
 				prevCol = currCol;
 				currCol = Integer.parseInt(colValue[1]);
-				// get action value-
+				// get action value
 				String[] actionValue = data[4].split("=");
 				m = Constants._regexAction.matcher(actionValue[0]);
 				Matcher n = Constants._regexMove.matcher(actionValue[1]);
@@ -187,7 +186,13 @@ public class Network {
 					continue; // skip line and continue counting
 				}
 				prevAction = currAction; // could be null if first line
-				currAction = DIR.getDirValue(n.group(1)); // could be null if error in dir
+				try {
+					n.matches();
+					currAction = DIR.getDirValue(n.group(1)); // could be null if error in dir	
+				}
+				catch(IllegalStateException ex) {
+					ex.printStackTrace();
+				}
 				// for each (i,j) given: (for each data point)
 				// remember previous (i,j) and previous action
 				// TODO add 1 to count of the applicable motion parameters, if prevAction not null
@@ -196,7 +201,7 @@ public class Network {
 						System.err.printf("error parsing action:%s\n",data[4]);
 						continue; // skip line and continue counting
 					}
-					motion.processMove(prevRow, prevCol, currRow, currCol, prevAction);
+					_motion.processMove(prevRow, prevCol, currRow, currCol, prevAction);
 				}
 				// all subsequent values are observation variable 'yes' values
 				// go through all subsequent variables
@@ -208,6 +213,7 @@ public class Network {
 					observationValue = observationValue[0].split("_");
 					
 					System.out.println(observationValue);
+
 				}
 				_obsMod.addObservation(currRow, currCol, obsers);
 				
@@ -215,8 +221,7 @@ public class Network {
 			}
 		}
 		br.close();
-		// smooth
-		motion.smooth();
+		_motion.printInfoDebug();
 	}
 
 	/**
@@ -273,6 +278,7 @@ public class Network {
 						// motion model:
 						// TODO 6 functions
 						// compute p(row i | row i-1, prev action moving in direction d)
+						//System.err.println(""+_motion.getProbability(i-1, j, i, j, d));
 						// compute p(row i | row i+1, prev action moving in direction d)
 						// compute p(row i | row i, prev action moving in direction d)
 						// compute p(col j | row j-1, prev action moving in direction d)

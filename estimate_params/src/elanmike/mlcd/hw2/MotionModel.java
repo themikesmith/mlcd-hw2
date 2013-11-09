@@ -4,7 +4,6 @@ import elanmike.mlcd.hw2.Constants.DIR;
 
 public class MotionModel {
 	private int[] attemptedMoves, successfulMoves;
-	private boolean smoothed;
 	/**
 	 * Create a MotionModel.
 	 * Instantiates and initializes our counting arrays.
@@ -13,13 +12,12 @@ public class MotionModel {
 	public MotionModel() {
 		attemptedMoves = new int[DIR.values().length];
 		for(int i = 0; i < attemptedMoves.length; i++) {
-			attemptedMoves[i] = 0;
+			attemptedMoves[i] = 2;
 		}
 		successfulMoves = new int[DIR.values().length];
 		for(int i = 0; i < successfulMoves.length; i++) {
-			successfulMoves[i] = 0;
+			successfulMoves[i] = 1;
 		}
-		smoothed = false;
 	}
 	/**
 	 * Increment the count corresponding to a successful move in direction d
@@ -60,12 +58,12 @@ public class MotionModel {
 	 * @param moveAttempted
 	 */
 	public void processMove(int prevRow, int prevCol, int currRow, int currCol, DIR moveAttempted) {
-		if(moveAttempted.equals(DIR.NORTH) || moveAttempted.equals(DIR.SOUTH)) {
+		if(moveAttempted.equals(DIR.EAST) || moveAttempted.equals(DIR.WEST)) {
 			if(prevCol == currCol && prevRow == currRow) { // unsuccessful
 				addFailedMove(moveAttempted);
 			}
 			else if(prevRow == currRow && 
-				prevCol == currCol + (moveAttempted.equals(DIR.NORTH) ? -1 : 1)) {
+				prevCol == currCol + (moveAttempted.equals(DIR.EAST) ? -1 : 1)) {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
@@ -73,12 +71,12 @@ public class MotionModel {
 					moveAttempted, prevRow, prevCol, currRow, currCol);
 			}
 		}
-		else if(moveAttempted.equals(DIR.EAST) || moveAttempted.equals(DIR.WEST)) {
+		else if(moveAttempted.equals(DIR.NORTH) || moveAttempted.equals(DIR.SOUTH)) {
 			if(prevRow == currRow && prevCol == currCol) { // unsuccessful
 				addFailedMove(moveAttempted);
 			}
 			else if(prevCol == currCol && 
-				prevRow == currRow + (moveAttempted.equals(DIR.EAST) ? -1 : 1)) {
+				prevRow == currRow + (moveAttempted.equals(DIR.NORTH) ? -1 : 1)) {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
@@ -88,25 +86,6 @@ public class MotionModel {
 		}
 		else {
 			System.err.printf("invalid direction!:%s\n",moveAttempted);
-		}
-	}
-	/**
-	 * Given our current counts, smooth by add-1 smoothing.
-	 */
-	public void smooth() {
-		if(!smoothed) {
-			// add 1 to every bucket of successful moves
-			for(int i = 0; i < attemptedMoves.length; i++) {
-				attemptedMoves[i]++;
-			}
-			// add 2 to every bucked of attempted moves
-			for(int i = 0; i < successfulMoves.length; i++) {
-				successfulMoves[i] += 2;
-			}
-			smoothed = true; // only smooth once
-		}
-		else {
-			System.err.println("already smoothed motion model! don't call me twice!");
 		}
 	}
 	/**
@@ -159,6 +138,19 @@ public class MotionModel {
 			String error = "invalid direction!:"+moveAttempted;
 			System.err.println(error);
 			throw new IllegalArgumentException(error);
+		}
+	}
+	/**
+	 * 
+	 */
+	public void printInfoDebug() {
+		System.err.println("attempted moves:");
+		for(int i = 0; i < attemptedMoves.length; i++) {
+			System.err.printf("i:%s c:%d\n", DIR.values()[i], attemptedMoves[i]);
+		}
+		System.err.println("successful moves:");
+		for(int i = 0; i < successfulMoves.length; i++) {
+			System.err.printf("i:%s c:%d\n", DIR.values()[i], successfulMoves[i]);
 		}
 	}
 }

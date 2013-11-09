@@ -8,23 +8,3 @@
 0 7 PositionRow_7=7 PositionCol_7=5 Action_7=MoveSouth ObserveLandmark2_S_7=Yes ObserveWall_N_7=Yes
 0 8 PositionRow_8=6 PositionCol_8=5 Action_8=MoveNorth ObserveWall_W_8=Yes
 0 9 PositionRow_9=7 PositionCol_9=5 Action_9=MoveNorth ObserveLandmark2_N_9=Yes ObserveWall_N_9=Yes
-1 0 PositionRow_0=9 PositionCol_0=8 Action_0=MoveEast ObserveLandmark2_W_0=Yes
-1 1 PositionRow_1=9 PositionCol_1=9 Action_1=MoveNorth ObserveLandmark2_N_1=Yes ObserveLandmark1_S_1=Yes
-1 2 PositionRow_2=10 PositionCol_2=9 Action_2=MoveSouth ObserveWall_W_2=Yes
-1 3 PositionRow_3=9 PositionCol_3=9 Action_3=MoveSouth ObserveLandmark1_N_3=Yes
-1 4 PositionRow_4=8 PositionCol_4=9 Action_4=MoveSouth ObserveWall_W_4=Yes
-1 5 PositionRow_5=7 PositionCol_5=9 Action_5=MoveSouth ObserveWall_W_5=Yes
-1 6 PositionRow_6=6 PositionCol_6=9 Action_6=MoveEast ObserveWall_W_6=Yes ObserveWall_E_6=Yes ObserveLandmark1_W_6=Yes ObserveWall_S_6=Yes
-1 7 PositionRow_7=6 PositionCol_7=9 Action_7=MoveNorth ObserveLandmark2_W_7=Yes ObserveWall_W_7=Yes ObserveWall_E_7=Yes
-1 8 PositionRow_8=7 PositionCol_8=9 Action_8=MoveSouth ObserveLandmark1_W_8=Yes ObserveLandmark2_N_8=Yes ObserveWall_W_8=Yes
-1 9 PositionRow_9=7 PositionCol_9=9 Action_9=MoveNorth ObserveWall_W_9=Yes
-2 0 PositionRow_0=7 PositionCol_0=5 Action_0=MoveEast ObserveLandmark2_S_0=Yes ObserveLandmark1_W_0=Yes ObserveLandmark2_N_0=Yes ObserveLandmark1_N_0=Yes ObserveWall_S_0=Yes ObserveLandmark1_S_0=Yes
-2 1 PositionRow_1=7 PositionCol_1=6 Action_1=MoveEast ObserveLandmark2_E_1=Yes ObserveWall_W_1=Yes ObserveLandmark1_E_1=Yes
-2 2 PositionRow_2=7 PositionCol_2=7 Action_2=MoveSouth ObserveLandmark2_W_2=Yes ObserveWall_E_2=Yes ObserveWall_N_2=Yes
-2 3 PositionRow_3=7 PositionCol_3=7 Action_3=MoveNorth ObserveWall_E_3=Yes ObserveLandmark1_S_3=Yes
-2 4 PositionRow_4=8 PositionCol_4=7 Action_4=MoveWest ObserveLandmark2_S_4=Yes ObserveWall_W_4=Yes ObserveWall_N_4=Yes
-2 5 PositionRow_5=8 PositionCol_5=7 Action_5=MoveSouth ObserveWall_W_5=Yes ObserveLandmark2_N_5=Yes ObserveLandmark1_N_5=Yes
-2 6 PositionRow_6=7 PositionCol_6=7 Action_6=MoveSouth ObserveWall_E_6=Yes ObserveLandmark1_S_6=Yes
-2 7 PositionRow_7=6 PositionCol_7=7 Action_7=MoveSouth ObserveWall_E_7=Yes
-2 8 PositionRow_8=5 PositionCol_8=7 Action_8=MoveSouth ObserveWall_E_8=Yes ObserveWall_W_8=Yes ObserveWall_N_8=Yes
-2 9 PositionRow_9=4 PositionCol_9=7 Action_9=MoveSouth ObserveLandmark2_S_9=Yes ObserveWall_E_9=Yes
