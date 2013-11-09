@@ -336,12 +336,18 @@ public class Network {
 						}
 						// observation model:
 						// compute p(observe wall in that direction | current position)
-						// TODO compute 'yes' | i,j
-						// TODO and compute 'no' = 1-'yes' | i,j
-						for(int l = 1; l <= _numLandmarks; l++) {
+						//walls
+						//e.g. ObserveWall_N_8=Yes PositionRow_8=9,PositionCol_8=2 0.866634
+						out.printf("ObserveWall_%s_%d=Yes PositionRow_%d=%d,PositionCol_%d=%d %.13e\n",
+								d.toString(),t,t,i,t,j,_obsMod.getWallObservation(i, j, d.ordinal()));
+						out.printf("ObserveWall_%s_%d=No PositionRow_%d=%d,PositionCol_%d=%d %.13e\n",
+								d.toString(),t,t,i,t,j,(1-_obsMod.getWallObservation(i, j, d.ordinal())));
+						for(int lmk = 1; lmk <= _numLandmarks; lmk++) {
 							// compute p(observe landmark L in that direction | current position)
-							// TODO compute 'yes' | i,j
-							// TODO and compute 'no' = 1-'yes' | i,j
+							out.printf("ObserveLandmark%d_%s_%d=Yes PositionRow_%d=%d,PositionCol_%d=%d %.13e\n",
+									lmk,d.toString(),t,t,i,t,j,_obsMod.getLandmarkObservation(i, j, lmk, d.ordinal()));
+							out.printf("ObserveLandmark%d_%s_%d=No PositionRow_%d=%d,PositionCol_%d=%d %.13e\n",
+									lmk,d.toString(),t,t,i,t,j,(1-_obsMod.getLandmarkObservation(i, j, lmk, d.ordinal())));
 						}
 					}
 				}
