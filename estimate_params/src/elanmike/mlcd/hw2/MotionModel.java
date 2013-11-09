@@ -1,6 +1,5 @@
 package elanmike.mlcd.hw2;
 
-import elanmike.mlcd.hw2.Constants.AXIS;
 import elanmike.mlcd.hw2.Constants.DIR;
 
 public class MotionModel {

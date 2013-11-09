@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 
 import elanmike.mlcd.hw2.Constants.DIR;
@@ -191,12 +189,7 @@ public class Network {
 						System.err.printf("error parsing action:%s\n",data[4]);
 						continue; // skip line and continue counting
 					}
-					// p(row i | row i-1, prev action moving in direction d)
-					// p(row i | row i+1, prev action moving in direction d)
-					// p(row i | row i, prev action moving in direction d)
-					// p(col j | row j-1, prev action moving in direction d)
-					// p(col j | row j+1, prev action moving in direction d)
-					// p(col j | row j, prev action moving in direction d)
+					motion.processMove(prevRow, prevCol, currRow, currCol, prevAction);
 				}
 				// all subsequent values are observation variable 'yes' values
 				// go through all subsequent variables
@@ -207,26 +200,7 @@ public class Network {
 		}
 		br.close();
 		// smooth
-		smoothCounts();
-	}
-	/**
-	 * Compute our smoothed counts
-	 */
-	private void smoothCounts() {
-		// TODO implement smoothing counts
-	}
-	/**
-	 * Gets our probability of X=x given context variables Y1=y1, Y2=y2, ... Yn=yn
-	 * aka P(X=x | Y1=y1, Y2=y2, ... Yn=yn)
-	 * One may pass no contexts.
-	 * 
-	 * @param lhsVar left hand side of query, X=x
-	 * @param contextVars list of context variables, Yi=yi
-	 * @return float probability
-	 */
-	private float getProbability(VariablePair lhsVar, VariablePair... contextVars) {
-		// TODO implement
-		return -1;
+		motion.smooth();
 	}
 
 	/**
