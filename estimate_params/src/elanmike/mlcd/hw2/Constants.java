@@ -4,16 +4,29 @@ import java.util.regex.Pattern;
 
 public class Constants {
 	/**
+	 * Enum for axes
+	 */
+	public enum AXIS {
+		H, V
+	}
+	/**
 	 * Enum for directions. 
 	 * @author mcs
 	 */
 	public enum DIR {
-		NORTH("N", "North"), SOUTH("S", "South"), EAST("E","East"), WEST("W","West");
+		NORTH("N", "North", AXIS.V), SOUTH("S", "South", AXIS.V), 
+			EAST("E","East", AXIS.H), WEST("W","West", AXIS.H);
 		private String shortName, longName;
-		DIR(String s, String t) {
+		private AXIS axis;
+		DIR(String s, String t, AXIS a) {
 			this.shortName = s;
 			this.longName = t;
+			this.axis = a;
 		}
+		/**
+		 * @return the axis of the direction
+		 */
+		public AXIS getAxis() {return axis;}
 		/** @return the short name of the direction */
 		public String toString() {return shortName;}
 		/** @return the long name of the direction */

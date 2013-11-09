@@ -1,5 +1,6 @@
 package elanmike.mlcd.hw2;
 
+import elanmike.mlcd.hw2.Constants.AXIS;
 import elanmike.mlcd.hw2.Constants.DIR;
 
 public class MotionModel {
@@ -67,7 +68,7 @@ public class MotionModel {
 				addFailedMove(moveAttempted);
 			}
 			else if(prevRow == currRow && 
-				prevCol == (currCol + (moveAttempted.equals(DIR.EAST) ? -1 : 1) % numCols)) {
+				prevCol == (moveAttempted.equals(DIR.EAST) ? decrementCol(currCol) : incrementCol(currCol))) {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
@@ -80,7 +81,7 @@ public class MotionModel {
 				addFailedMove(moveAttempted);
 			}
 			else if(prevCol == currCol && 
-				prevRow == currRow + (moveAttempted.equals(DIR.NORTH) ? -1 : 1) % numRows) {
+					prevRow == (moveAttempted.equals(DIR.NORTH) ? decrementRow(currRow) : incrementRow(currRow))) {
 				addSuccessfulMove(moveAttempted);
 			}
 			else {
@@ -110,39 +111,49 @@ public class MotionModel {
 	 * @return the probability
 	 * @throws IllegalArgumentException
 	 */
-	public float getProbability(int currRow, int currCol, int prevRow, int prevCol, 
-			DIR moveAttempted) throws IllegalArgumentException {
+	public float getProbability(int currPos, int prevPos, AXIS a, DIR moveAttempted) 
+			throws IllegalArgumentException {
 		float value = (float) successfulMoves[moveAttempted.ordinal()] 
 			/ attemptedMoves[moveAttempted.ordinal()];
-		if(moveAttempted.equals(DIR.NORTH) || moveAttempted.equals(DIR.SOUTH)) {
-			if(prevCol == currCol && prevRow == currRow) { // unsuccessful
-				return 1 - value;
+		if(!moveAttempted.getAxis().equals(a)) {
+			// if the axis of movement specified is perpendicular to the movement...
+			if(currPos == prevPos) {
+				// and we didn't move in the perpendicular axis (read: always will happen)
+				return 1;
 			}
-			else if(prevRow == currRow && // successful
-				prevCol == currCol + (moveAttempted.equals(DIR.NORTH) ? -1 : 1)) {
-				return value;
-			}
-			else { // impossible
+			else { // and we did move in the perpendicular axis! uh oh
+				System.err.println("change in position in axis perpendicular to movement");
+				System.err.printf("curr:%d prev:%d axis:%s dir:%s\n", currPos, prevPos, a, moveAttempted);
 				return 0;
 			}
 		}
-		else if(moveAttempted.equals(DIR.EAST) || moveAttempted.equals(DIR.WEST)) {
-			if(prevRow == currRow && prevCol == currCol) { // unsuccessful
+		else { // else the axis of movement is parallel to change in position
+			if(prevPos == currPos) { // unsuccessful
 				return 1 - value;
 			}
-			else if(prevCol == currCol && // successful
-				prevRow == currRow + (moveAttempted.equals(DIR.EAST) ? -1 : 1)) {
-				return value;
-			}
-			else { // impossible
-				return 0;
+			else {
+				if(moveAttempted.equals(DIR.NORTH) || moveAttempted.equals(DIR.SOUTH)) {
+					if(prevPos == (moveAttempted.equals(DIR.NORTH)
+							? decrementRow(currPos) : incrementRow(currPos))) {
+						return value;
+					}
+				}
+				else if(moveAttempted.equals(DIR.EAST) || moveAttempted.equals(DIR.WEST)) {
+					if(prevPos == (moveAttempted.equals(DIR.EAST)
+							? decrementCol(currPos) : incrementCol(currPos))) {
+						return value;
+					}
+				}
+				else {
+					String error = "invalid direction!:"+moveAttempted;
+					System.err.println(error);
+					throw new IllegalArgumentException(error);
+				}
 			}
 		}
-		else {
-			String error = "invalid direction!:"+moveAttempted;
-			System.err.println(error);
-			throw new IllegalArgumentException(error);
-		}
+		String error = prevPos+" differs from "+currPos+" by more than 1 on axis:"+a;
+		System.err.println(error);
+		throw new IllegalArgumentException(error);
 	}
 	/**
 	 * 
