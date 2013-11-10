@@ -332,7 +332,8 @@ public class Bump {
 		_useSumProduct = useSumProduct;
 	}
 	/**
-	 * Runs belief update message passing to calibrate the tree
+	 * Runs belief update message passing to calibrate the tree.
+	 * Resets, assigns an ordering, inits beliefs, calibrates the tree.
 	 */
 	public void runBump() {
 		assignOrderingAndInitBeliefs();
@@ -436,8 +437,10 @@ public class Bump {
 	 */
 	void incorporateQueryEvidence(int varInt, int varValue) {
 		// Find a clique with the variable, C
-		Vertex newRoot = findVertexQuery(varInt, varValue);
-		// TODO verify this is not null
+		Vertex newRoot = findVertexQuery(varInt);
+		if(newRoot == null) {
+			System.err.println("can't find vertex - whoops!");
+		}
 		// multiply in a new indicator factor
 		// TODO multiply in new indicator
 		// conduct one pass of B-U with C as the root
@@ -446,7 +449,7 @@ public class Bump {
 	String query(String[] lhs, String[] contexts, boolean useSumProduct) {
 		if(useSumProduct != _useSumProduct) {
 			System.err.println("oops! not ready.");
-			//TODO get ready.
+			// set appropriate method, and run bump to calibrate
 			setUseSumProduct(useSumProduct);
 			runBump();
 		}
