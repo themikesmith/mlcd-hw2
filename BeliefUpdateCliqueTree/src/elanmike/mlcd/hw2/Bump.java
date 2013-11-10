@@ -208,18 +208,6 @@ public class Bump {
 			this._two = two;
 			this._weight = weight;
 		}
-		
-		/*
-		Edge(Vertex one, Vertex two, int weight) {
-			this._one = one;
-			this._two = two;
-			this._weight = weight;
-			this._sepset = new HashSet<Integer>(one._variables);
-			_sepset.retainAll(two._variables);
-		}
-		void setBelief(Factor f) {this._mu = f;}
-		Factor getBelief() {return _mu;}
-		*/
 		/**
 		 * An edge is equal to another edge if its two vertices match the other's two
 		 */
