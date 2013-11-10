@@ -345,6 +345,7 @@ public class Bump {
 	}
 	void resetTreeForQueries() {
 		_queryTree = _tree.makeCopy();
+		_queryContexts = new HashMap<Integer, Integer>();
 	}
 	/**
 	 * find a vertex with a clique containing the given set of variables
@@ -394,14 +395,17 @@ public class Bump {
 			// retractive -- less evidence than before. reset and treat as incremental
 			retractive = true;
 		}
-		for(String s : contexts) {
-			String[] varValue = s.split("=");
-			String var = varValue[0], value = varValue[1];
-			// TODO convert to integers
-			int varInt = -1, valueInt = -1;
-			if(_queryContexts.containsKey(varInt) && _queryContexts.get(varInt) != valueInt) {
-				// query context variable has other value. reset.
-				retractive = true;
+		if(!retractive) {
+			for(String s : contexts) {
+				String[] varValue = s.split("=");
+				String var = varValue[0], value = varValue[1];
+				// TODO convert to integers
+				int varInt = -1, valueInt = -1;
+				if(_queryContexts.containsKey(varInt) && _queryContexts.get(varInt) != valueInt) {
+					// query context variable has other value. reset.
+					retractive = true;
+					break;
+				}
 			}
 		}
 		if(retractive) resetTreeForQueries();
@@ -418,7 +422,7 @@ public class Bump {
 				// already have this context variable = value pair, do nothing
 			}
 			else { // query context variable has other value. reset.
-				
+				// we've already reset so this should never occur
 			}
 		}
 		for(String s : lhs) {
