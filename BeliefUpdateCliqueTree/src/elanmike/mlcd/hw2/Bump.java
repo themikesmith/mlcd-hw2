@@ -485,12 +485,16 @@ public class Bump {
 		for(int i = 0;i<numCliques;i++){
 			if((line = br.readLine()) != null){
 				String[] containedVars = line.split(",");
-				new Clique(containedVars);
+				_tree.addVertex(new Vertex(containedVars));
 				
 			}else{
 				br.close();
 				throw new IOException("inconsistant network file.");
 			}
+		}
+		while ((line = br.readLine()) != null) {
+			
+			
 		}
 		
 		
