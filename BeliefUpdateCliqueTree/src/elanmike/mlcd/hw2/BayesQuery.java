@@ -15,27 +15,43 @@ public class BayesQuery {
 	 */
 	public static void main(String[] args) {
 		// check arguments
-		if(args.length != 4) {
+		if(args.length != 4 && args.length != 5) {
 			usage();
 			return;
 		}
 		boolean useSumProduct = true;
-		if(args[0].equals("-s")) {
+		if(args.length>4 && args[0].equals("-s")) {
 			useSumProduct = true;
 		}
-		else if(args[0].equals("-m")) {
+		else if(args.length>4 && args[0].equals("-m")) {
 			useSumProduct = false;
 		}
-		else {
+		else if (args.length>4 ){
 			usage();
 			return;
 		}
+		
+		try {
+			readNetworkFile(args[0]);
+			readCPDFile(args[1]);
+		} catch (NumberFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		// TODO load cpd, throw error on failure
 		// TODO load network file, throw error on failure
 		// TODO verify clique tree is valid for the loaded network, throw error on failure
 		try {
 			b = readTree(args[2]);
-		} catch (NumberFormatException | IOException e) {
+		} catch (NumberFormatException e) {
+			System.err.println("error reading tree!");
+			e.printStackTrace();
+			return;
+		}catch(IOException e){
 			System.err.println("error reading tree!");
 			e.printStackTrace();
 			return;
@@ -82,7 +98,7 @@ public class BayesQuery {
 	
 	
 
-	public void readNetworkFile(String networkFilename)
+	public static void readNetworkFile(String networkFilename)
 		throws IOException, NumberFormatException {
 			BufferedReader br = new BufferedReader(new FileReader(networkFilename));
 			String line;
@@ -111,7 +127,7 @@ public class BayesQuery {
 			br.close();
 	}
 
-	public void readCPDFile(String cpdFilename)
+	public static void readCPDFile(String cpdFilename)
 		throws IOException, NumberFormatException {
 			BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
 			String line;
