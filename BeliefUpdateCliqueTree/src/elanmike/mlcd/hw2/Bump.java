@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -595,18 +596,16 @@ public class Bump {
 			String[] left_variables = tokenized[0].split(",");
 			String[] right_variables = tokenized[2].split(",");
 			
-			//System.out.println("Adding edge: " + Factor.variableNamesToIndicies(left_variables) + " --- " + Factor.variableNamesToIndicies(right_variables));
 			
-			/*
-			System.out.println(_tree._vertices.keySet());
-			if(_tree._vertices.get(Factor.variableNamesToIndicies(left_variables).toString()) == null)
-				System.out.println("left null" + Factor.variableNamesToIndicies(left_variables).toString());
-			if(_tree._vertices.get(Factor.variableNamesToIndicies(right_variables).toString()) == null)
-				System.out.println("right null"+ Factor.variableNamesToIndicies(left_variables).toString());
-				*/
+			ArrayList<Integer> left = Factor.variableNamesToIndicies(new ArrayList<String>(Arrays.asList(left_variables)));
+			ArrayList<Integer> right = Factor.variableNamesToIndicies(new ArrayList<String>(Arrays.asList(right_variables)));
+			
+			Collections.sort(left);
+			Collections.sort(right);
+			
 			_tree.addEdge(new Edge(
-					_tree._vertices.get(Factor.variableNamesToIndicies(left_variables).toString()), 
-					_tree._vertices.get(Factor.variableNamesToIndicies(right_variables).toString()), 
+					_tree._vertices.get(left.toString()), 
+					_tree._vertices.get(right.toString()), 
 					1));
 		}
 		
@@ -648,22 +647,39 @@ public class Bump {
 	}
 
 	public void readCPDFile(String cpdFilename)
-			throws IOException, NumberFormatException {
+			throws Exception {
 		BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
 		String line;
 		
 		while ((line = br.readLine()) != null) {
-			String[] tokenized = line.split(" ");
+			String[] tokenized = line.split(" |,");
 			ArrayList<String> variables = new ArrayList<String>();
 			ArrayList<String> var_value = new ArrayList<String>();
 			for(int i = 0; i<tokenized.length-1; i++){
+				System.out.println(tokenized[i]);
 				String[] var_pair = tokenized[i].split("=");
 				variables.add(var_pair[0]);
 				var_value.add(var_pair[1]);
 			}
+			System.out.println(tokenized[tokenized.length-1]);
 			double prob = Double.valueOf(tokenized[tokenized.length-1]);
 			//Put into appropriate clique
+			//System.out.println(variables);
 			System.out.println(variables+" "+var_value+" "+ prob);
+			
+			System.out.println(Factor.variableNamesToIndicies(variables).toString());
+			
+			ArrayList<Integer> key = Factor.variableNamesToIndicies(variables);
+			
+			Collections.sort(key);
+			
+			if(_tree._vertices.containsKey(key.toString())){// CDP is covers an entire clique
+				System.out.println("fail");
+			}else{// Cpd is a subfactor of one of our cliques.
+				
+			}
+			
+			
 		}		
 		br.close();
 	}

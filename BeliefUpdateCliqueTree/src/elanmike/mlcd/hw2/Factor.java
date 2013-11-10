@@ -1,6 +1,7 @@
 package elanmike.mlcd.hw2;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -42,13 +43,14 @@ public class Factor {
 			return "";
 		return _variableNames.get(i);
 	}
-	public static ArrayList<Integer> variableNamesToIndicies(String[] varsToBeConverted){
+	public static ArrayList<Integer> variableNamesToIndicies(ArrayList<String> variables){
 		ArrayList<Integer> indicies = new ArrayList<Integer>();
-		for(String s:varsToBeConverted){
+		for(String s:variables){
 			indicies.add(_variableNames.indexOf(s));
 		}
 		return indicies;
-	}
+	}	
+	
 	public static int getVariableValueIndex(int varIdx, String val){
 		if(_variableValues == null)
 			return -1;
@@ -59,7 +61,14 @@ public class Factor {
 			return "";
 		return _variableValues.get(varIdx).get(valueIdx);
 	}
-	
+	public static ArrayList<Integer> valueNamesToIndicies(ArrayList<String> variables, ArrayList<String> var_value){
+		ArrayList<Integer> indicies = new ArrayList<Integer>();
+		
+		for(int i = 0; i < variables.size(); i++){
+			indicies.add(_variableValues.get(getVariableIndex(variables.get(i))).indexOf(var_value.get(i)));
+		}
+		return indicies;
+	}
 	
 	public static String variableInfo(){
 		String output = "";
@@ -96,6 +105,8 @@ public class Factor {
 		for(int index=0; index < varsNames.length; index ++) 
 			_variables.add(_variableNames.indexOf(varsNames[index]));
 		
+		Collections.sort(_variables);
+		
 		this._stride = new ArrayList<Integer>(_variables.size());
 		int strideTot = 1;
 		for(int index:_variables){
@@ -104,7 +115,7 @@ public class Factor {
 		}
 		
 		this.data = new ArrayList<Double>(strideTot);
-		for(int i = 0; i<strideTot; i++) data.add(0.0);
+		for(int i = 0; i<strideTot; i++) data.add(1.0);
 	}
 	
 	protected Factor(ArrayList<Integer> vars){
@@ -171,12 +182,12 @@ public class Factor {
 	public void addJointProbByName(String[] varVals, double prob) throws Exception{
 		if(varVals.length != _variables.size()) 
 			throw new Exception("InputLengthError: indexLength("+varVals.length+") does not match number of variables for this factor("+_variables.size()+")");
-		int[] valVarsIndicies = new int[varVals.length];
+		ArrayList<Integer> valVarsIndicies = new ArrayList<Integer>();
 		for(int varIdx=0; varIdx < varVals.length; varIdx ++){
 			int integerValOfString = _variableValues.get(varIdx).indexOf(varVals[varIdx]);
 			if(integerValOfString <0)
 				throw new Exception("ValueError: Value("+varVals[varIdx]+") not applicable for "+_variableNames.get(varIdx));
-			valVarsIndicies[varIdx] = integerValOfString;
+			valVarsIndicies.add(integerValOfString);
 		}
 		putProbByValues(valVarsIndicies,prob);
 		
@@ -210,16 +221,16 @@ public class Factor {
 		return output;
 	}
 	
-	public void putProbByValues(int[] variableValues,double prob) throws Exception{
+	public void putProbByValues(ArrayList<Integer> arrayList,double prob) throws Exception{
 		
 		int searchIndex = 0;
-		if(variableValues.length != _variables.size()) 
-			throw new Exception("FactorIndexError: indexLength("+variableValues.length+") does not match number of variables for this factor("+_variables.size()+")");
+		if(arrayList.size() != _variables.size()) 
+			throw new Exception("FactorIndexError: indexLength("+arrayList.size()+") does not match number of variables for this factor("+_variables.size()+")");
 		for(int index=0; index < _variables.size(); index ++)
-			if(variableValues[index] >= _variableCard.get(_variables.get(index))|| variableValues[index]< 0)
-				throw new Exception("FactorIndexError: variableValue("+variableValues[index]+") was not in the valid range of ( 0 - "+(_variableCard.get(_variables.get(index))-1)+")");
+			if(arrayList.get(index) >= _variableCard.get(_variables.get(index))|| arrayList.get(index)< 0)
+				throw new Exception("FactorIndexError: variableValue("+arrayList.get(index)+") was not in the valid range of ( 0 - "+(_variableCard.get(_variables.get(index))-1)+")");
 			else
-				searchIndex += variableValues[index]*_stride.get(index);
+				searchIndex += arrayList.get(index)*_stride.get(index);
 		
 		data.set(searchIndex,prob);
 	}
