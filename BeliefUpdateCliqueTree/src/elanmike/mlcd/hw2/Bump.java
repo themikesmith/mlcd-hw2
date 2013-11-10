@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -104,9 +105,8 @@ public class Bump {
 		 * Sends a message to its neighbor.
 		 * Calls the neighbor's onReceiveMessage method
 		 * @param recvingNeighbor
-		 * @param sentMsgInformed
 		 */
-		void sendMessage(Edge recvingNeighborEdge, boolean sentMsgInformed) {
+		void sendMessage(Edge recvingNeighborEdge) {
 			// TODO compose message
 			Factor message = null;
 			recvingNeighborEdge.getOtherVertex(this).
@@ -253,6 +253,10 @@ public class Bump {
 			_vertices = new HashSet<Vertex>();
 			_edges = new HashSet<Edge>();
 		}
+		Tree(Set<Vertex> vs, Set<Edge> es) {
+			this._vertices = vs;
+			this._edges = es;
+		}
 		void addVertex(Vertex v) {
 			_vertices.add(v);
 		}
@@ -267,6 +271,11 @@ public class Bump {
 				_vertices.add(e._two);
 				_edges.add(e);
 			}
+		}
+		Tree makeCopy() {
+			Tree t = new Tree();
+			//TODO make deep copy
+			return null;
 		}
 	}
 	private static final boolean DEBUG = true;
@@ -298,21 +307,65 @@ public class Bump {
 		// 		choose another root, repeat
 	}
 	/**
+	 * Calibrate the tree with two passes of belief-update message passing.
+	 */
+	void calibrateTree() {
+		Vertex[] vertices = _tree._vertices.toArray(new Vertex[_tree._vertices.size()]);
+		_bumpOnUpwardPass = true;
+		for(int i = 0; i < vertices.length; i++) {
+			Vertex v = vertices[i];
+			for(Edge e : v.getOutgoingNeighborEdges()) {
+				v.sendMessage(e);
+			}
+		}
+		_bumpOnUpwardPass = false;
+		for(int i = vertices.length -1; i >=0; i--) {
+			Vertex v = vertices[i];
+			for(Edge e : v.getOutgoingNeighborEdges()) {
+				v.sendMessage(e);
+			}
+		}
+	}
+	void copyTreeForQueries() {
+		_queryTree = _tree;
+	}
+	/**
+	 * Given that our tree is calibrated, incorporate the evidence.
+	 * 
+	 * @param variable
+	 * @param varValue
+	 */
+	void incorporateEvidence(int variable, int varValue) {
+		// Find a clique with the variable, C
+		// multiply in a new indicator factor
+		// conduct one pass of B-U with C as the root
+	}
+	/**
 	 * 
 	 */
 	String query(String[] lhs, String[] contexts) {
-		// do we have additional evidence?
+		// check if evidence is incremental or retractive
 		for(String s : contexts) {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
+			// TODO convert to integers
+			int varInt = -1, valueInt = -1;
+			if(_queryContexts.get(varInt) == valueInt) {
+				// already have this context variable = value pair, do nothing
+			}
+			else if(!_queryContexts.containsKey(varInt)) {
+				// additional evidence - we've never seen it before
+				
+			}
+			else { // query context 
+				
+			}
 		}
 		for(String s : lhs) {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
+			// TODO convert to integers
 		}
 		return null;
 	}
-
-
-	
 }
