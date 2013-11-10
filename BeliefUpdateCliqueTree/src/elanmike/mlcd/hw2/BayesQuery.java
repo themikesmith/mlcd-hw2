@@ -1,10 +1,6 @@
 package elanmike.mlcd.hw2;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class BayesQuery {
 
@@ -51,7 +47,12 @@ public class BayesQuery {
 		
 		// if sum-product:
 			// TODO run belief-update message passing, sum-product
-			// TODO process queries, print output for each
+			try {
+				b.processQueries(args[4]);
+			} catch (IOException e) {
+				System.err.println("error processing queries from:"+args[4]);
+				e.printStackTrace();
+			}
 		// else if max-product
 			// TODO run belief-update message passing, max-product
 			// TODO process queries, print output for each

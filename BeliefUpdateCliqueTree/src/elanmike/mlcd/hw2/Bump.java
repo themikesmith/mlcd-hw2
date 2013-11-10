@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
-import sun.security.util.Length;
-
 import elanmike.mlcd.hw2.Factor.Pair;
 
 /**
@@ -24,6 +22,7 @@ import elanmike.mlcd.hw2.Factor.Pair;
  *
  */
 public class Bump {
+	public static final int NO_EVIDENCE = -1;
 	private static int nextVertexID = 0;
 	/**
 	 * Small clique class that holds a list of variables
@@ -206,7 +205,7 @@ public class Bump {
 			this._one = one;
 			this._two = two;
 			this._weight = weight;
-			this._sepset = new HashSet(Arrays.asList(one._variables));
+			this._sepset = new HashSet<Integer>(one._variables);
 			_sepset.retainAll(two._variables);
 		}
 		void setBelief(Factor f) {this._mu = f;}
@@ -352,7 +351,7 @@ public class Bump {
 	 * in the QUERY TREE
 	 * @param pairs
 	 */
-	Vertex findVertexQuery(Pair<Integer, Integer>... pairs) {
+	Vertex findVertexQuery(Pair<Integer, Integer>[] pairs) {
 		Tree t = _queryTree;
 		// TODO implement
 		return null;
@@ -384,7 +383,7 @@ public class Bump {
 		downwardPassBeliefUpdateQuery(newRoot);
 	}
 	/**
-	 * 
+	 * queries the structure for p(lhs|contexts)
 	 */
 	String query(String[] lhs, String[] contexts) {
 		// check if evidence is incremental or retractive
@@ -429,6 +428,10 @@ public class Bump {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
 			// TODO convert to integers
+			int varInt = -1, valueInt = -1;
+			if(valueInt != NO_EVIDENCE) {
+				
+			}
 		}
 		return null;
 	}
@@ -451,16 +454,20 @@ public class Bump {
 		if((line = br.readLine()) != null){
 			numCliques = Integer.valueOf(line);
 		}else{
+			br.close();
 			throw new IOException();
 		}
-		if(numCliques<0)
+		if(numCliques<0) {
+			br.close();
 			throw new NumberFormatException();
+		}
 		for(int i = 0;i<numCliques;i++){
 			if((line = br.readLine()) != null){
 				String[] containedVars = line.split(",");
 				_tree.addVertex(new Vertex(containedVars));
 				
 			}else{
+				br.close();
 				throw new IOException("inconsistant network file.");
 			}
 		}
@@ -484,10 +491,13 @@ public class Bump {
 			if((line = br.readLine()) != null){
 				numVariables = Integer.valueOf(line);
 			}else{
+				br.close();
 				throw new IOException();
 			}
-			if(numVariables<0)
+			if(numVariables<0) {
+				br.close();
 				throw new NumberFormatException();
+			}
 			for(int i = 0;i<numVariables;i++){
 				if((line = br.readLine()) != null){
 					String[] tokenized = line.split(" ");
@@ -496,6 +506,7 @@ public class Bump {
 					
 					Factor.addVariable(variableName, new ArrayList<String>(Arrays.asList(tokenized)));
 				}else{
+					br.close();
 					throw new IOException("inconsistant network file.");
 				}
 			}
@@ -527,7 +538,7 @@ public class Bump {
 			br.close();
 	}
 
-	private void processQueries(String queryFile) throws IOException {
+	public void processQueries(String queryFile) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(queryFile));
 		String line;
 		while ((line = br.readLine()) != null) {
