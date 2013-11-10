@@ -113,10 +113,7 @@ public class Network {
 					}
 				}
 				numVariables--; // and decrement our number left to read
-			}
-			else { // reading edges
-				
-			}
+			} // we don't need to read the edges. we have sufficient statistics
 		}
 		br.close();
 		// check we have valid values for our network parameters
@@ -125,10 +122,6 @@ public class Network {
 			throw new IOException("error reading network!"
 				+_biggestRow+'_'+_biggestCol+'_'+_biggestTimeStep+'_'+_numLandmarks);
 		}
-		
-		
-		
-		_obsMod = new ObservationModel(_biggestRow,_biggestCol,_numLandmarks);
 	}
 
 	/**
@@ -144,7 +137,9 @@ public class Network {
 	 * @throws IOException 
 	 */
 	public void train(String trainingFilename) throws IOException {
+		// initialize our models
 		_motion = new MotionModel(_biggestRow, _biggestCol);
+		_obsMod = new ObservationModel(_biggestRow,_biggestCol,_numLandmarks);
 		BufferedReader br = new BufferedReader(new FileReader(trainingFilename));
 		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1,
 			currTrajectory = -1, prevTrajectory = -1;
@@ -295,8 +290,6 @@ public class Network {
 	 * @throws IOException if cannot create file, delete file, write to file
 	 */
 	public void writeCPD(String cpdOutputFilename) throws IOException {
-		// print out our read network parameters
-		System.out.printf("I:%d J:%d T:%d L:%d\n", _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks);
 		// create and open the cpd file
 		File outfile = new File(cpdOutputFilename);
 		if(outfile.exists()) {
@@ -304,44 +297,67 @@ public class Network {
 		}
 		outfile.createNewFile();
 		PrintWriter out = new PrintWriter(outfile);
-		for(int t = 0; t < _biggestTimeStep; t++) { // for each time point...
-			// compute motion model, and observation model at the same time
+		for(int t = 0; t <= _biggestTimeStep; t++) { // for each time point...
+			// motion model:
+			if(t + 1 <= _biggestTimeStep) { // only compute if we have data
+				// for every prev row value i
+				for(int i = 0; i < _biggestRow; i++) {
+					// for every prev action
+					for(DIR prevAction : DIR.values()) {
+						// print p(success)
+						int currPos = _motion.getPositionOfSuccessfulMove(prevAction, i, MotionModel.ROW_AXIS);
+						float f = _motion.getProbability(currPos, i, MotionModel.ROW_AXIS, prevAction);
+						if(f != 0) { // check superfluous, but just in case we don't smooth
+							out.println(_motion.assembleCPDEntry(t, currPos, i, MotionModel.ROW_AXIS, prevAction, f));
+						}
+						// print p(fail) where applicable (if axis is parallel)
+						if(prevAction.getAxis().equals(MotionModel.ROW_AXIS)) {
+							currPos = i;
+							f = _motion.getProbability(currPos, i, AXIS.V, prevAction);
+							if(f != 0) { // only print if scenario is possible.
+								out.println(_motion.assembleCPDEntry(t, currPos, i, MotionModel.ROW_AXIS, prevAction, f));
+							}
+						}
+					}
+				}
+				// for every prev col value j
+				for(int j = 0; j < _biggestCol; j++) {
+					// for every prev action
+					for(DIR prevAction : DIR.values()) {
+						// print p(success)
+						int currPos = _motion.getPositionOfSuccessfulMove(prevAction, j, MotionModel.COL_AXIS);
+						float f = _motion.getProbability(currPos, j, MotionModel.COL_AXIS, prevAction);
+						if(f != 0) { // check superfluous, but just in case we don't smooth
+							out.println(_motion.assembleCPDEntry(t, currPos, j, MotionModel.COL_AXIS, prevAction, f));
+						}
+						// print p(fail) where applicable (if axis is parallel)
+						if(prevAction.getAxis().equals(MotionModel.COL_AXIS)) {
+							currPos = j;
+							f = _motion.getProbability(currPos, j, AXIS.V, prevAction);
+							if(f != 0) { // only print if scenario is possible.
+								out.println(_motion.assembleCPDEntry(t, currPos, j, MotionModel.COL_AXIS, prevAction, f));
+							}
+						}
+					}
+				}
+			}
+			// observation model:
 			for(int i = 0; i < _biggestRow; i++) {
 				for(int j = 0; j < _biggestCol; j++) {
-					// for each i,j cell
-					// compute observation model and motion model at each point
 					for(DIR d : DIR.values()) {
-						if(t > 0) {
-							// motion model - only compute possible probabilities given our model
-							if(d.equals(DIR.NORTH)) {
-								// compute p(row i _t | row i-1 _t-1, prev action _t-1 moving in direction d)
-								out.println(_motion.calculateAssembleCPDEntry(t, i, _motion.decrementRow(i), AXIS.V, d));
-							}
-							if(d.equals(DIR.SOUTH)) {
-								// compute p(row i _t | row i+1 _t-1, prev action _t-1 moving in direction d)
-								out.println(_motion.calculateAssembleCPDEntry(t, i, _motion.incrementRow(i), AXIS.V, d));
-							}
-							if(d.equals(DIR.EAST)) {
-								// compute p(col j _t | row j-1 _t-1, prev action _t-1 moving in direction d)
-								out.println(_motion.calculateAssembleCPDEntry(t, j, _motion.decrementCol(j), AXIS.H, d));
-							}
-							if(d.equals(DIR.WEST)) {
-								// compute p(col j _t | row j+1 _t-1, prev action _t-1 moving in direction d)
-								out.println(_motion.calculateAssembleCPDEntry(t, j, _motion.incrementCol(j), AXIS.H, d));
-							}
-							// compute p(row i _t | row i _t-1, prev action _t-1 moving in direction d)
-							out.println(_motion.calculateAssembleCPDEntry(t, i, i, AXIS.V, d));
-							// compute p(col j _t | row j _t-1, prev action _t-1moving in direction d)
-							out.println(_motion.calculateAssembleCPDEntry(t, j, j, AXIS.H, d));
-						}
-						// observation model:
 						// compute p(observe wall in that direction | current position)
-						// TODO compute 'yes' | i,j
-						// TODO and compute 'no' = 1-'yes' | i,j
-						for(int l = 1; l <= _numLandmarks; l++) {
+						//walls
+						//e.g. ObserveWall_N_8=Yes PositionRow_8=9,PositionCol_8=2 0.866634
+						out.printf("ObserveWall_%s_%d=Yes PositionRow_%d=%d,PositionCol_%d=%d %.13e\n",
+								d.toString(),t,t,i+1,t,j+1,_obsMod.getWallObservation(i, j, d.ordinal()));
+						out.printf("ObserveWall_%s_%d=No PositionRow_%d=%d,PositionCol_%d=%d %.13e\n",
+								d.toString(),t,t,i+1,t,j+1,(1-_obsMod.getWallObservation(i, j, d.ordinal())));
+						for(int lmk = 1; lmk <= _numLandmarks; lmk++) {
 							// compute p(observe landmark L in that direction | current position)
-							// TODO compute 'yes' | i,j
-							// TODO and compute 'no' = 1-'yes' | i,j
+							out.printf("ObserveLandmark%d_%s_%d=Yes PositionRow_%d=%d,PositionCol_%d=%d %.13e\n",
+									lmk,d.toString(),t,t,i+1,t,j+1,_obsMod.getLandmarkObservation(i, j, lmk, d.ordinal()));
+							out.printf("ObserveLandmark%d_%s_%d=No PositionRow_%d=%d,PositionCol_%d=%d %.13e\n",
+									lmk,d.toString(),t,t,i+1,t,j+1,(1-_obsMod.getLandmarkObservation(i, j, lmk, d.ordinal())));
 						}
 					}
 				}
