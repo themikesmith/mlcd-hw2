@@ -18,7 +18,7 @@ import elanmike.mlcd.hw2.Constants.DIR;
 
 public class CreateNetworkCliqueTree {
 	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
-	private static List<Clique> _maximalCliques;
+	private static ArrayList<Clique> _maximalCliques;
 	private static List<Edge> _clusterGraphEdges;
 	/**
 	 * Small clique class that holds a list of variables
@@ -50,7 +50,7 @@ public class CreateNetworkCliqueTree {
 			return intersection.size();
 		}
 	}
-	private class Edge {
+	private static class Edge {
 		Clique one, two;
 		int weight; // number of variables one has in common with two
 		Edge(Clique one, Clique two, int weight) {
@@ -288,7 +288,20 @@ public class CreateNetworkCliqueTree {
 	 * assemble our cluster graph's list of edges.
 	 */
 	private static void assembleClusterGraphEdges() {
-		
+		_clusterGraphEdges = new ArrayList<Edge>();
+		int n = _maximalCliques.size();
+		// for each possible pair of cliques...
+		for(int i = 0; i < n; i++) {
+			for(int j = 0; j < n; j++) {
+				if(i != j) { // exclude edges between identical cliques 
+					Clique one = _maximalCliques.get(i), two = _maximalCliques.get(j);
+					int weight = one.getCardinalityOfIntersectionWith(two);
+					if(weight > 0) { // add an edge if they have things in common
+						_clusterGraphEdges.add(new Edge(one, two, weight));
+					}
+				}
+			}
+		}
 	}
 	/**
 	 * Creates the maximal spanning tree given our sorted edge list
