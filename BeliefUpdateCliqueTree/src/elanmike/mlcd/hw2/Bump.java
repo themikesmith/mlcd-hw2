@@ -344,7 +344,7 @@ public class Bump {
 	 */
 	void assignOrderingAndInitBeliefs() {
 		_orderedVertices.clear();
-		//TODO implement
+		//TODO implement assign ordering
 		// giving a number is equivalent to adding to ordering, giving index
 		// choose root
 		// while all vertices don't have a number
@@ -400,7 +400,7 @@ public class Bump {
 	 */
 	Vertex findVertexQuery(Pair<Integer, Integer>[] pairs) {
 		Tree t = _queryTree;
-		// TODO implement
+		// TODO implement find vertex query by pairs
 		return null;
 	}
 	/**
@@ -411,7 +411,7 @@ public class Bump {
 	 */
 	Vertex findVertexQuery(int varInt, int varValue) {
 		Tree t = _queryTree;
-		// TODO implement
+		// TODO implement find vertex query by one pair
 		return null;
 	}
 	/**
@@ -455,8 +455,8 @@ public class Bump {
 			for(String s : contexts) {
 				String[] varValue = s.split("=");
 				String var = varValue[0], value = varValue[1];
-				// TODO convert to integers
-				int varInt = -1, valueInt = -1;
+				int varInt = Factor.getVariableIndex(var),
+					valueInt = Factor.getVariableValueIndex(varInt, value);
 				if(_queryContexts.containsKey(varInt) && _queryContexts.get(varInt) != valueInt) {
 					// query context variable has other value. reset.
 					retractive = true;
@@ -468,8 +468,8 @@ public class Bump {
 		for(String s : contexts) {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
-			// TODO convert to integers
-			int varInt = -1, valueInt = -1;
+			int varInt = Factor.getVariableIndex(var),
+				valueInt = Factor.getVariableValueIndex(varInt, value);
 			if(!_queryContexts.containsKey(varInt)) {
 				// additional evidence - we've never seen it before
 				incorporateQueryEvidence(varInt, varInt);
@@ -479,15 +479,16 @@ public class Bump {
 			}
 			else { // query context variable has other value. reset.
 				// we've already reset so this should never occur
+				System.err.println("this should never occur. investigate handling of retractive evidence.");
 			}
 		}
 		for(String s : lhs) {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
-			// TODO convert to integers
-			int varInt = -1, valueInt = -1;
+			int varInt = Factor.getVariableIndex(var),
+				valueInt = Factor.getVariableValueIndex(varInt, value);
 			if(valueInt != NO_EVIDENCE) {
-				
+				// TODO conduct query
 			}
 		}
 		return null;
@@ -496,7 +497,7 @@ public class Bump {
 	 * queries the structure for p(lhs|contexts)
 	 */
 	String queryMaxProduct(String[] lhs, String[] contexts) {
-		// TODO implement
+		// TODO implement query max product = maximum likelihood
 		// check if evidence is incremental or retractive
 		boolean retractive = false;
 		// then take action
@@ -509,8 +510,8 @@ public class Bump {
 			for(String s : contexts) {
 				String[] varValue = s.split("=");
 				String var = varValue[0], value = varValue[1];
-				// TODO convert to integers
-				int varInt = -1, valueInt = -1;
+				int varInt = Factor.getVariableIndex(var),
+					valueInt = Factor.getVariableValueIndex(varInt, value);
 				if(_queryContexts.containsKey(varInt) && _queryContexts.get(varInt) != valueInt) {
 					// query context variable has other value. reset.
 					retractive = true;
@@ -522,8 +523,8 @@ public class Bump {
 		for(String s : contexts) {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
-			// TODO convert to integers
-			int varInt = -1, valueInt = -1;
+			int varInt = Factor.getVariableIndex(var),
+					valueInt = Factor.getVariableValueIndex(varInt, value);
 			if(!_queryContexts.containsKey(varInt)) {
 				// additional evidence - we've never seen it before
 				incorporateQueryEvidence(varInt, varInt);
@@ -538,10 +539,10 @@ public class Bump {
 		for(String s : lhs) {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
-			// TODO convert to integers
-			int varInt = -1, valueInt = -1;
+			int varInt = Factor.getVariableIndex(var),
+				valueInt = Factor.getVariableValueIndex(varInt, value);
 			if(valueInt != NO_EVIDENCE) {
-				
+				// TODO conduct query
 			}
 		}
 		return null;

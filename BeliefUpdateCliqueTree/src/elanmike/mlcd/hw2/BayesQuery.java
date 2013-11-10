@@ -26,25 +26,19 @@ public class BayesQuery {
 			usage();
 			return;
 		}
-		
 		b = new Bump();
 		b.setUseSumProduct(useSumProduct);
 		try {
-			// TODO load cpd, throw error on failure
-			// TODO load network file, throw error on failure
-			// TODO verify clique tree is valid for the loaded network, throw error on failure
 			b.readNetworkFile(args[0]);
-			b.readCliqueTreeFile(args[2]);
 			b.readCPDFile(args[1]);
-			
+			b.readCliqueTreeFile(args[2]);
 		} catch (NumberFormatException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			return;
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			return;
 		}
-
 		b.runBump();
 		try {
 			b.processQueries(args[4], useSumProduct);
