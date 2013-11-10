@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -352,7 +351,7 @@ public class Bump {
 	 * in the QUERY TREE
 	 * @param pairs
 	 */
-	Vertex findVertexQuery(Pair<Integer, Integer>... pairs) {
+	Vertex findVertexQuery(Pair<Integer, Integer>[] pairs) {
 		Tree t = _queryTree;
 		// TODO implement
 		return null;
