@@ -267,6 +267,7 @@ public class Bump {
 		}*/
 		void addVertex(Vertex v) {
 			_vertices.put(v._variables.toString(),v);
+			//System.out.println("adding vertice with key: "+ v._variables.toString());
 		}
 		/**
 		 * Adds the edge to the tree.
@@ -595,7 +596,15 @@ public class Bump {
 			
 			System.out.println("Adding edge: " + Factor.variableNamesToIndicies(left_variables) + " --- " + Factor.variableNamesToIndicies(right_variables));
 			
-			_tree.addEdge(new Edge(_tree._vertices.get(Factor.variableNamesToIndicies(left_variables)), _tree._vertices.get(Factor.variableNamesToIndicies(right_variables)), 1));
+			System.out.println(_tree._vertices.keySet());
+			if(_tree._vertices.get(Factor.variableNamesToIndicies(left_variables)) == null)
+				System.out.println("left null");
+			if(_tree._vertices.get(Factor.variableNamesToIndicies(right_variables)) == null)
+				System.out.println("right null");
+			_tree.addEdge(new Edge(
+					_tree._vertices.get(Factor.variableNamesToIndicies(left_variables)), 
+					_tree._vertices.get(Factor.variableNamesToIndicies(right_variables)), 
+					1));
 		}
 		
 		
