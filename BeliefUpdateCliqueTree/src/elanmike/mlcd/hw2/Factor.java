@@ -93,6 +93,9 @@ public class Factor {
 		for(int i = 0; i<strideTot; i++) data.add(0.0);
 	}
 	
+	private int getInternalIndex(int globalIndex){
+		return _variables.indexOf(globalIndex);
+	}
 	
 	interface Callback {
 		void iterate(int[] curValue); // n-dimensional point
@@ -151,7 +154,7 @@ public class Factor {
 	public String toString(){
 		String output = "Phi( ";
 		for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
-			output += _variableNames.get(var_idx) + " ";
+			output += _variableNames.get(_variables.get(var_idx)) + " ";
 		output += ")\n";
 		
 		for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
@@ -227,7 +230,6 @@ public class Factor {
 		Factor psi = new Factor(unionScope);
 		
 		
-		
 		int j =0;
 		int k =0;
 		int[] assigment = new int[unionScope.size()];
@@ -235,14 +237,20 @@ public class Factor {
 		for(int i = 0; i < psi.data.size(); i++){
 			psi.data.set(i, this.data.get(j)*f.data.get(k));
 			for(int l =0; l < unionScope.size(); l++){
+				
 				assigment[l]++;
-				if(assigment[l]==_variableCard.get(l)){
+				
+				if(assigment[l]==_variableCard.get(unionScope.get(l))){
 					assigment[l]=0;
-					j = j-(_variableCard.get(l)-1)*this._stride.get(l);
-					k = k-(_variableCard.get(l)-1)*f._stride.get(l);
+					if(this._variables.contains(unionScope.get(l)))
+						j = j-(_variableCard.get(unionScope.get(l))-1)*this._stride.get(this.getInternalIndex(unionScope.get(l)));
+					if(f._variables.contains(unionScope.get(l)))
+						k = k-(_variableCard.get(unionScope.get(l))-1)*f._stride.get(f.getInternalIndex(unionScope.get(l)));
 				}else{
-					j = j + this._stride.get(l);
-					k = k + f._stride.get(l);
+					if(this._variables.contains(unionScope.get(l)))
+						j = j + this._stride.get(this.getInternalIndex(unionScope.get(l)));
+					if(f._variables.contains(unionScope.get(l)))
+						k = k + f._stride.get(f.getInternalIndex(unionScope.get(l)));
 					break;
 				}
 			}
@@ -294,33 +302,33 @@ public class Factor {
 		B_vals.add("1");
 		B_vals.add("2");
 		
+		ArrayList<String> C_vals = new ArrayList<String>();
+		C_vals.add("1");
+		C_vals.add("2");
 		
 		Factor.addVariable("A", A_vals);
 		Factor.addVariable("B", B_vals);
+		Factor.addVariable("C", C_vals);
 		System.out.println(Factor.variableInfo());
 		
 		String[] fac1_vars = {"A","B"}; 
 		Factor fac1 = new Factor(fac1_vars);
 		fac1.addJointProbByIndex(0, .5);
-		fac1.addJointProbByIndex(1, 0);
+		fac1.addJointProbByIndex(1, .1);
 		fac1.addJointProbByIndex(2, .3);
-		fac1.addJointProbByIndex(3, .2);
+		fac1.addJointProbByIndex(3, .8);
 		fac1.addJointProbByIndex(4, 0);
-		fac1.addJointProbByIndex(5, .45);
+		fac1.addJointProbByIndex(5, .9);
 		System.out.println(fac1);
 		
-		String[] fac2_vars = {"A"}; 
+		String[] fac2_vars = {"B","C"}; 
 		Factor fac2 = new Factor(fac2_vars);
-		fac2.addJointProbByIndex(0, .8);
-		fac2.addJointProbByIndex(1, 0);
-		fac2.addJointProbByIndex(2, .6);
+		fac2.addJointProbByIndex(0, .5);
+		fac2.addJointProbByIndex(1, .1);
+		fac2.addJointProbByIndex(2, .7);
+		fac2.addJointProbByIndex(3, .2);
 		System.out.println(fac2);
 		
-		for(int i:fac1.intersection(fac2))
-			System.out.println(_variableNames.get(i));
-		
-		
-		//fac1.divided(fac2);
 		
 		System.out.println(fac1.product(fac2));
 		
