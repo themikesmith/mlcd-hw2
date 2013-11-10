@@ -18,13 +18,6 @@ import java.util.TreeSet;
  *
  */
 public class Bump {
-	private boolean _debug = true;
-	/**
-	 * true if we're on the upward pass, 
-	 * if we're going in increasing order id. 
-	 * false otherwise
-	 */
-	private boolean _bumpOnUpwardPass = true;
 	/**
 	 * Small clique class that holds a list of variables
 	 * We compare cliques by their number of shared variables
@@ -236,7 +229,7 @@ public class Bump {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append(_one.toString());
-			if(_debug) sb.append(" --").append(_weight).append("-- ");
+			if(DEBUG) sb.append(" --").append(_weight).append("-- ");
 			else sb.append(EDGE);
 			sb.append(_two.toString());
 			return sb.toString();
@@ -260,6 +253,9 @@ public class Bump {
 			_vertices = new HashSet<Vertex>();
 			_edges = new HashSet<Edge>();
 		}
+		void addVertex(Vertex v) {
+			_vertices.add(v);
+		}
 		/**
 		 * Adds the edge to the tree.
 		 * Checks for duplicates edges
@@ -272,44 +268,48 @@ public class Bump {
 				_edges.add(e);
 			}
 		}
-		/**
-		 * Assigns an initial ordering to each vertex,
-		 *  and initialize beliefs at each vertex while we're at it
-		 */
-		void assignOrderingAndInitBeliefs() {
-			// choose root
-			// while all vertices don't have a number
-			// 		depth first search from root, assigning numbers and init'ing beliefs
-			// 		if DFS ends before all vertices have numbers,
-			// 		choose another root, repeat
-		}
+	}
+	private static final boolean DEBUG = true;
+	/**
+	 * true if we're on the upward pass, 
+	 * if we're going in increasing order id. 
+	 * false otherwise
+	 */
+	private boolean _bumpOnUpwardPass;
+	private Tree _tree, _queryTree;
+	/**
+	 * A map from variable name to variable value, transformed into integers
+	 */
+	Map<Integer, Integer> _queryContexts;
+	Bump() {
+		_tree = new Tree();
+		_bumpOnUpwardPass = true;
+		_queryContexts = new HashMap<Integer, Integer>();
 	}
 	/**
-	 * Reads in the tree from the clique file.
-	 * @param cliqueTreeFilename
-	 * @throws IOException
-	 * @throws NumberFormatException
+	 * Assigns an initial ordering to each vertex of the tree,
+	 *  and initialize beliefs at each vertex while we're at it
 	 */
-	public void readTree(String cliqueTreeFilename) 
-			throws IOException, NumberFormatException {
-		BufferedReader br = new BufferedReader(new FileReader(cliqueTreeFilename));
-		String line;
-		// on the first line is the number of following lines that describe vertices
-		int numVertices = -1;
-		while ((line = br.readLine()) != null) {
-			if(numVertices == -1) { // set the number of vertices
-				numVertices = new Integer(line); // throws number format exception 
-			}
-			else if(numVertices > 0) { // reading vertices
-				String[] vars = line.split(",");
-				// TODO create clique
-				// TODO create vertex
-				numVertices--; // and decrement our number left to read
-			}
-			else { // reading edges
-				// TODO create edge
-			}
+	void assignOrderingAndInitBeliefs() {
+		// choose root
+		// while all vertices don't have a number
+		// 		depth first search from root, assigning numbers and init'ing beliefs
+		// 		if DFS ends before all vertices have numbers,
+		// 		choose another root, repeat
+	}
+	/**
+	 * 
+	 */
+	String query(String[] lhs, String[] contexts) {
+		// do we have additional evidence?
+		for(String s : contexts) {
+			String[] varValue = s.split("=");
+			String var = varValue[0], value = varValue[1];
 		}
-		br.close();
+		for(String s : lhs) {
+			String[] varValue = s.split("=");
+			String var = varValue[0], value = varValue[1];
+		}
+		return null;
 	}
 }
