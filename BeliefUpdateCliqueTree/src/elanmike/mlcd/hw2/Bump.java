@@ -304,6 +304,7 @@ public class Bump {
 	 */
 	void assignOrderingAndInitBeliefs() {
 		_orderedVertices.clear();
+		//TODO implement
 		// giving a number is equivalent to adding to ordering, giving index
 		// choose root
 		// while all vertices don't have a number
