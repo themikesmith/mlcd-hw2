@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
-import sun.security.util.Length;
-
 import elanmike.mlcd.hw2.Factor.Pair;
 
 /**
@@ -24,6 +22,7 @@ import elanmike.mlcd.hw2.Factor.Pair;
  *
  */
 public class Bump {
+	public static final int NO_EVIDENCE = -1;
 	private static int nextVertexID = 0;
 	/**
 	 * Small clique class that holds a list of variables
@@ -389,7 +388,7 @@ public class Bump {
 		downwardPassBeliefUpdateQuery(newRoot);
 	}
 	/**
-	 * 
+	 * queries the structure for p(lhs|contexts)
 	 */
 	String query(String[] lhs, String[] contexts) {
 		// check if evidence is incremental or retractive
@@ -434,6 +433,10 @@ public class Bump {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
 			// TODO convert to integers
+			int varInt = -1, valueInt = -1;
+			if(valueInt != NO_EVIDENCE) {
+				
+			}
 		}
 		return null;
 	}
@@ -528,7 +531,7 @@ public class Bump {
 			br.close();
 	}
 
-	private void processQueries(String queryFile) throws IOException {
+	public void processQueries(String queryFile) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(queryFile));
 		String line;
 		while ((line = br.readLine()) != null) {

@@ -51,7 +51,12 @@ public class BayesQuery {
 		
 		// if sum-product:
 			// TODO run belief-update message passing, sum-product
-			// TODO process queries, print output for each
+			try {
+				b.processQueries(args[4]);
+			} catch (IOException e) {
+				System.err.println("error processing queries from:"+args[4]);
+				e.printStackTrace();
+			}
 		// else if max-product
 			// TODO run belief-update message passing, max-product
 			// TODO process queries, print output for each
