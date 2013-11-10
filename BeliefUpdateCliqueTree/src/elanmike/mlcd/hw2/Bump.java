@@ -578,8 +578,9 @@ public class Bump {
 		for(int i = 0;i<numCliques;i++){
 			if((line = br.readLine()) != null){
 				String[] containedVars = line.split(",");
-				System.out.println("Adding verticie: " + Factor.variableNamesToIndicies(containedVars) );
-				_tree.addVertex(new Vertex(containedVars));
+				//System.out.println("Adding verticie: " + Factor.variableNamesToIndicies(containedVars) );
+				Vertex v = new Vertex(containedVars);
+				_tree.addVertex(v);
 				
 			}else{
 				br.close();
@@ -594,16 +595,18 @@ public class Bump {
 			String[] left_variables = tokenized[0].split(",");
 			String[] right_variables = tokenized[2].split(",");
 			
-			System.out.println("Adding edge: " + Factor.variableNamesToIndicies(left_variables) + " --- " + Factor.variableNamesToIndicies(right_variables));
+			//System.out.println("Adding edge: " + Factor.variableNamesToIndicies(left_variables) + " --- " + Factor.variableNamesToIndicies(right_variables));
 			
+			/*
 			System.out.println(_tree._vertices.keySet());
-			if(_tree._vertices.get(Factor.variableNamesToIndicies(left_variables)) == null)
-				System.out.println("left null");
-			if(_tree._vertices.get(Factor.variableNamesToIndicies(right_variables)) == null)
-				System.out.println("right null");
+			if(_tree._vertices.get(Factor.variableNamesToIndicies(left_variables).toString()) == null)
+				System.out.println("left null" + Factor.variableNamesToIndicies(left_variables).toString());
+			if(_tree._vertices.get(Factor.variableNamesToIndicies(right_variables).toString()) == null)
+				System.out.println("right null"+ Factor.variableNamesToIndicies(left_variables).toString());
+				*/
 			_tree.addEdge(new Edge(
-					_tree._vertices.get(Factor.variableNamesToIndicies(left_variables)), 
-					_tree._vertices.get(Factor.variableNamesToIndicies(right_variables)), 
+					_tree._vertices.get(Factor.variableNamesToIndicies(left_variables).toString()), 
+					_tree._vertices.get(Factor.variableNamesToIndicies(right_variables).toString()), 
 					1));
 		}
 		
