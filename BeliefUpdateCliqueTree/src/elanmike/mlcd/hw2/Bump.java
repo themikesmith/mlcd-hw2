@@ -260,11 +260,6 @@ public class Bump {
 			_vertices = new HashMap<String,Vertex>();
 			_edges = new HashMap<String,Edge>();
 		}
-		/*
-		Tree(Set<Vertex> vs, Set<Edge> es) {
-			this._vertices = vs;
-			this._edges = es;
-		}*/
 		void addVertex(Vertex v) {
 			_vertices.put(v._variables.toString(),v);
 			//System.out.println("adding vertice with key: "+ v._variables.toString());
