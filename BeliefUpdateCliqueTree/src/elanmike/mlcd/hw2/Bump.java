@@ -302,11 +302,12 @@ public class Bump {
 			}
 			else if(numVertices > 0) { // reading vertices
 				String[] vars = line.split(",");
-				
+				// TODO create clique
+				// TODO create vertex
 				numVertices--; // and decrement our number left to read
 			}
 			else { // reading edges
-				
+				// TODO create edge
 			}
 		}
 		br.close();
