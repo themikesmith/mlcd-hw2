@@ -1,6 +1,8 @@
 package elanmike.mlcd.hw2;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class BayesQuery {
 
