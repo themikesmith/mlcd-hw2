@@ -277,7 +277,11 @@ public class Bump {
 		 *  and initialize beliefs at each vertex while we're at it
 		 */
 		void assignOrderingAndInitBeliefs() {
-			
+			// choose root
+			// while all vertices don't have a number
+			// 		depth first search from root, assigning numbers and init'ing beliefs
+			// 		if DFS ends before all vertices have numbers,
+			// 		choose another root, repeat
 		}
 	}
 	/**
