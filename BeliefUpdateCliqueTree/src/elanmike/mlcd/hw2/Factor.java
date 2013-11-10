@@ -6,7 +6,9 @@ public class Factor {
 	private static ArrayList<String> _variableNames;
 	private static ArrayList<Integer> _variableCard;
 	
-	public static 
+	public static void defineVariables(){
+		
+	}
 	
 	private int[] _variables;
 	private int _stride;
