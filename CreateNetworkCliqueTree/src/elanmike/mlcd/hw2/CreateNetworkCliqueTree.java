@@ -207,7 +207,7 @@ public class CreateNetworkCliqueTree {
 		_biggestRow = -1;
 		_biggestCol = -1;
 		_biggestTimeStep = -1;
-		_numLandmarks = -1;
+		_numLandmarks = 0;
 		while ((line = br.readLine()) != null) {
 			if(numVariables == -1) { // set the number of variables
 				numVariables = new Integer(line); // throws number format exception 
