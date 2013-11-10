@@ -95,19 +95,19 @@ public class Factor {
 	
 	
 	interface Callback {
-		void iterate(ArrayList<Integer> curValue); // n-dimensional point
+		void iterate(int[] curValue); // n-dimensional point
 	}
 
-	void iterate(ArrayList<Integer> heldVariables, ArrayList<Integer> heldValues, int currentDimension, ArrayList<Integer> curValue, Callback c) {
+	void iterate(ArrayList<Integer> heldVariables, ArrayList<Integer> heldValues, int currentDimension, int[] js, Callback c) {
 		for (int i = 0; i < _variableCard.get(currentDimension); i++) {
 			if(heldVariables.contains(i)){
-				curValue.set(currentDimension, heldValues.get(heldVariables.indexOf(i)));
+				js[currentDimension] =  heldValues.get(heldVariables.indexOf(i));
 			}else{
-				curValue.set(currentDimension, i);
+				js[currentDimension] =  i;
 			}
 			
-	        if (currentDimension == curValue.size() - 1) c.iterate(curValue);
-	        else iterate(heldVariables,heldValues, currentDimension + 1, curValue, c);
+	        if (currentDimension == js.length - 1) c.iterate(js);
+	        else iterate(heldVariables,heldValues, currentDimension + 1, js, c);
 
 		}
 	}
@@ -202,14 +202,58 @@ public class Factor {
 		Set<Integer> theirVars = new TreeSet<Integer>(f._variables);
 		
 		myVars.removeAll(theirVars);
-		ArrayList<Integer> intersection = new ArrayList<Integer>();
+		ArrayList<Integer> difference = new ArrayList<Integer>();
 		
 		for(Object o:myVars.toArray())
-			intersection.add((Integer) o);
-		return intersection;
+			difference.add((Integer) o);
+		return difference;
 	}
 	
-	public Factor dividedBy(Factor f) throws Exception{
+	public ArrayList<Integer> union(Factor f){
+		Set<Integer> myVars = new TreeSet<Integer>(this._variables);
+		Set<Integer> theirVars = new TreeSet<Integer>(f._variables);
+		
+		myVars.addAll(theirVars);
+		ArrayList<Integer> union = new ArrayList<Integer>();
+		
+		for(Object o:myVars.toArray())
+			union.add((Integer) o);
+		return union;
+	}
+	
+
+	public Factor product(Factor f) throws Exception{
+		ArrayList<Integer> unionScope = this.union(f);
+		Factor psi = new Factor(unionScope);
+		
+		
+		
+		int j =0;
+		int k =0;
+		int[] assigment = new int[unionScope.size()];
+		
+		for(int i = 0; i < psi.data.size(); i++){
+			psi.data.set(i, this.data.get(j)*f.data.get(k));
+			for(int l =0; l < unionScope.size(); l++){
+				assigment[l]++;
+				if(assigment[l]==_variableCard.get(l)){
+					assigment[l]=0;
+					j = j-(_variableCard.get(l)-1)*this._stride.get(l);
+					k = k-(_variableCard.get(l)-1)*f._stride.get(l);
+				}else{
+					j = j + this._stride.get(l);
+					k = k + f._stride.get(l);
+					break;
+				}
+			}
+		}
+		
+		
+		return psi;
+	}
+	
+	
+	public Factor divided(Factor f) throws Exception{
 		if(!this._variables.containsAll(f._variables))
 			throw new Exception("DivionError: Numerator does not contain Denominator");
 		
@@ -218,15 +262,19 @@ public class Factor {
 		ArrayList<Integer> sepset = this.intersection(f);
 		ArrayList<Integer> cliqueMinusSepset = this.difference(f);
 		
-		/*
-		iterate(new int[] {10, 10, 10}, 0, new int[3], new Callback() {
-			   public void iterate(ArrayList<Integer> curValue) {
-			        System.out.println(curValue);
+		//new ArrayList<Integer>()
+		
+		iterate(new ArrayList<Integer>(),new ArrayList<Integer>(), 0, new int[_variables.size()], new Callback() {
+			   public void iterate(int[] curValue) {
+			        try {
+						System.out.println(data.get(index(curValue)));
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 			   }
 			});
-
-		*/
-		
+	
 		for(int common_var_idx = 0; common_var_idx<sepset.size(); common_var_idx++){
 			
 		}
@@ -271,6 +319,10 @@ public class Factor {
 		for(int i:fac1.intersection(fac2))
 			System.out.println(_variableNames.get(i));
 		
+		
+		//fac1.divided(fac2);
+		
+		System.out.println(fac1.product(fac2));
 		
 		
 		/*
