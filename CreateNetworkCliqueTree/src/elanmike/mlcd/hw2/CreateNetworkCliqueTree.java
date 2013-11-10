@@ -18,9 +18,11 @@ import elanmike.mlcd.hw2.Constants.DIR;
 
 public class CreateNetworkCliqueTree {
 	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
-	private static ArrayList<Clique> _maximalCliques;
+	private static Set<Clique> _maximalCliques;
 	private static List<Edge> _clusterGraphEdges;
 	private static Tree _cliqueTree;
+	private static Clique _lastAction;
+	private static boolean _debug = true;
 	/**
 	 * Small clique class that holds a list of variables
 	 * We compare cliques by their number of shared variables
@@ -92,7 +94,10 @@ public class CreateNetworkCliqueTree {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append(_one.toString()).append(EDGE).append(_two.toString());
+			sb.append(_one.toString());
+			if(_debug) sb.append(" --").append(_weight).append("-- ");
+			else sb.append(EDGE);
+			sb.append(_two.toString());
 			return sb.toString();
 		}
 	}
@@ -141,12 +146,11 @@ public class CreateNetworkCliqueTree {
 			usage();
 			return;
 		}
-		boolean debug = true;
-		if(debug) {
-			// kidding! debug with 10.8 example
-			debugMaximalCliques();
-		}
-		else {
+//		if(_debug) {
+//			// kidding! debug with 10.8 example
+//			debugMaximalCliques();
+//		}
+//		else {
 			// read network file
 			try {
 				read(args[0]);
@@ -158,13 +162,22 @@ public class CreateNetworkCliqueTree {
 			System.out.println("read network from:"+args[0]);
 			// given sufficient statistics, assemble list of maximal cliques
 			assembleMaximalCliques();
-		}
+//		}
 		// now that we have our list of maximal cliques, assemble cluster graph
 		assembleClusterGraphEdges();
 		// sort the edges in descending order by weight
 		Collections.sort(_clusterGraphEdges, new EdgeComparator());
 		// create the tree!
 		createMaximalSpanningTree();
+		if(_cliqueTree._vertices.size() != _maximalCliques.size()) {
+			System.err.println("error when making tree!");
+			Set<Clique> difference = new HashSet<Clique>(_maximalCliques);
+			difference.removeAll(_cliqueTree._vertices);
+			System.err.println("difference:");
+			for(Clique c : difference) {
+				System.err.println(c);
+			}
+		}
 		// and print to file.
 		try {
 			printTreeToFile(args[1]);
@@ -272,7 +285,7 @@ public class CreateNetworkCliqueTree {
 	 * assemble the list of maximal cliques.
 	 */
 	private static void assembleMaximalCliques() {
-		_maximalCliques = new ArrayList<Clique>();
+		_maximalCliques = new HashSet<Clique>();
 		// forms of cliques:
 		for(int t = 0; t <= _biggestTimeStep; t++) {
 			for(DIR d : DIR.values()) {
@@ -338,9 +351,9 @@ public class CreateNetworkCliqueTree {
 			}
 			else { // last time step
 				// action t
-				Clique c = new Clique();
-				c.addVariable("Action_"+t);
-				_maximalCliques.add(c);
+				_lastAction = new Clique();
+				_lastAction.addVariable("Action_"+t);
+				_maximalCliques.add(_lastAction);
 			}
 		}
 	}
@@ -350,15 +363,19 @@ public class CreateNetworkCliqueTree {
 	 */
 	private static void assembleClusterGraphEdges() {
 		_clusterGraphEdges = new ArrayList<Edge>();
-		int n = _maximalCliques.size();
+		Clique[] maximalCliques = _maximalCliques.toArray(new Clique[_maximalCliques.size()]);
+		int n = maximalCliques.length;
 		// for each possible pair of cliques...
 		for(int i = 0; i < n; i++) {
-			for(int j = 0; j < n; j++) {
+			for(int j = 0; j <= i; j++) {
 				if(i != j) { // exclude edges between identical cliques 
-					Clique one = _maximalCliques.get(i), two = _maximalCliques.get(j);
+					Clique one = maximalCliques[i], two = maximalCliques[j];
 					int weight = one.getCardinalityOfIntersectionWith(two);
-					if(weight > 0) { // add an edge if they have things in common
-						_clusterGraphEdges.add(new Edge(one, two, weight));
+					Edge e = new Edge(one, two, weight);
+					if(weight > 0) {  // add an edge if one has things in common with two
+						if(!_clusterGraphEdges.contains(e)) { // and if the edge isn't already there
+							_clusterGraphEdges.add(e);
+						}
 					}
 				}
 			}
@@ -373,11 +390,14 @@ public class CreateNetworkCliqueTree {
 	 */
 	private static void createMaximalSpanningTree() {
 		_cliqueTree = new Tree();
-		_cliqueTree.addEdge(_clusterGraphEdges.get(0)); // add first edge
-		int i = 1;
+		// add clique: action of last time step, since it won't get added when adding edges
+		_cliqueTree._vertices.add(_lastAction);
+		// add first edge
+		_cliqueTree.addEdge(_clusterGraphEdges.get(0));
 		// try to add n-1 edges without cycles
+		int i = 1;
 		// (assuming we will get edges in order of decreasing weight)
-		while(i < _maximalCliques.size() - 1) {
+		while(_cliqueTree._edges.size() < _maximalCliques.size() - 1) {
 			if(i >= _clusterGraphEdges.size()) { // we've run out of edges to add
 				return; // stop, return, even though the tree might not be fully connected
 			}
@@ -425,7 +445,7 @@ public class CreateNetworkCliqueTree {
 	 * Returns the cliques from the 10.8 example, for debugging.
 	 */
 	private static void debugMaximalCliques() {
-		_maximalCliques = new ArrayList<Clique>();
+		_maximalCliques = new HashSet<Clique>();
 		_maximalCliques.add(new Clique("C", "D"));
 		_maximalCliques.add(new Clique("D", "I", "G"));
 		_maximalCliques.add(new Clique("G", "H"));
