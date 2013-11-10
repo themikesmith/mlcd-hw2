@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -205,7 +206,7 @@ public class Bump {
 			this._one = one;
 			this._two = two;
 			this._weight = weight;
-			this._sepset = new HashSet(Arrays.asList(one._variables));
+			this._sepset = new HashSet<Integer>(one._variables);
 			_sepset.retainAll(two._variables);
 		}
 		void setBelief(Factor f) {this._mu = f;}
