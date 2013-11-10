@@ -1,8 +1,11 @@
 package elanmike.mlcd.hw2;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -103,7 +106,14 @@ public class CreateNetworkCliqueTree {
 		// create the tree!
 		createMaximalSpanningTree();
 		// and print to file.
-		printTreeToFile(args[1]);
+		try {
+			printTreeToFile(args[1]);
+		} catch (IOException e) {
+			System.err.println("error writing clique file:"+args[1]);
+			e.printStackTrace();
+			return;
+		}
+		System.out.println("wrote clique to:"+args[1]);
 		// done! yay.
 	}
 	private static void usage() {
@@ -236,8 +246,17 @@ public class CreateNetworkCliqueTree {
 	/**
 	 * Prints our tree to file
 	 * @param filename the desired output filename
+	 * @throws IOException 
 	 */
-	private static void printTreeToFile(String filename) {
-		
+	private static void printTreeToFile(String filename) throws IOException {
+		// create and open the cpd file
+		File outfile = new File(filename);
+		if(outfile.exists()) {
+			outfile.delete();
+		}
+		outfile.createNewFile();
+		PrintWriter out = new PrintWriter(outfile);
+		// TODO do fun stuff
+		out.close();
 	}
 }
