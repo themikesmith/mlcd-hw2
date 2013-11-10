@@ -454,16 +454,20 @@ public class Bump {
 		if((line = br.readLine()) != null){
 			numCliques = Integer.valueOf(line);
 		}else{
+			br.close();
 			throw new IOException();
 		}
-		if(numCliques<0)
+		if(numCliques<0) {
+			br.close();
 			throw new NumberFormatException();
+		}
 		for(int i = 0;i<numCliques;i++){
 			if((line = br.readLine()) != null){
 				String[] containedVars = line.split(",");
 				new Clique(containedVars);
 				
 			}else{
+				br.close();
 				throw new IOException("inconsistant network file.");
 			}
 		}
