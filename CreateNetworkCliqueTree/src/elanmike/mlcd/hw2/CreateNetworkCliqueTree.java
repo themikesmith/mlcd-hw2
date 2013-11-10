@@ -191,7 +191,6 @@ public class CreateNetworkCliqueTree {
 	 * (so we can iterate over every position)
 	 * - the number of time steps
 	 * - the number of landmarks
-	 * - ?? TODO what else ??
 	 * 
 	 * @param networkFilename the name of the network file
 	 * @throws IOException if cannot find the network file, or can't read a line in the file
@@ -208,7 +207,7 @@ public class CreateNetworkCliqueTree {
 		_biggestRow = -1;
 		_biggestCol = -1;
 		_biggestTimeStep = -1;
-		_numLandmarks = -1;
+		_numLandmarks = 0;
 		while ((line = br.readLine()) != null) {
 			if(numVariables == -1) { // set the number of variables
 				numVariables = new Integer(line); // throws number format exception 

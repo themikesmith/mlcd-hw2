@@ -9,12 +9,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
-
-import elanmike.mlcd.hw2.Factor.Pair;
 
 /**
  * Belief Update Message Passing class
@@ -334,7 +333,8 @@ public class Bump {
 		_useSumProduct = useSumProduct;
 	}
 	/**
-	 * Runs belief update message passing to calibrate the tree
+	 * Runs belief update message passing to calibrate the tree.
+	 * Resets, assigns an ordering, inits beliefs, calibrates the tree.
 	 */
 	public void runBump() {
 		assignOrderingAndInitBeliefs();
@@ -398,22 +398,36 @@ public class Bump {
 	/**
 	 * find a vertex with a clique containing the given set of variables
 	 * in the QUERY TREE
-	 * @param pairs
+	 * @param vars
+	 * @return vertex if found, null otherwise.  should always return a vertex.
 	 */
-	Vertex findVertexQuery(Pair<Integer, Integer>[] pairs) {
+	Vertex findVertexQuery(int... vars) {
 		Tree t = _queryTree;
-		// TODO implement find vertex query by pairs
+		for(Vertex v : t._vertices.values()) {
+			boolean containsAll = true;
+			for(int i : vars) {
+				if(!v._variables.contains(i)) {
+					containsAll = false;
+					//continue; // skip.
+				}
+			}
+			if(containsAll) return v;
+		}
 		return null;
 	}
 	/**
-	 * find a vertex with a clique containing the given set of variables
+	 * find a vertex with a clique containing the given variable
 	 * in the QUERY TREE
-	 * @param varInt
-	 * @param varValue
+	 * @param var if found, null if not found
+	 * @return vertex if found, null otherwise.  should always return a vertex.
 	 */
-	Vertex findVertexQuery(int varInt, int varValue) {
+	Vertex findVertexQuery(String var) {
 		Tree t = _queryTree;
-		// TODO implement find vertex query by one pair
+		for(Vertex v : t._vertices.values()) {
+			if(v._variables.contains(var)) {
+				return v;
+			}
+		}
 		return null;
 	}
 	/**
@@ -424,8 +438,10 @@ public class Bump {
 	 */
 	void incorporateQueryEvidence(int varInt, int varValue) {
 		// Find a clique with the variable, C
-		Vertex newRoot = findVertexQuery(varInt, varValue);
-		// TODO verify this is not null
+		Vertex newRoot = findVertexQuery(varInt);
+		if(newRoot == null) {
+			System.err.println("can't find vertex - whoops!");
+		}
 		// multiply in a new indicator factor
 		// TODO multiply in new indicator
 		// conduct one pass of B-U with C as the root
@@ -434,7 +450,7 @@ public class Bump {
 	String query(String[] lhs, String[] contexts, boolean useSumProduct) {
 		if(useSumProduct != _useSumProduct) {
 			System.err.println("oops! not ready.");
-			//TODO get ready.
+			// set appropriate method, and run bump to calibrate
 			setUseSumProduct(useSumProduct);
 			runBump();
 		}

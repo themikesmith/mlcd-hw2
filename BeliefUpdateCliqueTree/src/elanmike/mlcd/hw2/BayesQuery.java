@@ -1,6 +1,8 @@
 package elanmike.mlcd.hw2;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class BayesQuery {
 
@@ -16,10 +18,10 @@ public class BayesQuery {
 			return;
 		}
 		boolean useSumProduct = true;
-		if(args.length>4 && args[0].equals("-s")) {
+		if(args.length>4 && args[4].equals("-s")) {
 			useSumProduct = true;
 		}
-		else if(args.length>4 && args[0].equals("-m")) {
+		else if(args.length>4 && args[4].equals("-m")) {
 			useSumProduct = false;
 		}
 		else if (args.length>4 ){
@@ -44,7 +46,7 @@ public class BayesQuery {
 		}
 		b.runBump();
 		try {
-			b.processQueries(args[4], useSumProduct);
+			b.processQueries(args[3], useSumProduct);
 		} catch (IOException e) {
 			System.err.println("error processing queries from:"+args[4]);
 			e.printStackTrace();
@@ -56,8 +58,8 @@ public class BayesQuery {
 	 * Prints an example of proper usage of the program
 	 */
 	private static void usage() {
-		System.err.println("usage: pass 5 arguments. arg[0] = 's|m' (for sum- or max-product ; " +
-				"arg[1] = network_file ; arg[2] = cpd_file ; arg[3] = clique_tree_file ;" +
-				"arg[4] = query_file");
+		System.err.println("usage: pass 5 arguments. arg[0] = network_file ;" +
+				" arg[1] = cpd_file ; arg[2] = clique_tree_file ;" +
+				"arg[3] = query_file ; arg[4] = 's|m' (for sum- or max-product ; ");
 	}
 }
