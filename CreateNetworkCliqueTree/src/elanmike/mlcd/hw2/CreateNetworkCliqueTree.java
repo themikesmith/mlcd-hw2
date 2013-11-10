@@ -215,18 +215,72 @@ public class CreateNetworkCliqueTree {
 		// forms of cliques:
 		for(int t = 0; t <= _biggestTimeStep; t++) {
 			for(DIR d : DIR.values()) {
-				// row t, col t, observe wall t d
-				for(int l = 0; l < _numLandmarks; l++) {
-					// row t, col t, observe landmark L t d		
+				// row t, col t, observe wall d t
+				Clique c = new Clique();
+				c.addVariable("PositionRow_"+t);
+				c.addVariable("PositionCol_"+t);
+				c.addVariable("ObserveWall_"+d.toString()+"_"+t);
+				_maximalCliques.add(c);
+				for(int l = 1; l <= _numLandmarks; l++) {
+					// row t, col t, observe landmark L d t
+					c = new Clique();
+					c.addVariable("PositionRow_"+t);
+					c.addVariable("PositionCol_"+t);
+					c.addVariable("ObserveLandmark"+l+"_"+d.toString()+"_"+t);
+					_maximalCliques.add(c);
 				}
 			}
-			// row t, col t, action t
-			// row t+1, col t+1, action i
-			// row t, row t+1, action i
-			// col t, col t+1, action i
-			// row t, col t, col t+1
-			// row t, action t, col t+1
-			// row t, row t+1, col t+1
+			// if time step not last one
+			if(t != _biggestTimeStep) {
+				// row t, col t, action t
+				Clique c = new Clique();
+				c.addVariable("PositionRow_"+t);
+				c.addVariable("PositionCol_"+t);
+				c.addVariable("Action_"+t);
+				_maximalCliques.add(c);
+				// row t+1, col t+1, action t
+				c = new Clique();
+				c.addVariable("PositionRow_"+(t+1));
+				c.addVariable("PositionCol_"+(t+1));
+				c.addVariable("Action_"+t);
+				_maximalCliques.add(c);
+				// row t, row t+1, action t
+				c = new Clique();
+				c.addVariable("PositionRow_"+t);
+				c.addVariable("PositionRow_"+(t+1));
+				c.addVariable("Action_"+t);
+				_maximalCliques.add(c);
+				// col t, col t+1, action t
+				c = new Clique();
+				c.addVariable("PositionCol_"+t);
+				c.addVariable("PositionCol_"+(t+1));
+				c.addVariable("Action_"+t);
+				_maximalCliques.add(c);
+				// row t, col t, col t+1
+				c = new Clique();
+				c.addVariable("PositionRow_"+t);
+				c.addVariable("PositionCol_"+t);
+				c.addVariable("PositionCol_"+(t+1));
+				_maximalCliques.add(c);
+				// row t, action t, col t+1
+				c = new Clique();
+				c.addVariable("PositionRow_"+t);
+				c.addVariable("Action_"+t);
+				c.addVariable("PositionCol_"+(t+1));
+				_maximalCliques.add(c);
+				// row t, row t+1, col t+1
+				c = new Clique();
+				c.addVariable("PositionRow_"+t);
+				c.addVariable("PositionRow_"+(t+1));
+				c.addVariable("PositionCol_"+(t+1));
+				_maximalCliques.add(c);
+			}
+			else { // last time step
+				// action t
+				Clique c = new Clique();
+				c.addVariable("Action_"+t);
+				_maximalCliques.add(c);
+			}
 		}
 	}
 	/**
