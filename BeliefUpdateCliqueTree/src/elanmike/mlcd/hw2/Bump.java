@@ -478,10 +478,12 @@ public class Bump {
 			br.close();
 			throw new IOException();
 		}
+		//num Cliques
 		if(numCliques<0) {
 			br.close();
 			throw new NumberFormatException();
 		}
+		//cliques
 		for(int i = 0;i<numCliques;i++){
 			if((line = br.readLine()) != null){
 				String[] containedVars = line.split(",");
@@ -492,8 +494,12 @@ public class Bump {
 				throw new IOException("inconsistant network file.");
 			}
 		}
+		//edges
 		while ((line = br.readLine()) != null) {
+			String[] tokenized = line.split(" ");
 			
+			String[] left_variables = tokenized[0].split(",");
+			String[] right_variables = tokenized[2].split(",");
 			
 		}
 		
