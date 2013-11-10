@@ -113,10 +113,7 @@ public class Network {
 					}
 				}
 				numVariables--; // and decrement our number left to read
-			}
-			else { // reading edges
-				
-			}
+			} // we don't need to read the edges. we have sufficient statistics
 		}
 		br.close();
 		// check we have valid values for our network parameters
@@ -125,10 +122,6 @@ public class Network {
 			throw new IOException("error reading network!"
 				+_biggestRow+'_'+_biggestCol+'_'+_biggestTimeStep+'_'+_numLandmarks);
 		}
-		
-		
-		
-		_obsMod = new ObservationModel(_biggestRow,_biggestCol,_numLandmarks);
 	}
 
 	/**
@@ -144,7 +137,9 @@ public class Network {
 	 * @throws IOException 
 	 */
 	public void train(String trainingFilename) throws IOException {
+		// initialize our models
 		_motion = new MotionModel(_biggestRow, _biggestCol);
+		_obsMod = new ObservationModel(_biggestRow,_biggestCol,_numLandmarks);
 		BufferedReader br = new BufferedReader(new FileReader(trainingFilename));
 		int prevRow = -1, prevCol = -1, currRow = -1, currCol = -1,
 			currTrajectory = -1, prevTrajectory = -1;
