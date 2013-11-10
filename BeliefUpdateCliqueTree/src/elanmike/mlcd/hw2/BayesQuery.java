@@ -31,9 +31,16 @@ public class BayesQuery {
 			return;
 		}
 		
+		
+		
 		try {
+			// TODO load cpd, throw error on failure
+			// TODO load network file, throw error on failure
+			// TODO verify clique tree is valid for the loaded network, throw error on failure
+			b = readCliqueTreeFile(args[2]);
 			readNetworkFile(args[0]);
 			readCPDFile(args[1]);
+			
 		} catch (NumberFormatException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -42,20 +49,6 @@ public class BayesQuery {
 			e1.printStackTrace();
 		}
 		
-		// TODO load cpd, throw error on failure
-		// TODO load network file, throw error on failure
-		// TODO verify clique tree is valid for the loaded network, throw error on failure
-		try {
-			b = readTree(args[2]);
-		} catch (NumberFormatException e) {
-			System.err.println("error reading tree!");
-			e.printStackTrace();
-			return;
-		}catch(IOException e){
-			System.err.println("error reading tree!");
-			e.printStackTrace();
-			return;
-		}
 		// if sum-product:
 			// TODO run belief-update message passing, sum-product
 			// TODO process queries, print output for each
@@ -71,7 +64,7 @@ public class BayesQuery {
 	 * @throws IOException
 	 * @throws NumberFormatException
 	 */
-	public static Bump readTree(String cliqueTreeFilename) 
+	public static Bump readCliqueTreeFile(String cliqueTreeFilename) 
 			throws IOException, NumberFormatException {
 		Bump b = new Bump();
 		BufferedReader br = new BufferedReader(new FileReader(cliqueTreeFilename));
