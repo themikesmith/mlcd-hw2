@@ -326,6 +326,9 @@ public class Bump {
 			}
 		}
 	}
+	void downwardPassBeliefUpdate() {
+		
+	}
 	void copyTreeForQueries() {
 		_queryTree = _tree;
 	}
