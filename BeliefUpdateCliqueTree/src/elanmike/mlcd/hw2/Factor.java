@@ -129,6 +129,19 @@ public class Factor {
 		return searchIndex;
 	}
 	
+	private int[] valuesFromIndex(int datum_index) throws Exception{
+		if(datum_index >= data.size()|| datum_index< 0)
+			throw new Exception("FactorIndexError: index("+datum_index+") was not in the valid range of ( 0 - "+(data.size()-1)+")");
+		
+		int values[] = new int[_variables.size()];
+		
+		for(int varIdx = 0; varIdx< _variables.size(); varIdx++){
+			values[varIdx] = (datum_index/_stride.get(varIdx))%_variableCard.get(varIdx);
+		}
+		
+		return values;
+	}
+	
 	public void addJointProbByName(String[] varVals, double prob) throws Exception{
 		if(varVals.length != _variables.size()) 
 			throw new Exception("InputLengthError: indexLength("+varVals.length+") does not match number of variables for this factor("+_variables.size()+")");
@@ -224,7 +237,6 @@ public class Factor {
 		return union;
 	}
 	
-
 	public Factor product(Factor f) throws Exception{
 		ArrayList<Integer> unionScope = this.union(f);
 		Factor psi = new Factor(unionScope);
@@ -260,7 +272,6 @@ public class Factor {
 		return psi;
 	}
 	
-	
 	public Factor divided(Factor f) throws Exception{
 		if(!this._variables.containsAll(f._variables))
 			throw new Exception("DivionError: Numerator does not contain Denominator");
@@ -268,31 +279,72 @@ public class Factor {
 		Factor result = new Factor(this._variables);
 		
 		ArrayList<Integer> sepset = this.intersection(f);
-		ArrayList<Integer> cliqueMinusSepset = this.difference(f);
 		
-		//new ArrayList<Integer>()
-		
-		iterate(new ArrayList<Integer>(),new ArrayList<Integer>(), 0, new int[_variables.size()], new Callback() {
-			   public void iterate(int[] curValue) {
-			        try {
-						System.out.println(data.get(index(curValue)));
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			   }
-			});
-	
-		for(int common_var_idx = 0; common_var_idx<sepset.size(); common_var_idx++){
+
+		for(int datum_idx = 0; datum_idx < this.data.size(); datum_idx++ ){
+			int[] values = valuesFromIndex(datum_idx);
+			ArrayList<Integer> sharedVarValues = new ArrayList<Integer>();
+			
+			int[] f_indicies_of_values = new int[sepset.size()];
+			for(int s:sepset){
+				int this_ind = this._variables.indexOf(s);//index of variable in sepset in this factor
+				//sharedVarValues.add(values[this_ind]);//value of that variable
+				int that_ind = f._variables.indexOf(s);//index of variable in sepset in this factor
+				f_indicies_of_values[that_ind] = values[this_ind];
+			}
+			
+			if(this.data.get(datum_idx) == 0.0 && f.getProbByValues(f_indicies_of_values) == 0.0 ){
+				result.data.set(datum_idx, 0.0);
+			}else{
+				result.data.set(datum_idx, this.data.get(datum_idx)/f.getProbByValues(f_indicies_of_values));
+			}
 			
 		}
+		
+		
 		
 		return result;
 	}
 	
 	public static void main(String args[]) throws Exception{
+		//Division Test
+		ArrayList<String> A_vals = new ArrayList<String>();
+		A_vals.add("1");
+		A_vals.add("2");
+		A_vals.add("3");
+		
+		ArrayList<String> B_vals = new ArrayList<String>();
+		B_vals.add("1");
+		B_vals.add("2");
+		
+		Factor.addVariable("A", A_vals);
+		Factor.addVariable("B", B_vals);
+		System.out.println(Factor.variableInfo());
+		
+		String[] fac1_vars = {"A","B"}; 
+		Factor fac1 = new Factor(fac1_vars);
+		fac1.addJointProbByIndex(0, .5);
+		fac1.addJointProbByIndex(1, 0);
+		fac1.addJointProbByIndex(2, .3);
+		fac1.addJointProbByIndex(3, .2);
+		fac1.addJointProbByIndex(4, 0);
+		fac1.addJointProbByIndex(5, .45);
+		System.out.println(fac1);
+		
+		String[] fac2_vars = {"A"}; 
+		Factor fac2 = new Factor(fac2_vars);
+		fac2.addJointProbByIndex(0, .8);
+		fac2.addJointProbByIndex(1, .0);
+		fac2.addJointProbByIndex(2, .6);
+		System.out.println(fac2);
 		
 		
+		System.out.println(fac1.divided(fac2));
+		
+		
+		
+		
+		/*//Product Test
 		ArrayList<String> A_vals = new ArrayList<String>();
 		A_vals.add("1");
 		A_vals.add("2");
@@ -332,24 +384,7 @@ public class Factor {
 		
 		System.out.println(fac1.product(fac2));
 		
-		
-		/*
-		ArrayList<String> A_vals = new ArrayList<String>();
-		A_vals.add("Yes");
-		A_vals.add("No");
-		Factor.addVariable("A", A_vals);
-		Factor.addVariable("B", A_vals);
-		System.out.println(Factor.variableInfo());
-		
-		String[] fac1_vars = {"A","B"}; 
-		String[] values = {"Yes","No"};
-		Factor fac1 = new Factor(fac1_vars);
-		fac1.addJointProbByName(values, .5);
-		fac1.addJointProbByIndex(0, .5);
-		System.out.println(fac1);
 		*/
-		
-		
 	}
 	
 }
