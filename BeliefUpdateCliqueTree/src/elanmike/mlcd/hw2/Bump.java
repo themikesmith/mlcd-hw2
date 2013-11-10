@@ -254,18 +254,19 @@ public class Bump {
 		}
 	}
 	private class Tree {
-		private HashMap<Vertex> _vertices;
-		private HashMap<Edge> _edges;
+		private HashMap<String,Vertex> _vertices;
+		private HashMap<String,Edge> _edges;
 		Tree() {
 			_vertices = new HashMap<String,Vertex>();
 			_edges = new HashMap<String,Edge>();
 		}
+		/*
 		Tree(Set<Vertex> vs, Set<Edge> es) {
 			this._vertices = vs;
 			this._edges = es;
-		}
+		}*/
 		void addVertex(Vertex v) {
-			_vertices.add(v);
+			_vertices.put(v._variables.toString(),v);
 		}
 		/**
 		 * Adds the edge to the tree.
@@ -273,16 +274,30 @@ public class Bump {
 		 * @param e
 		 */
 		void addEdge(Edge e) {
-			if(!_edges.contains(e)) {
-				_vertices.add(e._one);
-				_vertices.add(e._two);
-				_edges.add(e);
+			if(!_edges.containsKey(e._variables.toString())) {
+				//_vertices.put(e._one._variables.toString(),e._one);
+				//_vertices.put(e._two._variables.toString(),e._two);
+				_edges.put(e._variables.toString(),e);
 			}
 		}
 		Tree makeCopy() {
 			Tree t = new Tree();
 			//TODO make deep copy
 			return null;
+		}
+		
+		public String toString(){
+			String output = "=== Verticies ===\n";
+			Set<String> keys = _vertices.keySet();
+			for(String k:keys){
+				output += _vertices.get(k)._variables.toString()+"\n";
+			}
+			output += "=== Edges ===\n";
+			keys = _edges.keySet();
+			for(String k:keys){
+				output += _edges.get(k)._variables.toString()+"\n";
+			}
+			return output;
 		}
 	}
 	private static final boolean DEBUG = true;
