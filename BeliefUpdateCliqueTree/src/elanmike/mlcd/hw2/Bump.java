@@ -198,15 +198,12 @@ public class Bump {
 	private class Edge extends Factor{
 		public static final String EDGE = " -- ";
 		Vertex _one, _two;
-		//Factor _mu;
-		//Set<Integer> _sepset; 
-		int _weight; // number of variables one has in common with two
-		
-		Edge(Vertex one, Vertex two, int weight) {
+		//int _weight;
+		Edge(Vertex one, Vertex two) {//, int weight) {
 			super(one.intersection(two._variables));
 			this._one = one;
 			this._two = two;
-			this._weight = weight;
+			//this._weight = weight;
 		}
 		/**
 		 * An edge is equal to another edge if its two vertices match the other's two
@@ -224,8 +221,9 @@ public class Bump {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append(_one.toString());
-			if(DEBUG) sb.append(" --").append(_weight).append("-- ");
-			else sb.append(EDGE);
+//			if(DEBUG) sb.append(" --").append(_weight).append("-- ");
+//			else
+				sb.append(EDGE);
 			sb.append(_two.toString());
 			return sb.toString();
 		}
@@ -604,8 +602,9 @@ public class Bump {
 			
 			_tree.addEdge(new Edge(
 					_tree._vertices.get(left.toString()), 
-					_tree._vertices.get(right.toString()), 
-					1));
+					_tree._vertices.get(right.toString()) 
+//					,1
+					));
 		}
 		
 		
