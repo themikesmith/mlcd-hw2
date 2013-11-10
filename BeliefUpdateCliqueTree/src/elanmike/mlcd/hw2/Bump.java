@@ -576,6 +576,7 @@ public class Bump {
 		for(int i = 0;i<numCliques;i++){
 			if((line = br.readLine()) != null){
 				String[] containedVars = line.split(",");
+				System.out.println("Adding verticie: " + Factor.variableNamesToIndicies(containedVars) );
 				_tree.addVertex(new Vertex(containedVars));
 				
 			}else{
@@ -590,10 +591,14 @@ public class Bump {
 			
 			String[] left_variables = tokenized[0].split(",");
 			String[] right_variables = tokenized[2].split(",");
+			
+			System.out.println("Adding edge: " + Factor.variableNamesToIndicies(left_variables) + " --- " + Factor.variableNamesToIndicies(right_variables));
+			
+			_tree.addEdge(new Edge(_tree._vertices.get(Factor.variableNamesToIndicies(left_variables)), _tree._vertices.get(Factor.variableNamesToIndicies(right_variables)), 1));
 		}
 		
 		
-		
+		System.out.println(_tree.toString());
 		
 		br.close();
 	}

@@ -42,7 +42,13 @@ public class Factor {
 			return "";
 		return _variableNames.get(i);
 	}
-	
+	public static ArrayList<Integer> variableNamesToIndicies(String[] varsToBeConverted){
+		ArrayList<Integer> indicies = new ArrayList<Integer>();
+		for(String s:varsToBeConverted){
+			indicies.add(_variableNames.indexOf(s));
+		}
+		return indicies;
+	}
 	public static int getVariableValueIndex(int varIdx, String val){
 		if(_variableValues == null)
 			return -1;
@@ -53,7 +59,6 @@ public class Factor {
 			return "";
 		return _variableValues.get(varIdx).get(valueIdx);
 	}
-	
 	
 	
 	public static String variableInfo(){
