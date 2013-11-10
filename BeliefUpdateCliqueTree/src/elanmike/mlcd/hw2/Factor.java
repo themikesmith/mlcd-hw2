@@ -32,6 +32,17 @@ public class Factor {
 		_variableCard.add(varValues.size());
 	}
 	
+	public static int getVariableIndex(String var){
+		if(_variableNames == null)
+			return -1;
+		return _variableNames.indexOf(var);
+	}
+	public static String getVariableName(int i){
+		if(_variableNames == null)
+			return "";
+		return _variableNames.get(i);
+	}
+	
 	public static String variableInfo(){
 		String output = "";
 		if(_variableNames == null){
@@ -57,7 +68,6 @@ public class Factor {
 		return output;
 	}
 	
-	
 	protected ArrayList<Integer> _variables;
 	protected ArrayList<Integer> _stride;
 	
@@ -79,7 +89,7 @@ public class Factor {
 		for(int i = 0; i<strideTot; i++) data.add(0.0);
 	}
 	
-	private Factor(ArrayList<Integer> vars){
+	protected Factor(ArrayList<Integer> vars){
 		this._variables = vars;
 		
 		this._stride = new ArrayList<Integer>(_variables.size());
@@ -100,7 +110,6 @@ public class Factor {
 	interface Callback {
 		void iterate(int[] curValue); // n-dimensional point
 	}
-
 	void iterate(ArrayList<Integer> heldVariables, ArrayList<Integer> heldValues, int currentDimension, int[] js, Callback c) {
 		for (int i = 0; i < _variableCard.get(currentDimension); i++) {
 			if(heldVariables.contains(i)){
@@ -115,7 +124,6 @@ public class Factor {
 		}
 	}
 
-	
 	private int index(int[] variableValues) throws Exception{
 		int searchIndex = 0;
 		if(variableValues.length != _variables.size()) 

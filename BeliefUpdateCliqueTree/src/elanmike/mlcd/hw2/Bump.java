@@ -195,12 +195,21 @@ public class Bump {
 			return false;
 		}
 	}
-	private class Edge {
+	private class Edge extends Factor{
 		public static final String EDGE = " -- ";
 		Vertex _one, _two;
-		Factor _mu;
-		Set<Integer> _sepset; 
+		//Factor _mu;
+		//Set<Integer> _sepset; 
 		int _weight; // number of variables one has in common with two
+		
+		Edge(Vertex one, Vertex two, int weight) {
+			super(one.intersection(two._variables));
+			this._one = one;
+			this._two = two;
+			this._weight = weight;
+		}
+		
+		/*
 		Edge(Vertex one, Vertex two, int weight) {
 			this._one = one;
 			this._two = two;
@@ -210,6 +219,7 @@ public class Bump {
 		}
 		void setBelief(Factor f) {this._mu = f;}
 		Factor getBelief() {return _mu;}
+		*/
 		/**
 		 * An edge is equal to another edge if its two vertices match the other's two
 		 */
@@ -244,11 +254,11 @@ public class Bump {
 		}
 	}
 	private class Tree {
-		private Set<Vertex> _vertices;
-		private Set<Edge> _edges;
+		private HashMap<Vertex> _vertices;
+		private HashMap<Edge> _edges;
 		Tree() {
-			_vertices = new HashSet<Vertex>();
-			_edges = new HashSet<Edge>();
+			_vertices = new HashMap<String,Vertex>();
+			_edges = new HashMap<String,Edge>();
 		}
 		Tree(Set<Vertex> vs, Set<Edge> es) {
 			this._vertices = vs;
@@ -285,6 +295,7 @@ public class Bump {
 	private Tree _tree, _queryTree;
 	private ArrayList<Vertex> _orderedVertices;
 	private boolean _useSumProduct;
+	
 	/**
 	 * A map from variable name to variable value, transformed into integers
 	 */
