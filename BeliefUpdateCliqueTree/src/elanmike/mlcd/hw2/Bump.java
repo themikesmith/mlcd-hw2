@@ -662,8 +662,7 @@ public class Bump {
 		br.close();
 	}
 
-	public void readCPDFile(String cpdFilename)
-			throws Exception {
+	public void readCPDFile(String cpdFilename) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
 		String line;
 		
@@ -694,8 +693,6 @@ public class Bump {
 			}else{// Cpd is a subfactor of one of our cliques.
 				
 			}
-			
-			
 		}		
 		br.close();
 	}
