@@ -69,20 +69,18 @@ public class Bump {
 			return sb.toString();
 		}
 	}
-	private class Vertex {
+	private class Vertex extends Clique{
 		private Integer _orderID;
-		private Factor _beta;
-		private Clique _data;
+
 		private Set<Edge> _neighborEdges, _incomingEdges, _outgoingEdges;
 		private Map<Edge, Boolean> _recvdMsgStatus;
 		private boolean _isInformed, _onUpwardPass;
-		Vertex() {
+		Vertex(String[] varsContained){
+			super(varsContained);
 			_neighborEdges = new TreeSet<Edge>();
 			_incomingEdges = new TreeSet<Edge>();
 			_outgoingEdges = new TreeSet<Edge>();
 			_orderID = nextVertexID++;
-			_beta = null;
-			_data = null;
 			_recvdMsgStatus = new HashMap<Edge, Boolean>();
 			_isInformed = false;
 			_onUpwardPass = false;
@@ -101,9 +99,6 @@ public class Bump {
 				_neighborEdges.add(e);
 			}
 		}
-		Clique getClique() {return _data;}
-		Factor getBelief() {return _beta;}
-		void setFactor(Factor f) {this._beta = f;}
 		/**
 		 * Sends a message to its neighbor.
 		 * Calls the neighbor's onReceiveMessage method
@@ -211,8 +206,8 @@ public class Bump {
 			this._one = one;
 			this._two = two;
 			this._weight = weight;
-			this._sepset = new HashSet(Arrays.asList(one._data._variables));
-			_sepset.retainAll(two._data._variables);
+			this._sepset = new HashSet(Arrays.asList(one._variables));
+			_sepset.retainAll(two._variables);
 		}
 		void setBelief(Factor f) {this._mu = f;}
 		Factor getBelief() {return _mu;}
