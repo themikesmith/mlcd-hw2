@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -31,9 +30,6 @@ public class CreateNetworkCliqueTree {
 		private Set<String> _variables;
 		Clique() {
 			_variables = new HashSet<String>();
-		}
-		Clique(String... variables) {
-			this._variables = new HashSet<String>(Arrays.asList(variables));
 		}
 		void addVariable(String var) {
 			_variables.add(var);
