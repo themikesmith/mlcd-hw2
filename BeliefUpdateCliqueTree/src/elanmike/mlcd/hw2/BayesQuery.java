@@ -27,8 +27,8 @@ public class BayesQuery {
 			return;
 		}
 		
-		
 		b = new Bump();
+		b.setUseSumProduct(useSumProduct);
 		try {
 			// TODO load cpd, throw error on failure
 			// TODO load network file, throw error on failure
@@ -46,7 +46,7 @@ public class BayesQuery {
 		}
 		
 		// if sum-product:
-			// TODO run belief-update message passing, sum-product
+			b.runBump();
 			try {
 				b.processQueries(args[4]);
 			} catch (IOException e) {

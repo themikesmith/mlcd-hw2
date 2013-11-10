@@ -284,6 +284,7 @@ public class Bump {
 	private boolean _bumpOnUpwardPass;
 	private Tree _tree, _queryTree;
 	private ArrayList<Vertex> _orderedVertices;
+	private boolean _useSumProduct;
 	/**
 	 * A map from variable name to variable value, transformed into integers
 	 */
@@ -293,6 +294,23 @@ public class Bump {
 		_bumpOnUpwardPass = false;
 		_queryContexts = new HashMap<Integer, Integer>();
 		_orderedVertices = new ArrayList<Vertex>();
+		_useSumProduct = true;
+	}
+	/**
+	 * Sets the value of use sum product.
+	 * Note that after changing this, one needs to call runBump again
+	 * to recalibrate the tree.
+	 * @param useSumProduct true if use sum product, false if use max product
+	 */
+	void setUseSumProduct(boolean useSumProduct) {
+		_useSumProduct = useSumProduct;
+	}
+	/**
+	 * Runs belief update message passing to calibrate the tree
+	 */
+	public void runBump() {
+		assignOrderingAndInitBeliefs();
+		calibrateTree();
 	}
 	/**
 	 * Run DFS to init ordering.
@@ -342,6 +360,9 @@ public class Bump {
 		//TODO implement DFS in QUERY COPY
 		return null;
 	}
+	/**
+	 * Resets the query tree in preparation for queries
+	 */
 	void resetTreeForQueries() {
 		_queryTree = _tree.makeCopy();
 		_queryContexts = new HashMap<Integer, Integer>();
