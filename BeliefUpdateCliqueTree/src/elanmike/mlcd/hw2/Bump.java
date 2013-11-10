@@ -292,6 +292,7 @@ public class Bump {
 			else if(numVertices > 0) { // reading vertices
 				String[] vars = line.split(",");
 				
+				numVertices--; // and decrement our number left to read
 			}
 			else { // reading edges
 				
