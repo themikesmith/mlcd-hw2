@@ -1,5 +1,8 @@
 package elanmike.mlcd.hw2;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,13 +31,10 @@ public class Bump {
 	 * @author mcs
 	 *
 	 */
-	private class Clique {
-		private Set<Integer> _variables;
-		Clique() {
-			_variables = new HashSet<Integer>();
-		}
-		Clique(Integer... variables) {
-			this._variables = new HashSet<Integer>(Arrays.asList(variables));
+	private class Clique extends Factor {
+		
+		Clique(String[] varNames) {
+			super(varNames);
 		}
 		void addVariable(int var) {
 			_variables.add(var);
@@ -211,7 +211,7 @@ public class Bump {
 			this._one = one;
 			this._two = two;
 			this._weight = weight;
-			this._sepset = one._data._variables;
+			this._sepset = new HashSet(Arrays.asList(one._data._variables));
 			_sepset.retainAll(two._data._variables);
 		}
 		void setBelief(Factor f) {this._mu = f;}
@@ -432,5 +432,107 @@ public class Bump {
 			// TODO convert to integers
 		}
 		return null;
+	}
+
+
+	/**
+	 * Reads in the tree from the clique file.
+	 * Builds the tree
+	 * @param cliqueTreeFilename
+	 * @throws IOException
+	 * @throws NumberFormatException
+	 */
+	public void readCliqueTreeFile(String cliqueTreeFilename) 
+			throws IOException, NumberFormatException {
+		BufferedReader br = new BufferedReader(new FileReader(cliqueTreeFilename));
+		String line;
+		
+		// on the first line is the number of following lines that describe vertices
+		int numCliques = -1;
+		if((line = br.readLine()) != null){
+			numCliques = Integer.valueOf(line);
+		}else{
+			throw new IOException();
+		}
+		if(numCliques<0)
+			throw new NumberFormatException();
+		for(int i = 0;i<numCliques;i++){
+			if((line = br.readLine()) != null){
+				String[] containedVars = line.split(",");
+				new Clique(containedVars);
+				
+			}else{
+				throw new IOException("inconsistant network file.");
+			}
+		}
+		
+		
+		
+		
+		br.close();
+	}
+
+	public void readNetworkFile(String networkFilename)
+		throws IOException, NumberFormatException {
+			BufferedReader br = new BufferedReader(new FileReader(networkFilename));
+			String line;
+			// on the first line is the number of following lines that describe vertices
+			int numVariables = -1;
+			if((line = br.readLine()) != null){
+				numVariables = Integer.valueOf(line);
+			}else{
+				throw new IOException();
+			}
+			if(numVariables<0)
+				throw new NumberFormatException();
+			for(int i = 0;i<numVariables;i++){
+				if((line = br.readLine()) != null){
+					String[] tokenized = line.split(" ");
+					String variableName = tokenized[0];
+					tokenized = tokenized[1].split(",");//values
+					
+					Factor.addVariable(variableName, new ArrayList<String>(Arrays.asList(tokenized)));
+				}else{
+					throw new IOException("inconsistant network file.");
+				}
+			}
+			
+			
+			br.close();
+	}
+
+	public void readCPDFile(String cpdFilename)
+		throws IOException, NumberFormatException {
+			BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
+			String line;
+			
+			while ((line = br.readLine()) != null) {
+				String[] tokenized = line.split(" ");
+				ArrayList<String> variables = new ArrayList<String>();
+				ArrayList<String> var_value = new ArrayList<String>();
+				for(int i = 0; i<tokenized.length-1; i++){
+					String[] var_pair = tokenized[i].split("=");
+					variables.add(var_pair[0]);
+					var_value.add(var_pair[1]);
+				}
+				double prob = Double.valueOf(tokenized[tokenized.length-1]);
+				//Put into appropriate clique
+				System.out.println(variables+" "+var_value+" "+ prob);
+			}
+			
+			
+			br.close();
+	}
+
+	private void processQueries(String queryFile) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(queryFile));
+		String line;
+		while ((line = br.readLine()) != null) {
+			String[] stuff = line.split(" ");
+			String[] lhs = stuff[0].split(",");
+			String[] rhs = stuff[1].split(",");
+			System.out.println(query(lhs, rhs));
+		}
+		br.close();
 	}
 }
