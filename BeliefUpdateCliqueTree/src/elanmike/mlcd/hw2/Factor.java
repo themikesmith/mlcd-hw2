@@ -202,9 +202,9 @@ public class Factor {
 		return data.get(index(variableValues));
 	}
 	
-	public ArrayList<Integer> intersection(Factor f){
+	public ArrayList<Integer> intersection(ArrayList<Integer> other){
 		Set<Integer> myVars = new TreeSet<Integer>(this._variables);
-		Set<Integer> theirVars = new TreeSet<Integer>(f._variables);
+		Set<Integer> theirVars = new TreeSet<Integer>(other);
 		
 		myVars.retainAll(theirVars);
 		ArrayList<Integer> intersection = new ArrayList<Integer>();
@@ -213,9 +213,9 @@ public class Factor {
 		return intersection;
 	}
 	
-	public ArrayList<Integer> difference(Factor f){
+	public ArrayList<Integer> difference(ArrayList<Integer> other){
 		Set<Integer> myVars = new TreeSet<Integer>(this._variables);
-		Set<Integer> theirVars = new TreeSet<Integer>(f._variables);
+		Set<Integer> theirVars = new TreeSet<Integer>(other);
 		
 		myVars.removeAll(theirVars);
 		ArrayList<Integer> difference = new ArrayList<Integer>();
@@ -225,9 +225,9 @@ public class Factor {
 		return difference;
 	}
 	
-	public ArrayList<Integer> union(Factor f){
+	public ArrayList<Integer> union(ArrayList<Integer> other){
 		Set<Integer> myVars = new TreeSet<Integer>(this._variables);
-		Set<Integer> theirVars = new TreeSet<Integer>(f._variables);
+		Set<Integer> theirVars = new TreeSet<Integer>(other);
 		
 		myVars.addAll(theirVars);
 		ArrayList<Integer> union = new ArrayList<Integer>();
@@ -238,7 +238,7 @@ public class Factor {
 	}
 	
 	public Factor product(Factor f) throws Exception{
-		ArrayList<Integer> unionScope = this.union(f);
+		ArrayList<Integer> unionScope = this.union(f._variables);
 		Factor psi = new Factor(unionScope);
 		
 		
@@ -272,13 +272,13 @@ public class Factor {
 		return psi;
 	}
 	
-	public Factor divided(Factor f) throws Exception{
+	public Factor divide(Factor f) throws Exception{
 		if(!this._variables.containsAll(f._variables))
 			throw new Exception("DivionError: Numerator does not contain Denominator");
 		
 		Factor result = new Factor(this._variables);
 		
-		ArrayList<Integer> sepset = this.intersection(f);
+		ArrayList<Integer> sepset = this.intersection(f._variables);
 		
 
 		for(int datum_idx = 0; datum_idx < this.data.size(); datum_idx++ ){
@@ -301,12 +301,77 @@ public class Factor {
 			
 		}
 		
-		
-		
 		return result;
 	}
 	
+	public Factor marginalize(ArrayList<Integer> elimVar) throws Exception{
+		ArrayList<Integer> finalVars = difference(elimVar);
+		
+		Factor result = new Factor(finalVars);
+		for(int datum_idx = 0; datum_idx < this.data.size(); datum_idx++ ){
+			int[] values = valuesFromIndex(datum_idx);
+			
+			int[] f_indicies_of_values = new int[finalVars.size()];
+			ArrayList<Integer> sharedVarValues = new ArrayList<Integer>();
+			
+			for(int s:finalVars){
+				
+				int this_ind = this._variables.indexOf(s);//index of variable in sepset in this factor
+				//sharedVarValues.add(values[this_ind]);//value of that variable
+				int that_ind = result._variables.indexOf(s);//index of variable in sepset in this factor
+				f_indicies_of_values[that_ind] = values[this_ind];
+				
+			}
+			result.data.set(result.index(f_indicies_of_values), result.data.get(result.index(f_indicies_of_values))+this.data.get(datum_idx));
+			
+		}
+		return result;
+	}
+	
+	
 	public static void main(String args[]) throws Exception{
+		
+		
+		//Division Test
+				ArrayList<String> A_vals = new ArrayList<String>();
+				A_vals.add("1");
+				A_vals.add("2");
+				A_vals.add("3");
+				
+				ArrayList<String> B_vals = new ArrayList<String>();
+				B_vals.add("1");
+				B_vals.add("2");
+				
+				Factor.addVariable("A", A_vals);
+				Factor.addVariable("B", B_vals);
+				Factor.addVariable("C", B_vals);
+				System.out.println(Factor.variableInfo());
+				
+				String[] fac1_vars = {"A","B","C"}; 
+				Factor fac1 = new Factor(fac1_vars);
+				fac1.addJointProbByIndex(0, .25);// 1 1 1
+				fac1.addJointProbByIndex(1, .05);// 2 1 1
+				fac1.addJointProbByIndex(2, .15);// 3 1 1
+				
+				fac1.addJointProbByIndex(3, .08);// 1 2 1 
+				fac1.addJointProbByIndex(4, 0);  // 2 2 1
+				fac1.addJointProbByIndex(5, .09);// 3 2 1
+				
+				fac1.addJointProbByIndex(6, .35);// 1 1 2
+				fac1.addJointProbByIndex(7, .07);// 2 1 2
+				fac1.addJointProbByIndex(8, .21);// 3 1 2
+				
+				fac1.addJointProbByIndex(9, .16); //1 2 2
+				fac1.addJointProbByIndex(10, 0);  //2 2 2
+				fac1.addJointProbByIndex(11, .18);//3 2 2
+				System.out.println(fac1);
+				
+				ArrayList<Integer> elim_vars = new ArrayList<Integer>();
+				elim_vars.add(1);
+				System.out.println(fac1.marginalize(elim_vars));
+		
+		/*
+		 
 		//Division Test
 		ArrayList<String> A_vals = new ArrayList<String>();
 		A_vals.add("1");
@@ -339,8 +404,8 @@ public class Factor {
 		System.out.println(fac2);
 		
 		
-		System.out.println(fac1.divided(fac2));
-		
+		System.out.println(fac1.divide(fac2));
+		*/
 		
 		
 		
