@@ -3,6 +3,8 @@ package elanmike.mlcd.hw2;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class BayesQuery {
 
@@ -77,6 +79,62 @@ public class BayesQuery {
 		br.close();
 		return b;
 	}
+	
+	
+
+	public void readNetworkFile(String networkFilename)
+		throws IOException, NumberFormatException {
+			BufferedReader br = new BufferedReader(new FileReader(networkFilename));
+			String line;
+			// on the first line is the number of following lines that describe vertices
+			int numVariables = -1;
+			if((line = br.readLine()) != null){
+				numVariables = Integer.valueOf(line);
+			}else{
+				throw new IOException();
+			}
+			if(numVariables<0)
+				throw new NumberFormatException();
+			for(int i = 0;i<numVariables;i++){
+				if((line = br.readLine()) != null){
+					String[] tokenized = line.split(" ");
+					String variableName = tokenized[0];
+					tokenized = tokenized[1].split(",");//values
+					
+					Factor.addVariable(variableName, new ArrayList<String>(Arrays.asList(tokenized)));
+				}else{
+					throw new IOException("inconsistant network file.");
+				}
+			}
+			
+			
+			br.close();
+	}
+
+	public void readCPDFile(String cpdFilename)
+		throws IOException, NumberFormatException {
+			BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
+			String line;
+			
+			while ((line = br.readLine()) != null) {
+				String[] tokenized = line.split(" ");
+				ArrayList<String> variables = new ArrayList<String>();
+				ArrayList<String> var_value = new ArrayList<String>();
+				for(int i = 0; i<tokenized.length-1; i++){
+					String[] var_pair = tokenized[i].split("=");
+					variables.add(var_pair[0]);
+					var_value.add(var_pair[1]);
+				}
+				double prob = Double.valueOf(tokenized[tokenized.length-1]);
+				//Put into appropriate clique
+				System.out.println(variables+" "+var_value+" "+ prob);
+			}
+			
+			
+			br.close();
+	}
+
+	
 	private static void processQueries(String queryFile) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(queryFile));
 		String line;
