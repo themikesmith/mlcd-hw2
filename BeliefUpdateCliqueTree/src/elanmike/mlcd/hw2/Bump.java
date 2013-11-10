@@ -414,10 +414,74 @@ public class Bump {
 		// conduct one pass of B-U with C as the root
 		downwardPassBeliefUpdateQuery(newRoot);
 	}
+	String query(String[] lhs, String[] contexts, boolean useSumProduct) {
+		if(useSumProduct != _useSumProduct) {
+			System.err.println("oops! not ready.");
+			//TODO get ready.
+			setUseSumProduct(useSumProduct);
+			runBump();
+		}
+		if(useSumProduct) return querySumProduct(lhs, contexts);
+		else return queryMaxProduct(lhs, contexts);
+	}
 	/**
 	 * queries the structure for p(lhs|contexts)
 	 */
-	String query(String[] lhs, String[] contexts) {
+	String querySumProduct(String[] lhs, String[] contexts) {
+		// check if evidence is incremental or retractive
+		boolean retractive = false;
+		// then take action
+		// check number of variables
+		if(contexts.length < _queryContexts.size()) {
+			// retractive -- less evidence than before. reset and treat as incremental
+			retractive = true;
+		}
+		if(!retractive) {
+			for(String s : contexts) {
+				String[] varValue = s.split("=");
+				String var = varValue[0], value = varValue[1];
+				// TODO convert to integers
+				int varInt = -1, valueInt = -1;
+				if(_queryContexts.containsKey(varInt) && _queryContexts.get(varInt) != valueInt) {
+					// query context variable has other value. reset.
+					retractive = true;
+					break;
+				}
+			}
+		}
+		if(retractive) resetTreeForQueries();
+		for(String s : contexts) {
+			String[] varValue = s.split("=");
+			String var = varValue[0], value = varValue[1];
+			// TODO convert to integers
+			int varInt = -1, valueInt = -1;
+			if(!_queryContexts.containsKey(varInt)) {
+				// additional evidence - we've never seen it before
+				incorporateQueryEvidence(varInt, varInt);
+			}
+			else if(_queryContexts.get(varInt) == valueInt) {
+				// already have this context variable = value pair, do nothing
+			}
+			else { // query context variable has other value. reset.
+				// we've already reset so this should never occur
+			}
+		}
+		for(String s : lhs) {
+			String[] varValue = s.split("=");
+			String var = varValue[0], value = varValue[1];
+			// TODO convert to integers
+			int varInt = -1, valueInt = -1;
+			if(valueInt != NO_EVIDENCE) {
+				
+			}
+		}
+		return null;
+	}
+	/**
+	 * queries the structure for p(lhs|contexts)
+	 */
+	String queryMaxProduct(String[] lhs, String[] contexts) {
+		// TODO implement
 		// check if evidence is incremental or retractive
 		boolean retractive = false;
 		// then take action
@@ -468,7 +532,6 @@ public class Bump {
 		return null;
 	}
 
-
 	/**
 	 * Reads in the tree from the clique file.
 	 * Builds the tree
@@ -507,11 +570,11 @@ public class Bump {
 		}
 		//edges
 		while ((line = br.readLine()) != null) {
+			// edges
 			String[] tokenized = line.split(" ");
 			
 			String[] left_variables = tokenized[0].split(",");
 			String[] right_variables = tokenized[2].split(",");
-			
 		}
 		
 		
@@ -522,68 +585,64 @@ public class Bump {
 
 	public void readNetworkFile(String networkFilename)
 		throws IOException, NumberFormatException {
-			BufferedReader br = new BufferedReader(new FileReader(networkFilename));
-			String line;
-			// on the first line is the number of following lines that describe vertices
-			int numVariables = -1;
+		BufferedReader br = new BufferedReader(new FileReader(networkFilename));
+		String line;
+		// on the first line is the number of following lines that describe vertices
+		int numVariables = -1;
+		if((line = br.readLine()) != null){
+			numVariables = Integer.valueOf(line);
+		}else{
+			br.close();
+			throw new IOException();
+		}
+		if(numVariables<0) {
+			br.close();
+			throw new NumberFormatException();
+		}
+		for(int i = 0;i<numVariables;i++){
 			if((line = br.readLine()) != null){
-				numVariables = Integer.valueOf(line);
+				String[] tokenized = line.split(" ");
+				String variableName = tokenized[0];
+				tokenized = tokenized[1].split(",");//values
+				
+				Factor.addVariable(variableName, new ArrayList<String>(Arrays.asList(tokenized)));
 			}else{
 				br.close();
-				throw new IOException();
+				throw new IOException("inconsistant network file.");
 			}
-			if(numVariables<0) {
-				br.close();
-				throw new NumberFormatException();
-			}
-			for(int i = 0;i<numVariables;i++){
-				if((line = br.readLine()) != null){
-					String[] tokenized = line.split(" ");
-					String variableName = tokenized[0];
-					tokenized = tokenized[1].split(",");//values
-					
-					Factor.addVariable(variableName, new ArrayList<String>(Arrays.asList(tokenized)));
-				}else{
-					br.close();
-					throw new IOException("inconsistant network file.");
-				}
-			}
-			
-			
-			br.close();
+		}
+		br.close();
 	}
 
 	public void readCPDFile(String cpdFilename)
-		throws IOException, NumberFormatException {
-			BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
-			String line;
-			
-			while ((line = br.readLine()) != null) {
-				String[] tokenized = line.split(" ");
-				ArrayList<String> variables = new ArrayList<String>();
-				ArrayList<String> var_value = new ArrayList<String>();
-				for(int i = 0; i<tokenized.length-1; i++){
-					String[] var_pair = tokenized[i].split("=");
-					variables.add(var_pair[0]);
-					var_value.add(var_pair[1]);
-				}
-				double prob = Double.valueOf(tokenized[tokenized.length-1]);
-				//Put into appropriate clique
-				System.out.println(variables+" "+var_value+" "+ prob);
+			throws IOException, NumberFormatException {
+		BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
+		String line;
+		
+		while ((line = br.readLine()) != null) {
+			String[] tokenized = line.split(" ");
+			ArrayList<String> variables = new ArrayList<String>();
+			ArrayList<String> var_value = new ArrayList<String>();
+			for(int i = 0; i<tokenized.length-1; i++){
+				String[] var_pair = tokenized[i].split("=");
+				variables.add(var_pair[0]);
+				var_value.add(var_pair[1]);
 			}
-			
-			
-			br.close();
+			double prob = Double.valueOf(tokenized[tokenized.length-1]);
+			//Put into appropriate clique
+			System.out.println(variables+" "+var_value+" "+ prob);
+		}		
+		br.close();
 	}
 
-	public void processQueries(String queryFile) throws IOException {
+	public void processQueries(String queryFile, boolean useSumProduct) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(queryFile));
 		String line;
 		while ((line = br.readLine()) != null) {
 			String[] stuff = line.split(" ");
 			String[] lhs = stuff[0].split(",");
 			String[] rhs = stuff[1].split(",");
-			System.out.println(query(lhs, rhs));
+			System.out.println(query(lhs, rhs, useSumProduct));
 		}
 		br.close();
 	}
