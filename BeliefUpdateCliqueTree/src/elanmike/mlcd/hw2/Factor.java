@@ -43,6 +43,19 @@ public class Factor {
 		return _variableNames.get(i);
 	}
 	
+	public static int getVariableValueIndex(int varIdx, String val){
+		if(_variableValues == null)
+			return -1;
+		return _variableValues.indexOf(val);
+	}
+	public static String getVariableName(int varIdx, int valueIdx){
+		if(_variableNames == null)
+			return "";
+		return _variableValues.get(varIdx).get(valueIdx);
+	}
+	
+	
+	
 	public static String variableInfo(){
 		String output = "";
 		if(_variableNames == null){
