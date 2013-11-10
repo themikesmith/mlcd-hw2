@@ -22,7 +22,7 @@ public class CreateNetworkCliqueTree {
 	private static List<Edge> _clusterGraphEdges;
 	private static Tree _cliqueTree;
 	private static Clique _lastAction;
-	private static boolean _debug = true;
+	private static boolean _debug = false;
 	/**
 	 * Small clique class that holds a list of variables
 	 * We compare cliques by their number of shared variables
