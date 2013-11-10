@@ -18,9 +18,9 @@ public class Factor {
 	}
 	
 	
-	private static ArrayList<String> _variableNames;
-	private static ArrayList<ArrayList<String>> _variableValues;
-	private static ArrayList<Integer> _variableCard;
+	protected static ArrayList<String> _variableNames;
+	protected static ArrayList<ArrayList<String>> _variableValues;
+	protected static ArrayList<Integer> _variableCard;
 	
 	public static void addVariable(String varName, ArrayList<String> varValues){
 		if(_variableNames == null) _variableNames = new ArrayList<String>();
@@ -58,10 +58,10 @@ public class Factor {
 	}
 	
 	
-	private ArrayList<Integer> _variables;
-	private ArrayList<Integer> _stride;
+	protected ArrayList<Integer> _variables;
+	protected ArrayList<Integer> _stride;
 	
-	private ArrayList<Double> data;
+	protected ArrayList<Double> data;
 	
 	Factor(String[] varsNames){
 		_variables= new ArrayList<Integer>(varsNames.length);
