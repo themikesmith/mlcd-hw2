@@ -60,7 +60,7 @@ public class CreateNetworkCliqueTree {
 			for(String var : _variables) {
 				sb.append(var).append(',');
 			}
-			sb.deleteCharAt(sb.length()-1); // delete final comma
+			if(_variables.size() > 0) sb.deleteCharAt(sb.length()-1); // delete final comma
 			return sb.toString();
 		}
 	}
@@ -141,7 +141,7 @@ public class CreateNetworkCliqueTree {
 			return;
 		}
 //		// kidding! debug with 10.8 example
-//		debugMaximalCliques();
+//		Set<Clique> maximalCliques = debugMaximalCliques();
 		// read network file
 		try {
 			read(args[0]);
@@ -152,11 +152,13 @@ public class CreateNetworkCliqueTree {
 		}
 		System.out.println("read network from:"+args[0]);
 		// given sufficient statistics, assemble list of maximal cliques
+		Set<Clique> maximalCliques = assembleMaximalCliques();
 		// now that we have our list of maximal cliques, assemble cluster graph
-		List<Edge> clusterGraphEdges = assembleClusterGraphEdges(assembleMaximalCliques());
+		List<Edge> clusterGraphEdges = assembleClusterGraphEdges(maximalCliques);
 		// sort the edges in descending order by weight
 		Collections.sort(clusterGraphEdges, new EdgeComparator());
 		// create the tree!
+		_numCliques = maximalCliques.size();
 		Tree cliqueTree = createMaximalSpanningTree(clusterGraphEdges, _numCliques);
 		if(cliqueTree._vertices.size() != _numCliques) {
 			System.err.printf("error when making tree! V:%d N:%d\n", cliqueTree._vertices.size(), _numCliques);
@@ -351,13 +353,12 @@ public class CreateNetworkCliqueTree {
 		List<Edge> clusterGraphEdges = new ArrayList<Edge>();
 		// for each possible pair of cliques...
 		Iterator<Clique> iIter = maximalCliques.iterator();
-		int i = 0, j = 0;
 		while(iIter.hasNext()) {
 			Clique one = iIter.next();
 			Iterator<Clique> jIter = maximalCliques.iterator();
 			while(jIter.hasNext()) {
 				Clique two = jIter.next();
-				if(i != j) { // exclude edges between identical cliques 
+				if(!one.equals(two)) { // exclude edges between identical cliques 
 					int weight = one.getCardinalityOfIntersectionWith(two);
 					Edge e = new Edge(one, two, weight);
 					if(weight > 0) {  // add an edge if one has things in common with two
@@ -366,9 +367,7 @@ public class CreateNetworkCliqueTree {
 						}
 					}
 				}
-				j++;
 			}
-			i++;
 		}
 		return clusterGraphEdges;
 	}
@@ -432,5 +431,37 @@ public class CreateNetworkCliqueTree {
 			out.println(e);
 		}
 		out.close();
+	}
+	private static Set<Clique> debugMaximalCliques() {
+		Set<Clique> cliques = new HashSet<Clique>();
+		Clique c = new Clique();
+		c.addVariable("C");
+		c.addVariable("D");
+		cliques.add(c);
+		c = new Clique();
+		c.addVariable("I");
+		c.addVariable("G");
+		c.addVariable("D");
+		cliques.add(c);
+		c = new Clique();
+		c.addVariable("G");
+		c.addVariable("H");
+		cliques.add(c);
+		c = new Clique();
+		c.addVariable("G");
+		c.addVariable("S");
+		c.addVariable("L");
+		cliques.add(c);
+		c = new Clique();
+		c.addVariable("G");
+		c.addVariable("I");
+		c.addVariable("S");
+		cliques.add(c);
+		c = new Clique();
+		c.addVariable("S");
+		c.addVariable("L");
+		c.addVariable("J");
+		cliques.add(c);
+		return cliques;
 	}
 }
