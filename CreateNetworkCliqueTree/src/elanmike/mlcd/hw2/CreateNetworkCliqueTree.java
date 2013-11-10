@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -20,6 +19,7 @@ public class CreateNetworkCliqueTree {
 	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
 	private static ArrayList<Clique> _maximalCliques;
 	private static List<Edge> _clusterGraphEdges;
+	private static Tree _cliqueTree;
 	/**
 	 * Small clique class that holds a list of variables
 	 * We compare cliques by their number of shared variables
@@ -27,40 +27,70 @@ public class CreateNetworkCliqueTree {
 	 *
 	 */
 	private static class Clique {
-		private Set<String> variables;
+		private Set<String> _variables;
 		Clique() {
-			variables = new HashSet<String>();
-		}
-		Clique(String... variables) {
-			this.variables = new HashSet<String>(Arrays.asList(variables));
+			_variables = new HashSet<String>();
 		}
 		void addVariable(String var) {
-			variables.add(var);
-		}
-		Set<String> getVariables() {
-			return variables;
+			_variables.add(var);
 		}
 		/**
-		 * @param other theo ther clique
+		 * @param other the other clique
 		 * @return the number of variables this clique has in common with the other
 		 */
 		int getCardinalityOfIntersectionWith(Clique other) {
-			Set<String> intersection = new HashSet<String>(this.variables);
-			intersection.retainAll(other.variables);
+			Set<String> intersection = new HashSet<String>(this._variables);
+			intersection.retainAll(other._variables);
 			return intersection.size();
+		}
+		/**
+		 * A clique is equal to another clique if their sets of variables are equal
+		 */
+		@Override
+		public boolean equals(Object other) {
+			if(other instanceof Clique) {
+				Clique c = (Clique) other;
+				return c._variables.equals(this._variables);
+			}
+			return false;
+		}
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			for(String var : _variables) {
+				sb.append(var).append(',');
+			}
+			sb.deleteCharAt(sb.length()-1); // delete final comma
+			return sb.toString();
 		}
 	}
 	private static class Edge {
-		Clique one, two;
-		int weight; // number of variables one has in common with two
+		public static final String EDGE = " -- ";
+		Clique _one, _two;
+		int _weight; // number of variables one has in common with two
 		Edge(Clique one, Clique two, int weight) {
-			this.one = one;
-			this.two = two;
-			this.weight = weight;
+			this._one = one;
+			this._two = two;
+			this._weight = weight;
 		}
-		Clique getOne() {return one;}
-		Clique getTwo() {return two;}
-		int getWeight() {return weight;}
+		/**
+		 * An edge is equal to another edge if its two vertices match the other's two
+		 */
+		@Override
+		public boolean equals(Object other) {
+			if(other instanceof Edge) {
+				Edge e = (Edge) other;
+				return e._one.equals(this._one) && e._two.equals(this._two)
+					|| e._one.equals(this._two) && e._two.equals(this._one);
+			}
+			return false;
+		}
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(_one.toString()).append(EDGE).append(_two.toString());
+			return sb.toString();
+		}
 	}
 	/**
 	 * Creating a comparator of edges so can call Collections.sort(list of edges)
@@ -73,7 +103,27 @@ public class CreateNetworkCliqueTree {
 	private static class EdgeComparator implements Comparator<Edge> {
 		@Override
 		public int compare(Edge e1, Edge e2) {
-			return -1 * new Integer(e1.weight).compareTo(new Integer(e2.weight));
+			return -1 * new Integer(e1._weight).compareTo(new Integer(e2._weight));
+		}
+	}
+	private static class Tree {
+		private Set<Clique> _vertices;
+		private Set<Edge> _edges;
+		Tree() {
+			_vertices = new HashSet<Clique>();
+			_edges = new HashSet<Edge>();
+		}
+		/**
+		 * Adds the edge to the tree.
+		 * Checks for duplicates edges
+		 * @param e
+		 */
+		void addEdge(Edge e) {
+			if(!_edges.contains(e)) {
+				_vertices.add(e._one);
+				_vertices.add(e._two);
+				_edges.add(e);
+			}
 		}
 	}
 	/**
@@ -304,13 +354,39 @@ public class CreateNetworkCliqueTree {
 		}
 	}
 	/**
-	 * Creates the maximal spanning tree given our sorted edge list
+	 * Creates the maximal spanning tree given our sorted edge list.
+	 * Kruskal's algorithm, slightly modified to return a tree that isn't fully connected
+	 * if we run out of edges, instead of returning an error.
+	 * 
+	 * Assumes our list of edges is sorted in decreasing order by weight.
 	 */
 	private static void createMaximalSpanningTree() {
-		
+		_cliqueTree = new Tree();
+		_cliqueTree.addEdge(_clusterGraphEdges.get(0)); // add first edge
+		int i = 1;
+		// try to add n-1 edges without cycles
+		// (assuming we will get edges in order of decreasing weight)
+		while(i < _maximalCliques.size() - 1) {
+			if(i >= _clusterGraphEdges.size()) { // we've run out of edges to add
+				return; // stop, return, even though the tree might not be fully connected
+			}
+			else {
+				Edge e = _clusterGraphEdges.get(i);
+				// if at least one vertex in e is not already in T...
+				if(!_cliqueTree._vertices.contains(e._one)
+						|| !_cliqueTree._vertices.contains(e._two)) {
+					_cliqueTree.addEdge(e); // ... we add!
+				} // otherwise the edge would be a duplicate or create a cycle
+			}
+			i++;
+		}
 	}
 	/**
-	 * Prints our tree to file
+	 * Prints our tree to file.
+	 * The first line contains the number of cliques |V| in the tree.
+	 * Each of the following |V| lines contains a clique specification.
+	 * Each of the following lines contains one edge.
+	 * 'cluster1 -- cluster2'
 	 * @param filename the desired output filename
 	 * @throws IOException 
 	 */
@@ -322,7 +398,16 @@ public class CreateNetworkCliqueTree {
 		}
 		outfile.createNewFile();
 		PrintWriter out = new PrintWriter(outfile);
-		// TODO do fun stuff
+		// the first line contains the number of cliques V in the tree.
+		out.println(_cliqueTree._vertices.size());
+		// each of the following V lines contains a clique specification
+		for(Clique c : _cliqueTree._vertices) {
+			out.println(c);
+		}
+		// rest of the lines contain edges
+		for(Edge e : _cliqueTree._edges) {
+			out.println(e);
+		}
 		out.close();
 	}
 }
