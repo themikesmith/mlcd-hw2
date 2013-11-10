@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import sun.security.util.Length;
+
 import elanmike.mlcd.hw2.Factor.Pair;
 
 /**
@@ -346,14 +348,26 @@ public class Bump {
 		//TODO implement DFS in QUERY COPY
 		return null;
 	}
-	void copyTreeForQueries() {
+	void resetTreeForQueries() {
 		_queryTree = _tree.makeCopy();
 	}
 	/**
 	 * find a vertex with a clique containing the given set of variables
 	 * in the QUERY TREE
+	 * @param pairs
 	 */
 	Vertex findVertexQuery(Pair<Integer, Integer>... pairs) {
+		Tree t = _queryTree;
+		// TODO implement
+		return null;
+	}
+	/**
+	 * find a vertex with a clique containing the given set of variables
+	 * in the QUERY TREE
+	 * @param varInt
+	 * @param varValue
+	 */
+	Vertex findVertexQuery(int varInt, int varValue) {
 		Tree t = _queryTree;
 		// TODO implement
 		return null;
@@ -364,9 +378,9 @@ public class Bump {
 	 * 
 	 * @param pairs list of Pair<Integer, Integer>... pairs pairs of variable=value
 	 */
-	void incorporateQueryEvidence(Pair<Integer, Integer>... pairs) {
+	void incorporateQueryEvidence(int varInt, int varValue) {
 		// Find a clique with the variable, C
-		Vertex newRoot = findVertexQuery(pairs);
+		Vertex newRoot = findVertexQuery(varInt, varValue);
 		// TODO verify this is not null
 		// multiply in a new indicator factor
 		// TODO multiply in new indicator
@@ -378,19 +392,37 @@ public class Bump {
 	 */
 	String query(String[] lhs, String[] contexts) {
 		// check if evidence is incremental or retractive
+		boolean retractive = false;
+		// then take action
+		// check number of variables
+		if(contexts.length < _queryContexts.size()) {
+			// retractive -- less evidence than before. reset and treat as incremental
+			retractive = true;
+		}
 		for(String s : contexts) {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
 			// TODO convert to integers
 			int varInt = -1, valueInt = -1;
-			if(_queryContexts.get(varInt) == valueInt) {
+			if(_queryContexts.containsKey(varInt) && _queryContexts.get(varInt) != valueInt) {
+				// query context variable has other value. reset.
+				retractive = true;
+			}
+		}
+		if(retractive) resetTreeForQueries();
+		for(String s : contexts) {
+			String[] varValue = s.split("=");
+			String var = varValue[0], value = varValue[1];
+			// TODO convert to integers
+			int varInt = -1, valueInt = -1;
+			if(!_queryContexts.containsKey(varInt)) {
+				// additional evidence - we've never seen it before
+				incorporateQueryEvidence(varInt, varInt);
+			}
+			else if(_queryContexts.get(varInt) == valueInt) {
 				// already have this context variable = value pair, do nothing
 			}
-			else if(!_queryContexts.containsKey(varInt)) {
-				// additional evidence - we've never seen it before
-				
-			}
-			else { // query context 
+			else { // query context variable has other value. reset.
 				
 			}
 		}
