@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -30,6 +31,9 @@ public class CreateNetworkCliqueTree {
 		private Set<String> _variables;
 		Clique() {
 			_variables = new HashSet<String>();
+		}
+		Clique(String... variables) {
+			this._variables = new HashSet<String>(Arrays.asList(variables));
 		}
 		void addVariable(String var) {
 			_variables.add(var);
@@ -148,6 +152,10 @@ public class CreateNetworkCliqueTree {
 		System.out.println("read network from:"+args[0]);
 		// given sufficient statistics, assemble list of maximal cliques
 		assembleMaximalCliques();
+		
+		// kidding! debug with 10.8 example
+		debugMaximalCliques();
+		
 		// now that we have our list of maximal cliques, assemble cluster graph
 		assembleClusterGraphEdges();
 		// sort the edges in descending order by weight
@@ -409,5 +417,17 @@ public class CreateNetworkCliqueTree {
 			out.println(e);
 		}
 		out.close();
+	}
+	/**
+	 * Returns the cliques from the 10.8 example, for debugging.
+	 */
+	private static void debugMaximalCliques() {
+		_maximalCliques = new ArrayList<Clique>();
+		_maximalCliques.add(new Clique("C", "D"));
+		_maximalCliques.add(new Clique("D", "I", "G"));
+		_maximalCliques.add(new Clique("G", "H"));
+		_maximalCliques.add(new Clique("G", "S", "L"));
+		_maximalCliques.add(new Clique("G", "I", "S"));
+		_maximalCliques.add(new Clique("S", "J", "L"));
 	}
 }
