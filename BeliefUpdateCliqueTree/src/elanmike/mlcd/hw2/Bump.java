@@ -272,6 +272,13 @@ public class Bump {
 				_edges.add(e);
 			}
 		}
+		/**
+		 * Assigns an initial ordering to each vertex,
+		 *  and initialize beliefs at each vertex while we're at it
+		 */
+		void assignOrderingAndInitBeliefs() {
+			
+		}
 	}
 	/**
 	 * Reads in the tree from the clique file.
