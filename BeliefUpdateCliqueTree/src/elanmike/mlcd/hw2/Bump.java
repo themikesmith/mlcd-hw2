@@ -487,10 +487,13 @@ public class Bump {
 			if((line = br.readLine()) != null){
 				numVariables = Integer.valueOf(line);
 			}else{
+				br.close();
 				throw new IOException();
 			}
-			if(numVariables<0)
+			if(numVariables<0) {
+				br.close();
 				throw new NumberFormatException();
+			}
 			for(int i = 0;i<numVariables;i++){
 				if((line = br.readLine()) != null){
 					String[] tokenized = line.split(" ");
@@ -499,6 +502,7 @@ public class Bump {
 					
 					Factor.addVariable(variableName, new ArrayList<String>(Arrays.asList(tokenized)));
 				}else{
+					br.close();
 					throw new IOException("inconsistant network file.");
 				}
 			}
