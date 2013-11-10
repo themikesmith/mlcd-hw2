@@ -141,21 +141,24 @@ public class CreateNetworkCliqueTree {
 			usage();
 			return;
 		}
-		// read network file
-		try {
-			read(args[0]);
-		} catch (IOException e) {
-			System.err.println("error reading network file:"+args[0]);
-			e.printStackTrace();
-			return;
+		boolean debug = true;
+		if(debug) {
+			// kidding! debug with 10.8 example
+			debugMaximalCliques();
 		}
-		System.out.println("read network from:"+args[0]);
-		// given sufficient statistics, assemble list of maximal cliques
-		assembleMaximalCliques();
-		
-		// kidding! debug with 10.8 example
-		debugMaximalCliques();
-		
+		else {
+			// read network file
+			try {
+				read(args[0]);
+			} catch (IOException e) {
+				System.err.println("error reading network file:"+args[0]);
+				e.printStackTrace();
+				return;
+			}
+			System.out.println("read network from:"+args[0]);
+			// given sufficient statistics, assemble list of maximal cliques
+			assembleMaximalCliques();
+		}
 		// now that we have our list of maximal cliques, assemble cluster graph
 		assembleClusterGraphEdges();
 		// sort the edges in descending order by weight
