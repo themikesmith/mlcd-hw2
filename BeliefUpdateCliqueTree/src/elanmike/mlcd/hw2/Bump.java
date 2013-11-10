@@ -1,16 +1,16 @@
 package elanmike.mlcd.hw2;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeSet;
+
+import elanmike.mlcd.hw2.Factor.Pair;
 
 /**
  * Belief Update Message Passing class
@@ -19,6 +19,7 @@ import java.util.TreeSet;
  *
  */
 public class Bump {
+	private static int nextVertexID = 0;
 	/**
 	 * Small clique class that holds a list of variables
 	 * We compare cliques by their number of shared variables
@@ -77,12 +78,12 @@ public class Bump {
 			_neighborEdges = new TreeSet<Edge>();
 			_incomingEdges = new TreeSet<Edge>();
 			_outgoingEdges = new TreeSet<Edge>();
-			_orderID = null;
+			_orderID = nextVertexID++;
 			_beta = null;
 			_data = null;
 			_recvdMsgStatus = new HashMap<Edge, Boolean>();
 			_isInformed = false;
-			_onUpwardPass = true;
+			_onUpwardPass = false;
 		}
 		int getOrderID() {return _orderID;}
 		void setOrderID(int o) {this._orderID = o;}
@@ -286,20 +287,24 @@ public class Bump {
 	 */
 	private boolean _bumpOnUpwardPass;
 	private Tree _tree, _queryTree;
+	private ArrayList<Vertex> _orderedVertices;
 	/**
 	 * A map from variable name to variable value, transformed into integers
 	 */
 	Map<Integer, Integer> _queryContexts;
 	Bump() {
 		_tree = new Tree();
-		_bumpOnUpwardPass = true;
+		_bumpOnUpwardPass = false;
 		_queryContexts = new HashMap<Integer, Integer>();
+		_orderedVertices = new ArrayList<Vertex>();
 	}
 	/**
-	 * Assigns an initial ordering to each vertex of the tree,
-	 *  and initialize beliefs at each vertex while we're at it
+	 * Run DFS to init ordering.
+	 * Initialize beliefs at each vertex of the tree
 	 */
 	void assignOrderingAndInitBeliefs() {
+		_orderedVertices.clear();
+		// giving a number is equivalent to adding to ordering, giving index
 		// choose root
 		// while all vertices don't have a number
 		// 		depth first search from root, assigning numbers and init'ing beliefs
@@ -308,40 +313,64 @@ public class Bump {
 	}
 	/**
 	 * Calibrate the tree with two passes of belief-update message passing.
+	 * Begin with our ordering.
 	 */
 	void calibrateTree() {
-		Vertex[] vertices = _tree._vertices.toArray(new Vertex[_tree._vertices.size()]);
-		_bumpOnUpwardPass = true;
-		for(int i = 0; i < vertices.length; i++) {
-			Vertex v = vertices[i];
-			for(Edge e : v.getOutgoingNeighborEdges()) {
-				v.sendMessage(e);
-			}
-		}
 		_bumpOnUpwardPass = false;
-		for(int i = vertices.length -1; i >=0; i--) {
-			Vertex v = vertices[i];
+		for(int i = 0; i < _orderedVertices.size(); i++) {
+			Vertex v = _orderedVertices.get(i);
 			for(Edge e : v.getOutgoingNeighborEdges()) {
 				v.sendMessage(e);
 			}
 		}
-	}
-	void downwardPassBeliefUpdate() {
-		
-	}
-	void copyTreeForQueries() {
-		_queryTree = _tree;
+		_bumpOnUpwardPass = true;
+		for(int i = _orderedVertices.size() - 1; i >= 0; i--) {
+			Vertex v = _orderedVertices.get(i);
+			for(Edge e : v.getOutgoingNeighborEdges()) {
+				v.sendMessage(e);
+			}
+		}
 	}
 	/**
-	 * Given that our tree is calibrated, incorporate the evidence.
+	 * Conducts one downward pass of belief update message passing
+	 * with a designated root.
+	 * Conducts depth-first search of the query tree, sends messages in that order.
 	 * 
-	 * @param variable
-	 * @param varValue
+	 * @param root
+	 * @return a stack of the reverse order of this pass, for the upward pass.
 	 */
-	void incorporateEvidence(int variable, int varValue) {
+	Stack<Integer> downwardPassBeliefUpdateQuery(Vertex root) {
+		_bumpOnUpwardPass = false;
+		Tree t = _queryTree;
+		//TODO implement DFS in QUERY COPY
+		return null;
+	}
+	void copyTreeForQueries() {
+		_queryTree = _tree.makeCopy();
+	}
+	/**
+	 * find a vertex with a clique containing the given set of variables
+	 * in the QUERY TREE
+	 */
+	Vertex findVertexQuery(Pair<Integer, Integer>... pairs) {
+		Tree t = _queryTree;
+		// TODO implement
+		return null;
+	}
+	/**
+	 * Given that our tree is calibrated, incorporate the evidence
+	 * into our QUERY COPY
+	 * 
+	 * @param pairs list of Pair<Integer, Integer>... pairs pairs of variable=value
+	 */
+	void incorporateQueryEvidence(Pair<Integer, Integer>... pairs) {
 		// Find a clique with the variable, C
+		Vertex newRoot = findVertexQuery(pairs);
+		// TODO verify this is not null
 		// multiply in a new indicator factor
+		// TODO multiply in new indicator
 		// conduct one pass of B-U with C as the root
+		downwardPassBeliefUpdateQuery(newRoot);
 	}
 	/**
 	 * 
