@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 
@@ -42,18 +43,6 @@ public class Bump {
 			super(cliqueToCopy);
 		}
 		
-//		void addVariable(int var) {
-//			_variables.add(var);
-//		}
-//		/**
-//		 * @param other the other clique
-//		 * @return the number of variables this clique has in common with the other
-//		 */
-//		int getCardinalityOfIntersectionWith(Clique other) {
-//			Set<Integer> intersection = new HashSet<Integer>(this._variables);
-//			intersection.retainAll(other._variables);
-//			return intersection.size();
-//		}
 		/**
 		 * A clique is equal to another clique if their sets of variables are equal
 		 */
@@ -206,12 +195,10 @@ public class Bump {
 	private class Edge extends Factor{
 		public static final String EDGE = " -- ";
 		Vertex _one, _two;
-		//int _weight;
-		Edge(Vertex one, Vertex two) {//, int weight) {
+		Edge(Vertex one, Vertex two) {
 			super(one.intersection(two._variables));
 			this._one = one;
 			this._two = two;
-			//this._weight = weight;
 		}
 		
 		Edge(Vertex one, Vertex two,Edge edgeToCopy) {
@@ -219,6 +206,7 @@ public class Bump {
 			this._one = one;
 			this._two = two;
 		}
+
 		/**
 		 * An edge is equal to another edge if its two vertices match the other's two
 		 */
@@ -266,6 +254,20 @@ public class Bump {
 			_vertices = new HashMap<String,Vertex>();
 			_edges = new HashMap<String,Edge>();
 		}
+		Tree(Tree other) {
+			_vertices = new HashMap<String,Vertex>();
+			Iterator<Entry<String, Vertex>> itv = other._vertices.entrySet().iterator();
+			while(itv.hasNext()) {
+				Entry<String,Vertex> entry = itv.next();
+				_vertices.put(entry.getKey(), new Vertex(entry.getValue()));
+			}
+			_edges = new HashMap<String,Edge>();
+			Iterator<Entry<String, Edge>> ite = other._edges.entrySet().iterator();
+			while(ite.hasNext()) {
+				Entry<String, Edge> entry = ite.next();
+				this.addEdge(new Edge(entry.getValue()));
+			}
+		}
 		void addVertex(Vertex v) {
 			_vertices.put(v.makeKey(),v);
 			//System.out.println("adding vertice with key: "+ v._variables.toString());
@@ -285,12 +287,6 @@ public class Bump {
 				e._two.addNeighborEdge(e);
 			}
 		}
-		Tree makeCopy() {
-			Tree t = new Tree();
-			//TODO make deep copy
-			return t;
-		}
-		
 		public String toString(){
 			StringBuilder output = new StringBuilder("=== Vertices ===\n");
 			Set<String> keys = _vertices.keySet();
@@ -467,7 +463,7 @@ public class Bump {
 	 * and clears our stored contexts.
 	 */
 	void resetTreeForQueries() {
-		_queryTree = _tree.makeCopy();
+		_queryTree = new Tree(_tree);
 	}
 	/**
 	 * find a vertex with a clique containing the given set of variables
