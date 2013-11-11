@@ -358,6 +358,10 @@ public class Factor {
 		output += ")\n";
 		
 		for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
+			output += _stride.get(var_idx) + "\t";
+		output += "Stride\n";
+		
+		for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
 			output += _variableNames.get(_variables.get(var_idx)) + "\t";
 		output += "Value\n";
 		
@@ -467,6 +471,7 @@ public class Factor {
 			return myVars.containsAll(theirVars);
 		}
 	
+	//p359 example problem p107
 	public Factor product(Factor f) throws ArrayIndexOutOfBoundsException {
 		ArrayList<Integer> unionScope = this.union(f._variables);
 		Factor psi = new Factor(unionScope);
@@ -477,6 +482,8 @@ public class Factor {
 		
 		for(int i = 0; i < psi.data.size(); i++){
 			psi.data.set(i, this.data.get(j)+f.data.get(k)); //adding log probabilies
+			//System.out.printf("Multiplying value at (%d) by (%d) to get value at (%d)\n",j,k,i);
+			
 			for(int l =0; l < unionScope.size(); l++){
 				
 				assigment[l]++;
