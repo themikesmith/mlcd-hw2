@@ -1,7 +1,6 @@
 package elanmike.mlcd.hw2;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import elanmike.mlcd.hw2.Factor.FactorException;
 

@@ -17,7 +17,6 @@ import java.util.Queue;
 import java.util.Set;
 
 import elanmike.mlcd.hw2.Factor.FactorException;
-import elanmike.mlcd.hw2.Factor.FactorIndexException;
 
 /**
  * Belief Update Message Passing class
