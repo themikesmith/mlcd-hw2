@@ -197,9 +197,8 @@ public class Bump {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append(_one.toString());
-//			if(DEBUG) sb.append(" --").append(_weight).append("-- ");
-//			else
-			sb.append(EDGE).append(Factor.variableIndicesToNames(_variables)).append(EDGE);
+			if(DEBUG) sb.append(" --").append(Factor.variableIndicesToNames(_variables)).append("-- ");
+			else sb.append(EDGE);
 			sb.append(_two.toString());
 			return sb.toString();
 		}
