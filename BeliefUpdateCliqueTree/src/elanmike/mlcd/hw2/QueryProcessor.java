@@ -19,7 +19,7 @@ public class QueryProcessor {
 	public QueryProcessor(Bump b) {
 		this._bump = b;
 		_queryContexts = new HashMap<Integer, Integer>();
-		_useSumProduct = false;
+		_useSumProduct = true;
 	}
 	public void resetTreeForQueries() {
 		_queryContexts = new HashMap<Integer, Integer>();
