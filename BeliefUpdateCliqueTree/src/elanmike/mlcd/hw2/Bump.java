@@ -127,7 +127,7 @@ public class Bump {
 			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ, sigmaItoJ);
 			// update edge potential
 			edgeToJ.setFactorData(sigmaItoJ);
-			if(DEBUG) System.out.println("mu I,J:\n"+(Factor)edgeToJ);
+			if(DEBUG) System.out.println("mu I,J:\n"+((Factor)edgeToJ));
 		}
 		/**
 		 * When we receive a message...
@@ -430,7 +430,7 @@ public class Bump {
 				}
 			}
 			Vertex curr = toProcess.remove();
-			if(DEBUG) System.out.printf("curr vertex:%s\n",curr);
+			if(DEBUG) System.out.printf("\ncurr vertex:%s\n",curr);
 			// mark
 			curr.setOrderID();
 			ordering.add(curr); // and add to our ordered list
@@ -461,6 +461,7 @@ public class Bump {
 		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
 		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
 			Vertex v = orderedVertices.get(i);
+			if(DEBUG) System.out.printf("\ncurr vertex:%s\n",v);
 			// for each edge that is outgoing given our ordering
 			for(Edge e : v.getUpwardOutgoingNeighborEdges()) {
 				// send our message along that edge
