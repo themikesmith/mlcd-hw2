@@ -103,7 +103,7 @@ public class QueryProcessor {
 			}
 		}
 		// now process lhs
-		vars = new ArrayList<Integer>(); 
+		vars = new ArrayList<Integer>();
 		values = new ArrayList<Integer>();
 		for(String s : lhs) {
 			String[] varValue = s.split("=");

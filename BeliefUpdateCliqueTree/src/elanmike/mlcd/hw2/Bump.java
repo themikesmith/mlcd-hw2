@@ -576,19 +576,22 @@ public class Bump {
 			System.err.println("uh oh! query vars size must equal query values size");
 			return null;
 		}
-		// at our target, we multiply indicator functions
+		// marginalize out variables not in query
+		Factor f = target.marginalize(target.difference(vars));
+		// check our LHS for evidence...
+		ArrayList<Integer> eVars = new ArrayList<Integer>(), 
+				eValues = new ArrayList<Integer>();
 		for(int i = 0; i < vars.size(); i++) {
 			int var = vars.get(i), value = values.get(i);
 			if(value != QueryProcessor.NO_EVIDENCE) {
-				// if we have evidence specified in this pair, we apply an indicator function
-				target.product(Factor.indicatorFunction(var, value));
+				eVars.add(var);
+				eValues.add(value);
 			}
 		}
-		// and then marginalize out variables not in query
-		Factor f = target.marginalize(target.difference(vars));
-		// TODO normalize here maybe?
-		f.normalize();
-		return f;
+		// and then reduce using the evidence given
+		Factor f = target.reduce(eVars, eValues);
+		// return normalized factor
+		return f.normalize();
 	}
 	/**
 	 * Reads in the tree from the clique file.
