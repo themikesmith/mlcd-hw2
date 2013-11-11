@@ -45,8 +45,9 @@ public class BayesQuery {
 			return;
 		}
 		b.runBump();
+		QueryProcessor qp = new QueryProcessor(b);
 		try {
-			b.processQueries(args[3], useSumProduct);
+			qp.processQueries(args[3]);
 		} catch (IOException e) {
 			System.err.println("error processing queries from:"+args[4]);
 			e.printStackTrace();

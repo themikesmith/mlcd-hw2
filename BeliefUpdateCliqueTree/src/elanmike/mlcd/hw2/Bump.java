@@ -24,7 +24,6 @@ import elanmike.mlcd.hw2.Factor.FactorException;
  *
  */
 public class Bump {
-	public static final int NO_EVIDENCE = -1;
 	public static final int UNMARKED = 0;
 	public static int nextOrderID = UNMARKED;
 	/**
@@ -309,17 +308,15 @@ public class Bump {
 	private boolean _bumpOnUpwardPass;
 	private Tree _tree, _queryTree;
 	private boolean _useSumProduct;
-	
-	/**
-	 * A map from variable name to variable value, transformed into integers
-	 */
-	Map<Integer, Integer> _queryContexts;
-	Bump() {
+	public Bump() {
 		_tree = new Tree();
 		_bumpOnUpwardPass = false;
-		_queryContexts = new HashMap<Integer, Integer>();
 		_useSumProduct = true;
 	}
+	/**
+	 * @return use sum product
+	 */
+	public boolean useSumProduct() {return _useSumProduct;}
 	/**
 	 * Sets the value of use sum product - this determines our semiring.
 	 * Note that after changing this, one needs to call runBump again
@@ -336,6 +333,7 @@ public class Bump {
 	 * @return true if successful, false otherwise
 	 */
 	public boolean runBump() {
+		if(DEBUG) System.out.println("running bump!");
 		// note we initialize the clique tree by construction!
 		try {
 			upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
@@ -444,7 +442,6 @@ public class Bump {
 	 */
 	void resetTreeForQueries() {
 		_queryTree = _tree.makeCopy();
-		_queryContexts = new HashMap<Integer, Integer>();
 	}
 	/**
 	 * find a vertex with a clique containing the given set of variables
@@ -473,7 +470,7 @@ public class Bump {
 	 * @param pairs list of Pair<Integer, Integer>... pairs pairs of variable=value
 	 * @throws FactorException 
 	 */
-	void incorporateQueryEvidence(int varInt, int varValue) throws FactorException {
+	public void incorporateQueryEvidence(int varInt, int varValue) throws FactorException {
 		// Find a clique with the variable, C, in the query tree
 		Vertex newRoot = findVertexInTree(_queryTree, varInt);
 		if(newRoot == null) {
@@ -486,137 +483,6 @@ public class Bump {
 		// conduct one pass of B-U with C as the root
 		downwardPassBeliefUpdate(_queryTree, newRoot);
 	}
-	String query(String[] lhs, String[] contexts, boolean useSumProduct) {
-		if(useSumProduct != _useSumProduct) {
-			System.err.println("oops! not ready.");
-			// set appropriate method, and run bump to calibrate
-			setUseSumProduct(useSumProduct);
-			runBump();
-		}
-		if(useSumProduct) return querySumProduct(lhs, contexts);
-		else return queryMaxProduct(lhs, contexts);
-	}
-	/**
-	 * queries the structure for p(lhs|contexts)
-	 */
-	String querySumProduct(String[] lhs, String[] contexts) {
-		// check if evidence is incremental or retractive
-		boolean retractive = false;
-		// then take action
-		// check number of variables
-		if(contexts.length < _queryContexts.size()) {
-			// retractive -- less evidence than before. reset and treat as incremental
-			retractive = true;
-		}
-		if(!retractive) {
-			for(String s : contexts) {
-				String[] varValue = s.split("=");
-				String var = varValue[0], value = varValue[1];
-				int varInt = Factor.getVariableIndex(var),
-					valueInt = Factor.getVariableValueIndex(varInt, value);
-				if(_queryContexts.containsKey(varInt) && _queryContexts.get(varInt) != valueInt) {
-					// query context variable has other value. reset.
-					retractive = true;
-					break;
-				}
-			}
-		}
-		if(retractive) resetTreeForQueries();
-		for(String s : contexts) {
-			String[] varValue = s.split("=");
-			String var = varValue[0], value = varValue[1];
-			int varInt = Factor.getVariableIndex(var),
-				valueInt = Factor.getVariableValueIndex(varInt, value);
-			if(!_queryContexts.containsKey(varInt)) {
-				// additional evidence - we've never seen it before
-				try {
-					incorporateQueryEvidence(varInt, varInt);
-				} catch (FactorException e) {
-					e.printStackTrace();
-					return e.getMessage();
-				}
-			}
-			else if(_queryContexts.get(varInt) == valueInt) {
-				// already have this context variable = value pair, do nothing
-			}
-			else { // query context variable has other value. reset.
-				// we've already reset so this should never occur
-				System.err.println("this should never occur. investigate handling of retractive evidence.");
-			}
-		}
-		// now process lhs
-		for(String s : lhs) {
-			String[] varValue = s.split("=");
-			String var = varValue[0], value = varValue[1];
-			int varInt = Factor.getVariableIndex(var),
-				valueInt = Factor.getVariableValueIndex(varInt, value);
-			if(valueInt != NO_EVIDENCE) {
-				// TODO conduct query sum product
-			}
-		}
-		return null;
-	}
-	/**
-	 * queries the structure for p(lhs|contexts)
-	 */
-	String queryMaxProduct(String[] lhs, String[] contexts) {
-		// TODO implement query max product = maximum likelihood
-		// check if evidence is incremental or retractive
-		boolean retractive = false;
-		// then take action
-		// check number of variables
-		if(contexts.length < _queryContexts.size()) {
-			// retractive -- less evidence than before. reset and treat as incremental
-			retractive = true;
-		}
-		if(!retractive) {
-			for(String s : contexts) {
-				String[] varValue = s.split("=");
-				String var = varValue[0], value = varValue[1];
-				int varInt = Factor.getVariableIndex(var),
-					valueInt = Factor.getVariableValueIndex(varInt, value);
-				if(_queryContexts.containsKey(varInt) && _queryContexts.get(varInt) != valueInt) {
-					// query context variable has other value. reset.
-					retractive = true;
-					break;
-				}
-			}
-		}
-		if(retractive) resetTreeForQueries();
-		for(String s : contexts) {
-			String[] varValue = s.split("=");
-			String var = varValue[0], value = varValue[1];
-			int varInt = Factor.getVariableIndex(var),
-					valueInt = Factor.getVariableValueIndex(varInt, value);
-			if(!_queryContexts.containsKey(varInt)) {
-				// additional evidence - we've never seen it before
-				try {
-					incorporateQueryEvidence(varInt, varInt);
-				} catch (FactorException e) {
-					e.printStackTrace();
-					return e.getMessage();
-				}
-			}
-			else if(_queryContexts.get(varInt) == valueInt) {
-				// already have this context variable = value pair, do nothing
-			}
-			else { // query context variable has other value. reset.
-				// we've already reset so this should never occur
-			}
-		}
-		// now process lhs
-		for(String s : lhs) {
-			String[] varValue = s.split("=");
-			String var = varValue[0], value = varValue[1];
-			int varInt = Factor.getVariableIndex(var),
-				valueInt = Factor.getVariableValueIndex(varInt, value);
-			if(valueInt != NO_EVIDENCE) {
-				// TODO conduct query max product
-			}
-		}
-		return null;
-	}
-
 	/**
 	 * Reads in the tree from the clique file.
 	 * Builds the tree
@@ -810,21 +676,8 @@ public class Bump {
 			}
 		}
 	}
-	/**
-	 * Process queries in a query file according to a semiring
-	 * @param queryFile
-	 * @param useSumProduct
-	 * @throws IOException
-	 */
-	public void processQueries(String queryFile, boolean useSumProduct) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(queryFile));
-		String line;
-		while ((line = br.readLine()) != null) {
-			String[] stuff = line.split(" ");
-			String[] lhs = stuff[0].split(",");
-			String[] rhs = stuff[1].split(",");
-			System.out.println(query(lhs, rhs, useSumProduct));
-		}
-		br.close();
+	public static void main(String[] args) {
+		Bump b = new Bump();
+		
 	}
 }
