@@ -127,7 +127,7 @@ public class Bump {
 			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ, sigmaItoJ);
 			// update edge potential
 			edgeToJ.setFactorData(sigmaItoJ);
-			if(DEBUG) System.out.println("mu I,J:\n"+((Factor)edgeToJ));
+			if(DEBUG) System.out.println("mu I,J:\n"+edgeToJ.toStringFactor());
 		}
 		/**
 		 * When we receive a message...
@@ -136,10 +136,13 @@ public class Bump {
 		 * @param sigmaItoJ
 		 */
 		private void onReceiveMessage(Edge edgeItoJ, Factor sigmaItoJ) throws FactorException {
-			if(DEBUG) System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
+			if(DEBUG) {
+				System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
+				System.out.println("mu I,J:"+edgeItoJ.toStringFactor());
+			}
 			// belief j = belief j * (sigma ij / mu ij)
 			this.setFactorData(this.product(sigmaItoJ.divide(edgeItoJ)));
-			if(DEBUG) System.out.println("belief J:\n"+(Factor)this);
+			if(DEBUG) System.out.println("belief J:\n"+super.toString());
 			// check if I was informed when sending
 			Vertex i = edgeItoJ.getOtherVertex(this);
 			_recvdMsgStatus.put(edgeItoJ, i._isInformed);
@@ -234,6 +237,9 @@ public class Bump {
 			sb.append(EDGE);
 			sb.append(Factor.variableIndicesToNames(_two._variables));
 			return sb.toString();
+		}
+		public String toStringFactor() {
+			return super.toString();
 		}
 		public String getLongInfo() {
 			StringBuilder sb = new StringBuilder("edge:\n");
