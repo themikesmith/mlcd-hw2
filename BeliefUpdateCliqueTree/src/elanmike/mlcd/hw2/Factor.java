@@ -721,12 +721,8 @@ public class Factor {
 		fac1.putProbByValues(.0,1,1);
 		fac1.putProbByValues(.3,2,0);
 		fac1.putProbByValues(.9,2,1);
+	
 		System.out.println(fac1);
-		for(int i = 0; i < fac1.data.size(); i++) {
-			System.out.print(Math.exp(fac1.data.get(i)));
-			System.out.print(", ");
-		}
-		System.out.println();
 		
 		String[] fac2_vars = {"B","C"}; 
 		Factor fac2 = new Factor(fac2_vars);
@@ -734,9 +730,9 @@ public class Factor {
 		fac2.putProbByValues(.7, 0,1);
 		fac2.putProbByValues(.1, 1,0);
 		fac2.putProbByValues(.2, 1,1);
+
 		System.out.println(fac2);
 		System.out.println(fac2.data.toString());
-		
 		
 		System.out.println(fac1.product(fac2));
 		
