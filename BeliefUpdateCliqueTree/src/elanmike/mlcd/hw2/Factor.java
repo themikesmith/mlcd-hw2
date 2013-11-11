@@ -348,10 +348,9 @@ public class Factor {
 			ArrayList<String> valueNames = valueIndiciesToNames(_variables,values);
 			System.out.println(valueNames);
 			*/
-			
 			for(int var_idx=0; var_idx < _variables.size(); var_idx ++){
 				
-				output += String.format("%01d       ", values.get(var_idx));
+				output += String.format("%01d\t", values.get(var_idx));
 				//output += valueNames.get(var_idx) + "\t";
 					//	String.format("%s\t",
 					//	.get(var_idx),);
@@ -607,6 +606,14 @@ public class Factor {
 		return result;
 	}
 	
+	private void printData() {
+		for(int i = 0; i < data.size(); i++) {
+			System.out.print(Math.exp(data.get(i)));
+			System.out.print(", ");
+		}
+		System.out.println();
+	}
+	
 	public static void main(String args[]) throws Exception{
 		
 		/*
@@ -709,29 +716,27 @@ public class Factor {
 		String[] fac1_vars = {"A","B"};
 		Factor fac1 = new Factor(fac1_vars);
 		fac1.putProbByValues(.5,0,0);
-		/*values = {0,0};
-		fac1.putProbByValues(values, .5);
-		fac1.putProbByValues(values, .5);
-		fac1.putProbByValues(values, .5);
-		fac1.putProbByValues(values, .5);
-		fac1.putProbByValues(values, .5);
-	
-		//fac1.putProbByIndex(0, .5);
-		fac1.putProbByIndex(1, .1);
-		fac1.putProbByIndex(2, .3);
-		fac1.putProbByIndex(3, .8);
-		fac1.putProbByIndex(4, 0);
-		fac1.putProbByIndex(5, .9);
+		fac1.putProbByValues(.8,0,1);
+		fac1.putProbByValues(.1,1,0);
+		fac1.putProbByValues(.0,1,1);
+		fac1.putProbByValues(.3,2,0);
+		fac1.putProbByValues(.9,2,1);
 		System.out.println(fac1);
+		for(int i = 0; i < fac1.data.size(); i++) {
+			System.out.print(Math.exp(fac1.data.get(i)));
+			System.out.print(", ");
+		}
+		System.out.println();
 		
 		String[] fac2_vars = {"B","C"}; 
 		Factor fac2 = new Factor(fac2_vars);
-		fac2.putProbByIndex(0, .5);
-		fac2.putProbByIndex(1, .1);
-		fac2.putProbByIndex(2, .7);
-		fac2.putProbByIndex(3, .2);
+		fac2.putProbByValues(.5, 0,0);
+		fac2.putProbByValues(.7, 0,1);
+		fac2.putProbByValues(.1, 1,0);
+		fac2.putProbByValues(.2, 1,1);
 		System.out.println(fac2);
-		*/
+		System.out.println(fac2.data.toString());
+		
 		
 		System.out.println(fac1.product(fac2));
 		
