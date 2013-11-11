@@ -588,11 +588,10 @@ public class Bump {
 				eValues.add(value);
 			}
 		}
-
-		// TODO normalize here maybe?
-		f.normalize();
-
-		return f;
+		// and then reduce using the evidence given
+		f = target.reduce(eVars, eValues);
+		// return the factor, normalized
+		return f.normalize();
 	}
 	/**
 	 * Reads in the tree from the clique file.
