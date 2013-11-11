@@ -213,6 +213,12 @@ public class Bump {
 			this._two = two;
 			//this._weight = weight;
 		}
+		
+		Edge(Vertex one, Vertex two,Edge edgeToCopy) {
+			super(edgeToCopy);
+			this._one = one;
+			this._two = two;
+		}
 		/**
 		 * An edge is equal to another edge if its two vertices match the other's two
 		 */
