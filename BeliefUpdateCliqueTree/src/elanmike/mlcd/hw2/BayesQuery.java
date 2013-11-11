@@ -31,9 +31,16 @@ public class BayesQuery {
 		b = new Bump();
 		b.setUseSumProduct(useSumProduct);
 		try {
-			b.readNetworkFile(args[0]);
-			b.readCliqueTreeFile(args[2]);
-			b.readCPDFile(args[1]);
+			b.init(args[0],args[2],args[1]);
+			b.runBump();
+			QueryProcessor qp = new QueryProcessor(b);
+			try {
+				qp.processQueries(args[3]);
+			} catch (IOException e) {
+				System.err.println("error processing queries from:"+args[4]);
+				e.printStackTrace();
+			}
+			
 		} catch (NumberFormatException e1) {
 			e1.printStackTrace();
 			return;
@@ -44,14 +51,7 @@ public class BayesQuery {
 			e.printStackTrace();
 			return;
 		}
-		b.runBump();
-		QueryProcessor qp = new QueryProcessor(b);
-		try {
-			qp.processQueries(args[3]);
-		} catch (IOException e) {
-			System.err.println("error processing queries from:"+args[4]);
-			e.printStackTrace();
-		}
+		
 		// done!
 	}
 	
