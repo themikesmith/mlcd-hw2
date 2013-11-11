@@ -190,10 +190,17 @@ public class Factor {
 		
 		this._stride = new ArrayList<Integer>(_variables.size());
 		int strideTot = 1;
-		for(int index:_variables){
+		/*
+		 for(int index:_variables){
 			_stride.add(strideTot);
 			strideTot*=_variableCard.get(index);
 		}
+		*/
+		for(int i = _variables.size()-1 ; i >=0 ; i--){
+			_stride.add(0, strideTot);
+			strideTot*=_variableCard.get(_variables.get(i));
+		}
+		
 		
 		this.data = new ArrayList<Double>(strideTot);
 		for(int i = 0; i<strideTot; i++) data.add(Math.log(1.0));
@@ -204,9 +211,15 @@ public class Factor {
 		
 		this._stride = new ArrayList<Integer>(_variables.size());
 		int strideTot = 1;
+		/*
 		for(int index:_variables){
 			_stride.add(strideTot);
 			strideTot*=_variableCard.get(index);
+		}
+		*/
+		for(int i = _variables.size()-1 ; i >=0 ; i--){
+			_stride.add(0, strideTot);
+			strideTot*=_variableCard.get(_variables.get(i));
 		}
 		
 		this.data = new ArrayList<Double>(strideTot);
@@ -226,9 +239,14 @@ public class Factor {
 		
 		this._stride = new ArrayList<Integer>(_variables.size());
 		int strideTot = 1;
+		/*
 		for(int index:_variables){
 			_stride.add(strideTot);
 			strideTot*=_variableCard.get(index);
+		}*/
+		for(int i = _variables.size()-1 ; i >=0 ; i--){
+			_stride.add(strideTot);
+			strideTot*=_variableCard.get(_variables.get(i));
 		}
 		
 		this.data = new ArrayList<Double>(strideTot);
@@ -295,6 +313,14 @@ public class Factor {
 		
 		ArrayList<Integer> values = new ArrayList<Integer>();
 		
+		/*
+		System.out.println("valuesFromIndex");
+		System.out.println("index:" + datum_index);
+		System.out.println("_variables"+_variables );
+		System.out.println("_stride"+_stride );
+		System.out.println("_variableCard"+_variableCard );
+		System.out.println();
+		*/
 		for(int varIdx = 0; varIdx< _variables.size(); varIdx++){
 			values.add((datum_index/_stride.get(varIdx))%_variableCard.get(varIdx));
 		}
