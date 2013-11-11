@@ -9,10 +9,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
-import java.util.Stack;
 
 /**
  * Belief Update Message Passing class
@@ -22,6 +23,8 @@ import java.util.Stack;
  */
 public class Bump {
 	public static final int NO_EVIDENCE = -1;
+	public static final int UNMARKED = 0;
+	public static int nextOrderID = UNMARKED;
 	/**
 	 * Small clique class that holds a list of variables
 	 * We compare cliques by their number of shared variables
@@ -69,7 +72,6 @@ public class Bump {
 	}
 	private class Vertex extends Clique {
 		private int _orderID;
-
 		private Set<Edge> _outgoingEdges;
 		/**
 		 * Stores each neighboring edge, initializes with the fact that we
@@ -78,16 +80,25 @@ public class Bump {
 		 * informed messages on all edges
 		 */
 		private Map<Edge, Boolean> _recvdMsgStatus;
-		private boolean _isInformed, _onUpwardPass;
+		private boolean _isInformed;
 		Vertex(String[] varsContained){
 			super(varsContained);
 			_outgoingEdges = new HashSet<Edge>();
-			_orderID = -1;
 			_recvdMsgStatus = new HashMap<Edge, Boolean>();
-			_isInformed = false;
-			_onUpwardPass = false;
+			reset();
 		}
-		void setOrderID(int o) {this._orderID = o;}
+		/**
+		 * Resets this vertex to prepare for the running of the algorithm
+		 */
+		void reset() {
+			_orderID = UNMARKED;
+			_isInformed = false;
+			for(Edge e : _recvdMsgStatus.keySet()) {
+				_recvdMsgStatus.put(e, false);
+			}
+			_outgoingEdges.clear();
+		}
+		void setOrderID() {this._orderID = ++nextOrderID;}
 		/**
 		 * Adds a neighbor edge
 		 * checks for duplicates.
@@ -105,17 +116,19 @@ public class Bump {
 		 * @param recvingNeighbor
 		 */
 		void sendMessage(Edge recvingNeighborEdge) {
+			// calculate message, and send
 			// TODO compose message
 			Factor message = null;
 			recvingNeighborEdge.getOtherVertex(this).
 				onReceiveMessage(recvingNeighborEdge, message);
 		}
 		/**
-		 * When we receives a message...
+		 * When we receive a message...
+		 * (called by our 'send message' function when our neighbor sends
 		 * @param sendingNeighborEdge
 		 * @param message
 		 */
-		void onReceiveMessage(Edge sendingNeighborEdge, Factor message) {
+		private void onReceiveMessage(Edge sendingNeighborEdge, Factor message) {
 			// TODO process message
 			Vertex v = sendingNeighborEdge.getOtherVertex(this);
 			_recvdMsgStatus.put(sendingNeighborEdge, v._isInformed);
@@ -124,25 +137,22 @@ public class Bump {
 			} // else don't bother, as we know it's impossible
 		}
 		/**
-		 * @return a list of all outgoing neighbors, as defined by our stream direction.
+		 * Return a list of all outgoing neighbors for the upward pass,
+		 * as defined by our vertex ordering.
+		 * @return the list of all outgoing neighbors for the upward pass
 		 */
-		Set<Edge> getOutgoingNeighborEdges() {
-			// only compute if we have to
-			if(_outgoingEdges.size() == 0 || this._onUpwardPass != _bumpOnUpwardPass) {
+		Set<Edge> getUpwardOutgoingNeighborEdges() {
+			if(!_bumpOnUpwardPass) {
+				System.err.println("calling upward pass neighbor method on downward pass!");
+			}
+			if(_outgoingEdges.size() == 0) { // only compute if we have to
 				Set<Edge> outgoingEdges = new HashSet<Edge>();
 				Iterator<Edge> it = _recvdMsgStatus.keySet().iterator();
 				while(it.hasNext()) {
 					Edge e = it.next();
 					Vertex v = e.getOtherVertex(this);
-					if(_onUpwardPass) { // check order id is less than this order id
-						if(this._orderID < v._orderID) {
-							outgoingEdges.add(e);
-						}
-					}
-					else { // check order id is greater than this order id
-						if(this._orderID > v._orderID) {
-							outgoingEdges.add(e);
-						}
+					if(this._orderID < v._orderID) {
+						outgoingEdges.add(e);
 					}
 				}
 				_outgoingEdges = outgoingEdges;
@@ -288,28 +298,13 @@ public class Bump {
 			return output.toString();
 		}
 		/**
-		 * Run DFS to init ordering.
 		 * Initialize beliefs at each vertex of the tree
-		 * @return the ordering as an array of vertices
 		 */
-		ArrayList<Vertex> assignOrderingAndInitBeliefs() {
-			//TODO implement assign ordering
-			ArrayList<Vertex> ordering = new ArrayList<Vertex>();
-			if(_vertices.size() == 0) return ordering;
-			// choose root
-			Vertex root = _vertices.values().iterator().next();
-			root.setOrderID(0);
-			// giving a number is equivalent to adding to ordering, giving index
-			// while all vertices don't have a number
-//			while(ordering.size() != _vertices.size()) {
-//				
-//				
-//			}
-			
-			// 		depth first search from root, assigning numbers and init'ing beliefs
-			// 		if DFS ends before all vertices have numbers,
-			// 		choose another root, repeat
-			return ordering;
+		void initCliques() {
+			//TODO implement init cliques
+			for(Vertex v : _vertices.values()) {
+				
+			}
 		}
 	}
 	private static final boolean DEBUG = true;
@@ -343,36 +338,26 @@ public class Bump {
 	}
 	/**
 	 * Runs belief update message passing to calibrate the tree.
-	 * Resets, assigns an ordering, inits beliefs, calibrates the tree.
+	 * Resets, inits beliefs, calibrates the tree.
 	 * copies this calibrated tree such that we might alter it with query evidence
 	 */
 	public void runBump() {
-		calibrateTree(_tree.assignOrderingAndInitBeliefs());
+		_tree.initCliques();
+		upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
 		resetTreeForQueries();
 	}
 	/**
-	 * Calibrate the tree with two passes of belief-update message passing.
-	 * As the starting point doesn't matter,
-	 * Use our ordering that we created when initializing.
+	 * Calibrate the tree with the upward pass of belief-update message passing.
+	 * Use the reverse of our ordering that we created in the downward pass.
 	 */
-	void calibrateTree(List<Vertex> orderedVertices) {
-		_bumpOnUpwardPass = false;
-		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
-		for(int i = 0; i < orderedVertices.size(); i++) {
-			Vertex v = orderedVertices.get(i);
-			for(Edge e : v.getOutgoingNeighborEdges()) {
-				v.sendMessage(e);
-				if(DEBUG) {
-					System.out.println("\n******\nmsg:"+i);
-					System.out.println(_tree.getLongInfo());
-				}
-			}
-		}
+	void upwardPassBeliefUpdate(List<Vertex> orderedVertices) {
 		_bumpOnUpwardPass = true;
 		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
 		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
 			Vertex v = orderedVertices.get(i);
-			for(Edge e : v.getOutgoingNeighborEdges()) {
+			// for each edge that is outgoing given our ordering
+			for(Edge e : v.getUpwardOutgoingNeighborEdges()) {
+				// send our message along that edge
 				v.sendMessage(e);
 				if(DEBUG) {
 					System.out.println("\n******\nmsg:"+i);
@@ -384,17 +369,70 @@ public class Bump {
 	/**
 	 * Conducts one downward pass of belief update message passing
 	 * with a designated root.
+	 * Conducts breadth-first search of the query tree, 
+	 * and sends messages in that order.
+	 * 
+	 * Chooses an arbitrary root.
+	 * 
+	 * @param t the tree in question
+	 * @return a list of the order of this pass, so we can reverse it in the upward pass
+	 */
+	List<Vertex> downwardPassBeliefUpdate(Tree t) {
+		return downwardPassBeliefUpdate(t, t._vertices.values().iterator().next());
+	}
+	/**
+	 * Conducts one downward pass of belief update message passing
+	 * with a designated root.
 	 * Conducts depth-first or breadth-first search of the query tree, 
 	 * sends messages in that order.
 	 * 
+	 * @param t the tree in question.
 	 * @param root
-	 * @return a stack of the reverse order of this pass, for the upward pass.
+	 * @return a list of the order of this pass, so the upward pass can reverse it
 	 */
-	Stack<Integer> downwardPassBeliefUpdateQuery(Vertex root) {
+	List<Vertex> downwardPassBeliefUpdate(Tree t, Vertex root) {
 		_bumpOnUpwardPass = false;
-		Tree t = _queryTree;
-		//TODO implement DFS in QUERY COPY
-		return null;
+		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
+		nextOrderID = UNMARKED; // begin again at 0
+		List<Vertex> ordering = new ArrayList<Vertex>();
+		if(t._vertices.size() == 0) return ordering;
+		Queue<Vertex> toProcess = new LinkedList<Vertex>();
+		toProcess.add(root);
+		// giving a number is equivalent to adding to ordering, giving index
+		// while all vertices don't have a number
+		while(ordering.size() != t._vertices.size()) {
+			if(toProcess.size() == 0) {
+				// find an unmarked node... expensive
+				for(Vertex v : t._vertices.values()) {
+					if(v._orderID == UNMARKED) {
+						toProcess.add(v); // add to queue when find unmarked
+					}
+				}
+			}
+			Vertex curr = toProcess.remove();
+			// mark
+			curr.setOrderID();
+			ordering.add(curr); // and add to our ordered list
+			if(curr._orderID != ordering.size()) {// verify
+				System.err.println("oops! order id incorrect");
+			}
+			// and then for each downstream child...
+			for(Edge e : curr._recvdMsgStatus.keySet()) {
+				Vertex k = e.getOtherVertex(curr);
+				if(k._orderID == UNMARKED) {
+					// downstream if we haven't marked it yet
+					// send belief update message to the child
+					curr.sendMessage(e);
+					if(DEBUG) {
+						System.out.println("\n******\nmsg:");
+						System.out.println(_tree.getLongInfo());
+					}
+					// and add the child to our list to process
+					toProcess.add(k);
+				}
+			}
+		}
+		return ordering;
 	}
 	/**
 	 * Resets the query tree in preparation for queries.
@@ -407,12 +445,12 @@ public class Bump {
 	}
 	/**
 	 * find a vertex with a clique containing the given set of variables
-	 * in the QUERY TREE
+	 * in the given tree
+	 * @param t the tree in question
 	 * @param vars the variable integers
 	 * @return a suitable vertex, or null otherwise.  should always return a vertex.
 	 */
-	Vertex findVertexInQueryTree(int... vars) {
-		Tree t = _queryTree;
+	Vertex findVertexInTree(Tree t, int... vars) {
 		for(Vertex v : t._vertices.values()) {
 			boolean containsAll = true;
 			for(int i : vars) {
@@ -433,14 +471,14 @@ public class Bump {
 	 */
 	void incorporateQueryEvidence(int varInt, int varValue) {
 		// Find a clique with the variable, C, in the query tree
-		Vertex newRoot = findVertexInQueryTree(varInt);
+		Vertex newRoot = findVertexInTree(_queryTree, varInt);
 		if(newRoot == null) {
 			System.err.println("can't find vertex - whoops!");
 		}
 		// multiply in a new indicator factor
 		// TODO multiply in new indicator
 		// conduct one pass of B-U with C as the root
-		downwardPassBeliefUpdateQuery(newRoot);
+		downwardPassBeliefUpdate(_queryTree, newRoot);
 	}
 	String query(String[] lhs, String[] contexts, boolean useSumProduct) {
 		if(useSumProduct != _useSumProduct) {
