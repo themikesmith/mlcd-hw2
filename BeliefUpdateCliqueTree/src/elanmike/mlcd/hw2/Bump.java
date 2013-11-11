@@ -40,7 +40,7 @@ public class Bump {
 			super(varNames);
 		}
 		
-		Clique(Clique cliqueToCopy) {
+		protected Clique(Clique cliqueToCopy) {
 			super(cliqueToCopy);
 		}
 		
@@ -83,7 +83,7 @@ public class Bump {
 			reset();
 		}
 		
-		Vertex(Vertex vertexToCopy) {
+		protected Vertex(Vertex vertexToCopy) {
 			super(vertexToCopy);
 			_outgoingEdges = new HashSet<Edge>();
 			_recvdMsgStatus = new HashMap<Edge, Boolean>();
@@ -210,7 +210,7 @@ public class Bump {
 			this._two = two;
 		}
 		
-		Edge(Edge edgeToCopy, Vertex newOne, Vertex newTwo) {
+		protected Edge(Edge edgeToCopy, Vertex newOne, Vertex newTwo) {
 			super(edgeToCopy);
 			this._one = newOne;
 			this._two = newTwo;
@@ -263,7 +263,7 @@ public class Bump {
 			_vertices = new HashMap<String,Vertex>();
 			_edges = new HashMap<String,Edge>();
 		}
-		Tree(Tree other) {
+		protected Tree(Tree other) {
 			_vertices = new HashMap<String,Vertex>();
 			Iterator<Entry<String, Vertex>> itv = other._vertices.entrySet().iterator();
 			while(itv.hasNext()) {
