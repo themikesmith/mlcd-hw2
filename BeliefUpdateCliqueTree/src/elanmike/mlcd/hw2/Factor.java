@@ -68,7 +68,6 @@ public class Factor {
 	    }
 	}
 	
-	
 	protected static ArrayList<String> _variableNames;
 	protected static ArrayList<ArrayList<String>> _variableValues;
 	protected static ArrayList<Integer> _variableCard;
@@ -177,7 +176,7 @@ public class Factor {
 	protected ArrayList<Integer> _variables;
 	protected ArrayList<Integer> _stride;
 	
-	protected ArrayList<Double> data;
+	protected ArrayList<Double> data; //log probabilities
 	
 	Factor(String[] varsNames){
 		_variables= new ArrayList<Integer>(varsNames.length);
@@ -194,7 +193,7 @@ public class Factor {
 		}
 		
 		this.data = new ArrayList<Double>(strideTot);
-		for(int i = 0; i<strideTot; i++) data.add(1.0);
+		for(int i = 0; i<strideTot; i++) data.add(Math.log(1.0));
 	}
 	
 	protected Factor(ArrayList<Integer> vars){
@@ -208,7 +207,7 @@ public class Factor {
 		}
 		
 		this.data = new ArrayList<Double>(strideTot);
-		for(int i = 0; i<strideTot; i++) data.add(1.0);
+		for(int i = 0; i<strideTot; i++) data.add(Math.log(1.0));
 	}
 	
 	public Factor(Factor factToCopy){
@@ -230,7 +229,7 @@ public class Factor {
 		}
 		
 		this.data = new ArrayList<Double>(strideTot);
-		for(int i = 0; i<strideTot; i++) data.add(d);
+		for(int i = 0; i<strideTot; i++) data.add(Math.log(d));
 	}
 
 	public void setFactorData(Factor f) throws FactorScopeException {
@@ -325,7 +324,7 @@ public class Factor {
 			for(int var_idx=0; var_idx < _variables.size(); var_idx ++){
 				output += String.format("%01d       ", ((datum_index/_stride.get(var_idx))%_variableCard.get(var_idx)));
 			}
-			output += data.get(datum_index)+"\n";
+			output += Math.exp(data.get(datum_index))+"\n";
 		}
 		
 		return output;
@@ -343,7 +342,7 @@ public class Factor {
 			else
 				searchIndex += arrayList.get(index)*_stride.get(index);
 		
-		data.set(searchIndex,prob);
+		data.set(searchIndex,Math.log(prob));
 	}
 	
 	public double getProbByValues(int[] variableValues) throws FactorIndexException {
@@ -401,7 +400,7 @@ public class Factor {
 		int[] assigment = new int[unionScope.size()];
 		
 		for(int i = 0; i < psi.data.size(); i++){
-			psi.data.set(i, this.data.get(j)*f.data.get(k));
+			psi.data.set(i, this.data.get(j)+f.data.get(k)); //adding log probabilies
 			for(int l =0; l < unionScope.size(); l++){
 				
 				assigment[l]++;
@@ -447,10 +446,10 @@ public class Factor {
 				f_indicies_of_values[that_ind] = values[this_ind];
 			}
 			
-			if(this.data.get(datum_idx) == 0.0 && f.getProbByValues(f_indicies_of_values) == 0.0 ){
-				result.data.set(datum_idx, 0.0);
+			if(this.data.get(datum_idx) == 0.0 && f.getProbByValues(f_indicies_of_values) == Math.log(0.0) ){
+				result.data.set(datum_idx, Math.log(0.0));
 			}else{
-				result.data.set(datum_idx, this.data.get(datum_idx)/f.getProbByValues(f_indicies_of_values));
+				result.data.set(datum_idx, this.data.get(datum_idx) - f.getProbByValues(f_indicies_of_values));
 			}
 			
 		}
@@ -476,7 +475,7 @@ public class Factor {
 				f_indicies_of_values[that_ind] = values[this_ind];
 				
 			}
-			result.data.set(result.index(f_indicies_of_values), result.data.get(result.index(f_indicies_of_values))+this.data.get(datum_idx));
+			result.data.set(result.index(f_indicies_of_values), Math.log(Math.exp(result.data.get(result.index(f_indicies_of_values)))+Math.exp(this.data.get(datum_idx))));
 			
 			
 		}
@@ -493,8 +492,22 @@ public class Factor {
 
 	}
 	
+	public static Factor indicatorFunctionForNames(ArrayList<String> varNames, ArrayList<String> valueNames){
+		ArrayList<Integer> vars = variableNamesToIndicies(varNames);
+		ArrayList<Integer> values = valueNamesToIndicies(varNames,valueNames);
+		return indicatorFunction(vars,values);
+	}
+	
+	public static Factor indicatorFunction(int var, int value){
+		ArrayList<Integer> vars = new ArrayList<Integer>();
+		vars.add(var);
+		ArrayList<Integer> values = new ArrayList<Integer>();
+		values.add(value);
+		return indicatorFunction(vars,values);
+	}
+	
 	public static Factor indicatorFunction(ArrayList<Integer> vars, ArrayList<Integer> values){
-		Factor result = new Factor(vars,0.0);
+		Factor result = new Factor(vars,Math.log(0.0));
 		
 		for(int i = 0; i<result.data.size(); i++){
 			boolean match = true;
@@ -505,8 +518,8 @@ public class Factor {
 					break;
 				}
 			}
-			if(match) result.data.set(i, 1.0);
-			else result.data.set(i, 0.0);
+			if(match) result.data.set(i, Math.log(1.0));
+			else result.data.set(i, Math.log(0.0));
 		}
 		
 		return result;

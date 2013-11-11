@@ -128,7 +128,7 @@ public class Bump {
 			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ, sigmaItoJ);
 			// update edge potential
 			edgeToJ.setFactorData(sigmaItoJ);
-			if(DEBUG) System.out.println("mu I,J:\n"+edgeToJ.toStringFactor());
+			if(DEBUG) System.out.println("mu I,J:\n"+(Factor)edgeToJ);
 		}
 		/**
 		 * When we receive a message...
@@ -137,13 +137,10 @@ public class Bump {
 		 * @param sigmaItoJ
 		 */
 		private void onReceiveMessage(Edge edgeItoJ, Factor sigmaItoJ) throws FactorException {
-			if(DEBUG) {
-				System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
-				System.out.println("mu I,J:"+edgeItoJ.toStringFactor());
-			}
+			if(DEBUG) System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
 			// belief j = belief j * (sigma ij / mu ij)
 			this.setFactorData(this.product(sigmaItoJ.divide(edgeItoJ)));
-			if(DEBUG) System.out.println("belief J:\n"+super.toString());
+			if(DEBUG) System.out.println("belief J:\n"+(Factor)this);
 			// check if I was informed when sending
 			Vertex i = edgeItoJ.getOtherVertex(this);
 			_recvdMsgStatus.put(edgeItoJ, i._isInformed);
@@ -238,9 +235,6 @@ public class Bump {
 			sb.append(EDGE);
 			sb.append(Factor.variableIndicesToNames(_two._variables));
 			return sb.toString();
-		}
-		public String toStringFactor() {
-			return super.toString();
 		}
 		public String getLongInfo() {
 			StringBuilder sb = new StringBuilder("edge:\n");
@@ -437,7 +431,7 @@ public class Bump {
 				}
 			}
 			Vertex curr = toProcess.remove();
-			if(DEBUG) System.out.printf("\ncurr vertex:%s\n",curr);
+			if(DEBUG) System.out.printf("curr vertex:%s\n",curr);
 			// mark
 			curr.setOrderID();
 			ordering.add(curr); // and add to our ordered list
@@ -468,7 +462,6 @@ public class Bump {
 		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
 		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
 			Vertex v = orderedVertices.get(i);
-			if(DEBUG) System.out.printf("\ncurr vertex:%s\n",v);
 			// for each edge that is outgoing given our ordering
 			for(Edge e : v.getUpwardOutgoingNeighborEdges()) {
 				// send our message along that edge
