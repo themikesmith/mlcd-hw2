@@ -261,6 +261,13 @@ public class Factor {
 		}
 	}
 
+	private int index(ArrayList<Integer> variables, ArrayList<Integer> values) throws FactorIndexException{
+		int[] temp = new int[variables.size()];
+		for(int i = 0; i< variables.size();i++){
+			temp[_variables.indexOf(variables.get(i))] = values.get(i);
+		}
+		return index(temp);
+	}
 	private int index(int[] variableValues) throws FactorIndexException{
 		int searchIndex = 0;
 		
@@ -277,14 +284,14 @@ public class Factor {
 		return searchIndex;
 	}
 	
-	private int[] valuesFromIndex(int datum_index) throws FactorIndexException {
+	private ArrayList<Integer> valuesFromIndex(int datum_index) throws FactorIndexException {
 		if(datum_index >= data.size()|| datum_index< 0)
 			throw new FactorIndexException("FactorIndexError: index("+datum_index+") was not in the valid range of ( 0 - "+(data.size()-1)+")");
 		
-		int values[] = new int[_variables.size()];
+		ArrayList<Integer> values = new ArrayList<Integer>();
 		
 		for(int varIdx = 0; varIdx< _variables.size(); varIdx++){
-			values[varIdx] = (datum_index/_stride.get(varIdx))%_variableCard.get(varIdx);
+			values.add((datum_index/_stride.get(varIdx))%_variableCard.get(varIdx));
 		}
 		
 		return values;
@@ -442,7 +449,7 @@ public class Factor {
 		//System.out.println("Dividing: "+ this._variables + " by "+ f._variables + ", intersection of: " + sepset  +"("+sepset.size()+")");
 		//System.out.println("LHS datasize: "+ this.data.size() + " RHS datasize: " + f.data.size() );
 		for(int datum_idx = 0; datum_idx < this.data.size(); datum_idx++ ){
-			int[] values = valuesFromIndex(datum_idx);
+			ArrayList<Integer> values = valuesFromIndex(datum_idx);
 			//ArrayList<Integer> sharedVarValues = new ArrayList<Integer>();
 			
 			int[] f_indicies_of_values = new int[sepset.size()];
@@ -450,7 +457,7 @@ public class Factor {
 				int this_ind = this._variables.indexOf(s);//index of variable in sepset in this factor
 				//sharedVarValues.add(values[this_ind]);//value of that variable
 				int that_ind = f._variables.indexOf(s);//index of variable in sepset in this factor
-				f_indicies_of_values[that_ind] = values[this_ind];
+				f_indicies_of_values[that_ind] = values.get(this_ind);
 			}
 			if(this.data.get(datum_idx) == 0.0 && f.getProbByValues(f_indicies_of_values) == Math.log(0.0) ){
 				result.data.set(datum_idx, Math.log(0.0));
@@ -468,7 +475,7 @@ public class Factor {
 		
 		Factor result = new Factor(finalVars);
 		for(int datum_idx = 0; datum_idx < this.data.size(); datum_idx++ ){
-			int[] values = valuesFromIndex(datum_idx);
+			ArrayList<Integer> values = valuesFromIndex(datum_idx);
 			
 			int[] f_indicies_of_values = new int[finalVars.size()];
 			//ArrayList<Integer> sharedVarValues = new ArrayList<Integer>();
@@ -478,7 +485,7 @@ public class Factor {
 				int this_ind = this._variables.indexOf(s);//index of variable in sepset in this factor
 				//sharedVarValues.add(values[this_ind]);//value of that variable
 				int that_ind = result._variables.indexOf(s);//index of variable in sepset in this factor
-				f_indicies_of_values[that_ind] = values[this_ind];
+				f_indicies_of_values[that_ind] = values.get(this_ind);
 				
 			}
 			result.data.set(result.index(f_indicies_of_values), Math.log(Math.exp(result.data.get(result.index(f_indicies_of_values)))+Math.exp(this.data.get(datum_idx))));
@@ -499,6 +506,25 @@ public class Factor {
 			data.set(i,data.get(i)-logZ);
 		}
 		
+	}
+
+	public Factor reduce(ArrayList<Integer> heldVars, ArrayList<Integer> heldValues){
+		Factor result = new Factor(this.difference(heldVars));
+		
+		for(int i = 0; i<result.data.size(); i++){
+			try {
+				ArrayList<Integer> variablesOfLarger = (ArrayList<Integer>) result._variables.clone();
+				variablesOfLarger.addAll(heldVars);
+				ArrayList<Integer> varValues = result.valuesFromIndex(i);
+				varValues.addAll(heldValues);
+				int indexOfLarger = this.index(variablesOfLarger,varValues);
+				result.data.set(i, this.data.get(indexOfLarger)) ;
+				
+				
+			} catch (FactorIndexException e) {e.printStackTrace();}
+		}
+		
+		return result;
 	}
 	
 	/**

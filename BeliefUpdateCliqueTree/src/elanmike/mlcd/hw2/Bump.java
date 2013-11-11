@@ -588,6 +588,11 @@ public class Bump {
 		Factor f = target.marginalize(target.difference(vars));
 		// TODO normalize here maybe?
 		f.normalize();
+		ArrayList<Integer> heldVars = new ArrayList<Integer>();
+		heldVars.add(f._variables.get(0));
+		ArrayList<Integer> heldValues = new ArrayList<Integer>();
+		heldValues.add(0);
+		f = f.reduce(heldVars, heldValues);
 		return f;
 	}
 	/**
