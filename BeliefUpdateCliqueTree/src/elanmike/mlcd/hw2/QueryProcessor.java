@@ -13,7 +13,7 @@ import elanmike.mlcd.hw2.Factor.FactorIndexException;
 public class QueryProcessor {
 	public static final int NO_EVIDENCE = -1;
 	private Bump _bump;
-	private boolean _ready;
+	private boolean _calibrated;
 	/**
 	 * A map from variable name to variable value, transformed into integers
 	 */
@@ -21,7 +21,7 @@ public class QueryProcessor {
 	public QueryProcessor(Bump b) {
 		this._bump = b;
 		_queryContexts = new HashMap<Integer, Integer>();
-		_ready = false;
+		_calibrated = false;
 	}
 	public void resetTreeForQueries() {
 		_queryContexts = new HashMap<Integer, Integer>();
@@ -29,11 +29,12 @@ public class QueryProcessor {
 	}
 	public String query(String[] lhs, String[] contexts, boolean useSumProduct) {
 		if(Bump.DEBUG) System.out.println("query"+(useSumProduct?"sp":"mp")+":"+lhs.toString()+" | "+ contexts.toString());
-		if(!_ready || useSumProduct != _bump.useSumProduct()) {
+		if(!_calibrated || (useSumProduct != _bump.useSumProduct())) {
 			// set appropriate method, and run bump to calibrate
 			_bump.setUseSumProduct(useSumProduct);
 			_bump.runBump();
-			_ready = true;
+			_calibrated = true;
+			resetTreeForQueries();
 		}
 		return query(lhs, contexts);
 	}
@@ -41,6 +42,7 @@ public class QueryProcessor {
 	 * queries the structure for p(lhs|contexts)
 	 */
 	String query(String[] lhs, String[] contexts) {
+		System.out.println("query function");
 		// check if evidence is incremental or retractive
 		boolean retractive = false;
 		// then take action
@@ -65,17 +67,21 @@ public class QueryProcessor {
 		if(retractive) resetTreeForQueries();
 		ArrayList<Integer> vars = new ArrayList<Integer>(), 
 				values = new ArrayList<Integer>();
-		for(String s : contexts) {
-			String[] varValue = s.split("=");
+		for(int i = 0; i < contexts.length; i++) {
+			String[] varValue = contexts[i].split("=");
 			String var = varValue[0], value = varValue[1];
 			int varInt = Factor.getVariableIndex(var),
 				valueInt = Factor.getVariableValueIndex(varInt, value);
 			boolean incrementalEvidence = false;
 			if(!_queryContexts.containsKey(varInt)) {
 				// additional evidence - we've never seen it before
+				if(Bump.DEBUG) {
+					System.out.printf("\ni:%d add'l evidence:%s=%s\n", i, var, value);
+				}
 				incrementalEvidence = true;
 				vars.add(varInt);
 				values.add(valueInt);
+				_queryContexts.put(varInt,valueInt);
 			}
 			if(incrementalEvidence) {
 				try {
@@ -87,6 +93,9 @@ public class QueryProcessor {
 			}
 			else if(_queryContexts.get(varInt) == valueInt) {
 				// already have this context variable = value pair, do nothing
+				if(Bump.DEBUG) {
+					System.out.printf("\ni:%d repeat evidence:%s=%s\n", i, var, value);
+				}
 			}
 			else { // query context variable has other value. reset.
 				// we've already reset so this should never occur
@@ -127,6 +136,7 @@ public class QueryProcessor {
 		BufferedReader br = new BufferedReader(new FileReader(queryFile));
 		String line;
 		while ((line = br.readLine()) != null) {
+			if(Bump.DEBUG) System.out.println("query:\n"+line);
 			String[] stuff = line.split(" ");
 			String[] lhs = stuff[0].split(",");
 			String[] rhs = stuff[1].split(",");

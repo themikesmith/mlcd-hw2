@@ -102,6 +102,7 @@ public class Bump {
 			_outgoingEdges.clear();
 		}
 		void setOrderID() {this._orderID = ++nextOrderID;}
+		void setUnmarked() {this._orderID = UNMARKED;}
 		/**
 		 * Adds a neighbor edge
 		 * checks for duplicates.
@@ -379,9 +380,8 @@ public class Bump {
 		}
 		if(DEBUG) {
 			System.out.println("\n******\ntree is now:");
-			System.out.println(_tree.getLongInfo());
+//			System.out.println(_tree.getLongInfo());
 		}
-		resetTreeForQueries();
 		return true;
 	}
 	
@@ -417,8 +417,13 @@ public class Bump {
 		nextOrderID = UNMARKED; // begin again at 0
 		List<Vertex> ordering = new ArrayList<Vertex>();
 		if(t._vertices.size() == 0) return ordering;
+		// mark all vertices unmarked
+		for(Vertex v : t._vertices.values()) {
+			v.setUnmarked();
+		}
 		Queue<Vertex> toProcess = new LinkedList<Vertex>();
 		toProcess.add(root);
+		if(DEBUG) System.out.println("toProcess:"+toProcess.toString());
 		// giving a number is equivalent to adding to ordering, giving index
 		// while all vertices don't have a number
 		while(ordering.size() != t._vertices.size()) {
@@ -440,8 +445,11 @@ public class Bump {
 			}
 			// and then for each downstream child...
 			for(Edge e : curr._recvdMsgStatus.keySet()) {
+				System.out.println("edge of curr:"+e);
 				Vertex k = e.getOtherVertex(curr);
+				System.out.println("leads to:"+k);
 				if(k._orderID == UNMARKED) {
+					System.out.println("and k is unmarked");
 					// downstream if we haven't marked it yet
 					// send belief update message to the child
 					curr.sendMessage(e);
@@ -476,6 +484,9 @@ public class Bump {
 	 */
 	void resetTreeForQueries() {
 		_queryTree = new Tree(_tree);
+		if(DEBUG) {
+			System.out.printf("\nquery tree copy:\n%s\n",_queryTree.toString());
+		}
 	}
 	/**
 	 * find a vertex with a clique containing the given set of variables
