@@ -692,10 +692,4 @@ public class Bump {
 			}
 		}
 	}
-	
-
-	public static void main(String[] args) {
-		Bump b = new Bump();
-		
-	}
 }
