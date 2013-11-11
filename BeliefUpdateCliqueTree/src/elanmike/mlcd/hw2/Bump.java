@@ -591,7 +591,8 @@ public class Bump {
 		// and then reduce using the evidence given
 		f = target.reduce(eVars, eValues);
 		// return the factor, normalized
-		return f.normalize();
+		f.normalize();
+		return f;
 	}
 	/**
 	 * Reads in the tree from the clique file.
