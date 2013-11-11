@@ -106,21 +106,15 @@ public class QueryProcessor {
 		vars = new ArrayList<Integer>();
 		values = new ArrayList<Integer>();
 		for(String s : lhs) {
-			System.out.println("s");
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = "";
 			int varInt = Factor.getVariableIndex(var), valueInt = NO_EVIDENCE;
-			System.out.printf("var:%s\n",var);
 			if(varValue.length > 1) {
 				value = varValue[1];
 				valueInt = Factor.getVariableValueIndex(varInt, value);
-				System.out.println("value:"+value);
 			}
-			else System.out.println("no value");
 			vars.add(varInt);
 			values.add(valueInt);
-			System.out.printf("%s=%s\n", var, value);
-			System.out.printf("varint:%d valueint:%d\n", varInt, valueInt);
 		}
 		Factor result;
 		try {
