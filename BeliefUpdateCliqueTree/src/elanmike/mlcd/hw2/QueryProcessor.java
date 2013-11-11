@@ -3,6 +3,7 @@ package elanmike.mlcd.hw2;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,15 +63,23 @@ public class QueryProcessor {
 			}
 		}
 		if(retractive) resetTreeForQueries();
+		ArrayList<Integer> vars = new ArrayList<Integer>(), 
+				values = new ArrayList<Integer>();
 		for(String s : contexts) {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
 			int varInt = Factor.getVariableIndex(var),
 				valueInt = Factor.getVariableValueIndex(varInt, value);
+			boolean incrementalEvidence = false;
 			if(!_queryContexts.containsKey(varInt)) {
 				// additional evidence - we've never seen it before
+				incrementalEvidence = true;
+				vars.add(varInt);
+				values.add(valueInt);
+			}
+			if(incrementalEvidence) {
 				try {
-					_bump.incorporateQueryEvidence(varInt, varInt);
+					_bump.incorporateQueryEvidence(vars, values);
 				} catch (FactorException e) {
 					e.printStackTrace();
 					return e.getMessage();
@@ -123,15 +132,23 @@ public class QueryProcessor {
 			}
 		}
 		if(retractive) resetTreeForQueries();
+		ArrayList<Integer> vars = new ArrayList<Integer>(), 
+				values = new ArrayList<Integer>();
 		for(String s : contexts) {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
 			int varInt = Factor.getVariableIndex(var),
-					valueInt = Factor.getVariableValueIndex(varInt, value);
+				valueInt = Factor.getVariableValueIndex(varInt, value);
+			boolean incrementalEvidence = false;
 			if(!_queryContexts.containsKey(varInt)) {
 				// additional evidence - we've never seen it before
+				incrementalEvidence = true;
+				vars.add(varInt);
+				values.add(valueInt);
+			}
+			if(incrementalEvidence) {
 				try {
-					_bump.incorporateQueryEvidence(varInt, varInt);
+					_bump.incorporateQueryEvidence(vars, values);
 				} catch (FactorException e) {
 					e.printStackTrace();
 					return e.getMessage();

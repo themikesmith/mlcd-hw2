@@ -17,6 +17,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import elanmike.mlcd.hw2.Factor.FactorException;
+import elanmike.mlcd.hw2.Factor.FactorIndexException;
 
 /**
  * Belief Update Message Passing class
@@ -510,21 +511,24 @@ public class Bump {
 	 * @param pairs list of Pair<Integer, Integer>... pairs pairs of variable=value
 	 * @throws FactorException 
 	 */
-	public void incorporateQueryEvidence(int varInt, int varValue) throws FactorException {
-		// Find a clique with the variable, C, in the query tree
-		Vertex newRoot = findVertexInTree(_queryTree, varInt);
-		if(newRoot == null) {
-			System.err.println("can't find vertex - whoops!");
+	public void incorporateQueryEvidence(ArrayList<Integer> vars, ArrayList<Integer> values) 
+			throws FactorException {
+		if(vars.size() != values.size()) {
+			throw new FactorIndexException("vars size must equal values size");
 		}
-		// multiply in a new indicator factor
-		ArrayList<Integer> vars = new ArrayList<Integer>(), 
-				values = new ArrayList<Integer>();
-		vars.add(varInt);
-		values.add(varValue);
-		Factor indicator = Factor.indicatorFunction(vars, values);
-		newRoot.product(indicator);
-		// conduct one pass of B-U with C as the root
-		downwardPassBeliefUpdate(_queryTree, newRoot);
+		for(int i = 0; i < vars.size(); i++) {
+			int var = vars.get(i), value = values.get(i);
+			// Find a clique with the variable, C, in the query tree
+			Vertex v = findVertexInTree(_queryTree, var);
+			if(v == null) {
+				System.err.println("can't find vertex - whoops!");
+			}
+			// multiply in a new indicator factor
+			Factor indicator = Factor.indicatorFunction(var, value);
+			v.product(indicator);
+		}
+		// and run bump on our query tree with our evidence
+		upwardPassBeliefUpdate(downwardPassBeliefUpdate(_queryTree));
 	}
 	/**
 	 * Reads in the tree from the clique file.
