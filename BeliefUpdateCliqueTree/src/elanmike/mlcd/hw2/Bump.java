@@ -37,18 +37,7 @@ public class Bump {
 		Clique(String[] varNames) {
 			super(varNames);
 		}
-//		void addVariable(int var) {
-//			_variables.add(var);
-//		}
-//		/**
-//		 * @param other the other clique
-//		 * @return the number of variables this clique has in common with the other
-//		 */
-//		int getCardinalityOfIntersectionWith(Clique other) {
-//			Set<Integer> intersection = new HashSet<Integer>(this._variables);
-//			intersection.retainAll(other._variables);
-//			return intersection.size();
-//		}
+		// TODO copy constructor clique
 		/**
 		 * A clique is equal to another clique if their sets of variables are equal
 		 */
@@ -60,7 +49,6 @@ public class Bump {
 			}
 			return false;
 		}
-		
 		public String getLongInfo() {
 			StringBuilder sb = new StringBuilder(toString());
 			// add factor result
@@ -85,6 +73,7 @@ public class Bump {
 			_recvdMsgStatus = new HashMap<Edge, Boolean>();
 			reset();
 		}
+		// TODO copy constructor vertex
 		/**
 		 * Resets this vertex to prepare for the running of the algorithm
 		 */
@@ -193,13 +182,12 @@ public class Bump {
 	private class Edge extends Factor{
 		public static final String EDGE = " -- ";
 		Vertex _one, _two;
-		//int _weight;
-		Edge(Vertex one, Vertex two) {//, int weight) {
+		Edge(Vertex one, Vertex two) {
 			super(one.intersection(two._variables));
 			this._one = one;
 			this._two = two;
-			//this._weight = weight;
 		}
+		// TODO copy constructor edge
 		/**
 		 * An edge is equal to another edge if its two vertices match the other's two
 		 */
@@ -247,6 +235,7 @@ public class Bump {
 			_vertices = new HashMap<String,Vertex>();
 			_edges = new HashMap<String,Edge>();
 		}
+		// TODO copy constructor tree
 		void addVertex(Vertex v) {
 			_vertices.put(v.makeKey(),v);
 			//System.out.println("adding vertice with key: "+ v._variables.toString());
