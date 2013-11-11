@@ -211,6 +211,14 @@ public class Factor {
 		for(int i = 0; i<strideTot; i++) data.add(1.0);
 	}
 	
+	public Factor(Factor factToCopy){
+		this._variables = factToCopy._variables;
+		this._stride = factToCopy._variables;
+		
+		this.data = new ArrayList<Double>(factToCopy.data.size());
+		for(int i = 0; i<factToCopy.data.size(); i++) data.add(factToCopy.data.get(i));
+	}
+	
 	public void setFactorData(Factor f) throws FactorScopeException {
 		if(this._variables.equals(f._variables)){
 			this.data = f.data;
