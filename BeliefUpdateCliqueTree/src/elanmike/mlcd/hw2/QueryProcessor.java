@@ -114,8 +114,6 @@ public class QueryProcessor {
 			if(varValue.length > 1) {
 				value = varValue[1];
 				valueInt = Factor.getVariableValueIndex(varInt, value);
-				vars.add(varInt);
-				values.add(valueInt);
 				System.out.println("value:"+value);
 			}
 			else System.out.println("no value");
