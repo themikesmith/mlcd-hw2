@@ -379,8 +379,8 @@ public class Bump {
 			return false;
 		}
 		if(DEBUG) {
-			System.out.println("\n******\ntree is now:");
-//			System.out.println(_tree.getLongInfo());
+			System.out.println("\n\n******\ntree is now calibrated:\n\n");
+			System.out.println(_tree.getLongInfo());
 		}
 		return true;
 	}
@@ -423,7 +423,6 @@ public class Bump {
 		}
 		Queue<Vertex> toProcess = new LinkedList<Vertex>();
 		toProcess.add(root);
-		if(DEBUG) System.out.println("toProcess:"+toProcess.toString());
 		// giving a number is equivalent to adding to ordering, giving index
 		// while all vertices don't have a number
 		while(ordering.size() != t._vertices.size()) {
@@ -445,11 +444,10 @@ public class Bump {
 			}
 			// and then for each downstream child...
 			for(Edge e : curr._recvdMsgStatus.keySet()) {
-				System.out.println("edge of curr:"+e);
 				Vertex k = e.getOtherVertex(curr);
-				System.out.println("leads to:"+k);
+				if(DEBUG) System.out.println("check neighbor:"+k);
 				if(k._orderID == UNMARKED) {
-					System.out.println("and k is unmarked");
+					if(DEBUG) System.out.println("k is unmarked - it's downstream");
 					// downstream if we haven't marked it yet
 					// send belief update message to the child
 					curr.sendMessage(e);
@@ -484,9 +482,9 @@ public class Bump {
 	 */
 	void resetTreeForQueries() {
 		_queryTree = new Tree(_tree);
-		if(DEBUG) {
-			System.out.printf("\nquery tree copy:\n%s\n",_queryTree.toString());
-		}
+//		if(DEBUG) {
+//			System.out.printf("\nquery tree structure:\n%s\n",_queryTree.toString());
+//		}
 	}
 	/**
 	 * find a vertex with a clique containing the given set of variables
@@ -619,7 +617,7 @@ public class Bump {
 		for(int i = 0;i<numCliques;i++){
 			if((line = br.readLine()) != null){
 				String[] containedVars = line.split(",");
-				if(DEBUG) System.out.println("Adding vertex: " + Factor.variableNamesToIndicies(containedVars) );
+//				if(DEBUG) System.out.println("Adding vertex: " + Factor.variableNamesToIndicies(containedVars) );
 				Vertex v = new Vertex(containedVars);
 				_tree.addVertex(v);
 			}else{
@@ -642,11 +640,9 @@ public class Bump {
 			
 			_tree.addEdge(new Edge(
 					_tree._vertices.get(left.toString()), 
-					_tree._vertices.get(right.toString()) 
-//					,1
-					));
+					_tree._vertices.get(right.toString())));
 		}
-		if(DEBUG) System.out.println(_tree.getLongInfo());
+		if(DEBUG) System.out.println("\nclique tree structure:\n"+_tree.toString());
 		br.close();
 	}
 	/**
@@ -758,7 +754,7 @@ public class Bump {
 		for(String initFactors:initialFactors.keySet()){
 			ArrayList<Integer> vars = initialFactors.get(initFactors)._variables;
 			
-			//if(DEBUG) System.out.println("Itinital Factor: " + initialFactors.get(initFactors));
+			//if(DEBUG) System.out.println("Initial Factor: " + initialFactors.get(initFactors));
 			
 			boolean foundSuperset = false;
 			for(String cliquesKeys:_tree._vertices.keySet()){
@@ -770,7 +766,7 @@ public class Bump {
 				}
 			}
 			if(!foundSuperset)
-				if(DEBUG) System.out.println("Hmmm... " + Factor.variableIndicesToNames(initialFactors.get(initFactors)._variables) + " has no supersets");
+				if(DEBUG) System.err.println("Hmmm... " + Factor.variableIndicesToNames(initialFactors.get(initFactors)._variables) + " has no supersets");
 			//System.out.println("initialFact "+ initialFactors.get(s));
 			
 		}
@@ -779,7 +775,7 @@ public class Bump {
 		if(DEBUG){
 			System.out.println("==initialBeliefs==");
 			for(String cliquesKeys:_tree._vertices.keySet()){
-				System.out.println(_tree._vertices.get(cliquesKeys).toString());
+				System.out.println(_tree._vertices.get(cliquesKeys).getLongInfo());
 			}
 		}
 	}
