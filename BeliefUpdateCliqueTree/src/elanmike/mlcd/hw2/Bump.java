@@ -356,17 +356,27 @@ public class Bump {
 	 */
 	void calibrateTree(List<Vertex> orderedVertices) {
 		_bumpOnUpwardPass = false;
+		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
 		for(int i = 0; i < orderedVertices.size(); i++) {
 			Vertex v = orderedVertices.get(i);
 			for(Edge e : v.getOutgoingNeighborEdges()) {
 				v.sendMessage(e);
+				if(DEBUG) {
+					System.out.println("\n******\nmsg:"+i);
+					System.out.println(_tree.getLongInfo());
+				}
 			}
 		}
 		_bumpOnUpwardPass = true;
+		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
 		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
 			Vertex v = orderedVertices.get(i);
 			for(Edge e : v.getOutgoingNeighborEdges()) {
 				v.sendMessage(e);
+				if(DEBUG) {
+					System.out.println("\n******\nmsg:"+i);
+					System.out.println(_tree.getLongInfo());
+				}
 			}
 		}
 	}
