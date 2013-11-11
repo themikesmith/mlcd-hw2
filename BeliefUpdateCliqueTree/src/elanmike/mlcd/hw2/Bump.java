@@ -40,7 +40,11 @@ public class Bump {
 		Clique(String[] varNames) {
 			super(varNames);
 		}
-		// TODO copy constructor clique
+		
+		Clique(Clique cliqueToCopy) {
+			super(cliqueToCopy);
+		}
+		
 		/**
 		 * A clique is equal to another clique if their sets of variables are equal
 		 */
@@ -52,6 +56,7 @@ public class Bump {
 			}
 			return false;
 		}
+		
 		public String getLongInfo() {
 			StringBuilder sb = new StringBuilder(toString());
 			// add factor result
@@ -76,7 +81,14 @@ public class Bump {
 			_recvdMsgStatus = new HashMap<Edge, Boolean>();
 			reset();
 		}
-		// TODO copy constructor vertex
+		
+		Vertex(Vertex vertexToCopy) {
+			super(vertexToCopy);
+			_outgoingEdges = new HashSet<Edge>();
+			_recvdMsgStatus = new HashMap<Edge, Boolean>();
+			reset();
+		}
+		
 		/**
 		 * Resets this vertex to prepare for the running of the algorithm
 		 */
