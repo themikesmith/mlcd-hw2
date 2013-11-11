@@ -153,6 +153,14 @@ public class Factor {
 		for(int i = 0; i<strideTot; i++) data.add(0.0);
 	}
 	
+	public void setFactorData(Factor f) throws Exception {
+		if(this._variables.equals(f._variables)){
+			this.data = f.data;
+		}else{
+			throw new Exception("can't see this factor, does not contain the same varaibles");
+		}
+	}
+	
 	private int getInternalIndex(int globalIndex){
 		return _variables.indexOf(globalIndex);
 	}
@@ -387,11 +395,6 @@ public class Factor {
 		return result;
 	}
 
-
-	public void multiplyInCpdValue(ArrayList<Integer> key, double prob) {
-		
-	}
-	
 	/**
 	 * Creates and returns a key representation of this factor.
 	 * This is a string representation of the variables array list

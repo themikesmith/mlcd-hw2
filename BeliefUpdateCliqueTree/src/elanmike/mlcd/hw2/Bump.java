@@ -177,6 +177,7 @@ public class Bump {
 			sb.append("recvdMsgStatus:").append(_recvdMsgStatus);
 			return sb.toString();
 		}
+		
 	}
 	private class Edge extends Factor{
 		public static final String EDGE = " -- ";
@@ -652,9 +653,11 @@ public class Bump {
 		br.close();
 	}
 
-	public void readCPDFile(String cpdFilename) throws IOException {
+	public void readCPDFile(String cpdFilename) throws Exception {
 		BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
 		String line;
+		
+		HashMap<String,Factor> initialFactors = new HashMap<String,Factor>();
 		
 		while ((line = br.readLine()) != null) {
 			String[] tokenized = line.split(" |,");
@@ -670,20 +673,52 @@ public class Bump {
 			double prob = Double.valueOf(tokenized[tokenized.length-1]);
 			//Put into appropriate clique
 			if(DEBUG) System.out.println(variables);
-			System.out.println(variables+" "+var_value+" "+ prob);
+			//System.out.println(variables+" "+var_value+" "+ prob);
 			
-			System.out.println(Factor.variableNamesToIndicies(variables).toString());
+			
+			//System.out.println(Factor.variableNamesToIndicies(variables).toString());
 			
 			ArrayList<Integer> key = Factor.variableNamesToIndicies(variables);
-			
+			ArrayList<Integer> val_indicies = Factor.valueNamesToIndicies(variables, var_value);
 			Collections.sort(key);
 			
-			if(_tree._vertices.containsKey(key.toString())){// CDP is covers an entire clique
-				//_tree._vertices.get(key.toSt ring()).multiplyInCpdValue(key, prob);
-			}else{// Cpd is a subfactor of one of our cliques.
+			//System.out.println(variables+" "+var_value+" "+ prob + "  key: "+key.toString()+ "  vals: "+val_indicies.toString());
+			//System.out.println(initialFactors.keySet().toString());
+			
+			if(initialFactors.containsKey(key.toString())){ //already has this factor
+				//System.out.println("Adding to previously created factor.");
+				initialFactors.get(key.toString()).putProbByValues(val_indicies, prob);
 				
+			}else{// new factor
+				//System.out.println("Creating new factor.");
+				Factor newFac = new Factor(key);
+				newFac.putProbByValues(val_indicies, prob);
+				initialFactors.put(key.toString(), newFac);
 			}
 		}		
+		
+		
+		if(DEBUG) System.out.println("initialFactors: " + initialFactors.keySet().toString());
+		if(DEBUG) System.out.println("_tree._vertices:"+_tree._vertices.keySet().toString());
+		for(String initFactors:initialFactors.keySet()){
+			ArrayList<Integer> vars = initialFactors.get(initFactors)._variables;
+			
+			if(DEBUG) System.out.println("Itinital Factor: " + initialFactors.get(initFactors));
+			
+			boolean foundSuperset = false;
+			for(String cliquesKeys:_tree._vertices.keySet()){
+				if(_tree._vertices.get(cliquesKeys).difference(vars).size() ==0 ){//we're a subset
+					if(DEBUG) System.out.println(initFactors + " is a subset of "+cliquesKeys );
+					_tree._vertices.get(cliquesKeys).setFactorData(_tree._vertices.get(cliquesKeys).product(initialFactors.get(initFactors)));
+					foundSuperset = true;
+					break;
+				}
+			}
+			if(!foundSuperset)
+				if(DEBUG) System.out.println("Hmmm... " + initFactors + " has no supersets");
+			//System.out.println("initialFact "+ initialFactors.get(s));
+			
+		}
 		br.close();
 	}
 
