@@ -122,10 +122,12 @@ public class Bump {
 			if(DEBUG) System.out.println(this.toString()+" sending message to:"+edgeToJ.getOtherVertex(this));
 			// calculate message - marginalize out all variables not in sepset ij
 			Factor sigmaItoJ = this.marginalize(this.difference(edgeToJ._variables));
+			if(DEBUG) System.out.println("sigma I,J:\n"+sigmaItoJ);
 			// send: make J receive
 			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ, sigmaItoJ);
 			// update edge potential
 			edgeToJ.setFactorData(sigmaItoJ);
+			if(DEBUG) System.out.println("mu I,J:\n"+(Factor)edgeToJ);
 		}
 		/**
 		 * When we receive a message...
@@ -137,12 +139,14 @@ public class Bump {
 			if(DEBUG) System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
 			// belief j = belief j * (sigma ij / mu ij)
 			this.setFactorData(this.product(sigmaItoJ.divide(edgeItoJ)));
+			if(DEBUG) System.out.println("belief J:\n"+(Factor)this);
 			// check if I was informed when sending
 			Vertex i = edgeItoJ.getOtherVertex(this);
 			_recvdMsgStatus.put(edgeItoJ, i._isInformed);
 			if(i._isInformed) { // if vertex I was informed....
 				_isInformed = isInformed(); // recheck if we are informed
 			}
+			if(DEBUG) System.out.println("informed status:\n"+_recvdMsgStatus);
 		}
 		/**
 		 * Return a list of all outgoing neighbors for the upward pass,
