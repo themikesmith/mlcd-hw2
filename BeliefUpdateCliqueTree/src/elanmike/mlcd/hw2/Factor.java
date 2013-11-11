@@ -229,7 +229,7 @@ public class Factor {
 		output += ")\n";
 		
 		for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
-			output += _variableNames.get(var_idx) + "\t";
+			output += _variableNames.get(_variables.get(var_idx)) + "\t";
 		output += "Value\n";
 		
 		for(int datum_index = 0; datum_index < data.size(); datum_index++){

@@ -63,6 +63,8 @@ public class Bump {
 				sb.append(var).append(',');
 			}
 			sb.deleteCharAt(sb.length()-1); // delete final comma
+			// add factor result
+			sb.append("\n").append(super.toString());
 			return sb.toString();
 		}
 	}
@@ -170,6 +172,15 @@ public class Bump {
 			}
 			return false;
 		}
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder("Vertex:\n");
+			// add clique string
+			sb.append(super.toString());
+			// add edge info
+			sb.append("recvdMsgStatus:").append(_recvdMsgStatus);
+			return sb.toString();
+		}
 	}
 	private class Edge extends Factor{
 		public static final String EDGE = " -- ";
@@ -195,11 +206,12 @@ public class Bump {
 		}
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append(_one.toString());
+			StringBuilder sb = new StringBuilder("edge:\n");
+			sb.append(Factor.variableIndicesToNames(_one._variables));
 			if(DEBUG) sb.append(" --").append(Factor.variableIndicesToNames(_variables)).append("-- ");
 			else sb.append(EDGE);
-			sb.append(_two.toString());
+			sb.append(Factor.variableIndicesToNames(_two._variables));
+			sb.append("\nmu:\n").append(super.toString());
 			return sb.toString();
 		}
 		/**
@@ -247,18 +259,17 @@ public class Bump {
 		}
 		
 		public String toString(){
-			String output = "=== Vertices ===\n";
+			StringBuilder output = new StringBuilder("=== Vertices ===\n");
 			Set<String> keys = _vertices.keySet();
 			for(String k:keys){
-				output += Factor.variableIndicesToNames(_vertices.get(k)._variables)+"\n";
+				output.append(_vertices.get(k).toString()).append("\n\n");
 			}
-			output += "=== Edges ===\n";
+			output.append("=== Edges ===\n");
 			keys = _edges.keySet();
 			for(String k:keys){
-				output += _edges.get(k).toString()+"\n";
-//				output += Factor.variableIndicesToNames(_edges.get(k)._variables)+"\n";
+				output.append(_edges.get(k).toString()).append("\n");
 			}
-			return output;
+			return output.toString();
 		}
 		/**
 		 * Run DFS to init ordering.
@@ -266,14 +277,19 @@ public class Bump {
 		 * @return the ordering as an array of vertices
 		 */
 		ArrayList<Vertex> assignOrderingAndInitBeliefs() {
+			//TODO implement assign ordering
 			ArrayList<Vertex> ordering = new ArrayList<Vertex>();
 			if(_vertices.size() == 0) return ordering;
+			// choose root
 			Vertex root = _vertices.values().iterator().next();
 			root.setOrderID(0);
-			//TODO implement assign ordering
 			// giving a number is equivalent to adding to ordering, giving index
-			// choose root
 			// while all vertices don't have a number
+//			while(ordering.size() != _vertices.size()) {
+//				
+//				
+//			}
+			
 			// 		depth first search from root, assigning numbers and init'ing beliefs
 			// 		if DFS ends before all vertices have numbers,
 			// 		choose another root, repeat
