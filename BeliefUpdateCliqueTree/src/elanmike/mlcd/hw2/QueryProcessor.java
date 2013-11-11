@@ -136,11 +136,13 @@ public class QueryProcessor {
 		BufferedReader br = new BufferedReader(new FileReader(queryFile));
 		String line;
 		while ((line = br.readLine()) != null) {
-			if(Bump.DEBUG) System.out.println("\n\n### query:\n\n"+line);
+			
 			String[] stuff = line.split(" ");
 			String[] lhs = stuff[0].split(",");
 			String[] rhs = stuff[1].split(",");
-			System.out.println("\n\n\n******result!!!******\n"+query(lhs, rhs, useSumProduct));
+			if(Bump.DEBUG) {
+				System.out.println("\n\n\n******result!!!******\n"+line+"\n"+query(lhs, rhs, useSumProduct));
+			}
 		}
 		br.close();
 	}
