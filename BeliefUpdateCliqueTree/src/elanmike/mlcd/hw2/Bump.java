@@ -601,6 +601,7 @@ public class Bump {
 		}
 		// and then reduce using the evidence given
 		//System.out.println("Reducing:  "+ Factor.variableIndicesToNames(eVars)+"  "+Factor.valueIndiciesToNames(eVars, eValues));
+		System.out.println("eVars"+ Factor.variableIndicesToNames(eVars));
 		f = target.reduce(eVars, eValues);
 		// return the factor, normalized
 		f.normalize();
