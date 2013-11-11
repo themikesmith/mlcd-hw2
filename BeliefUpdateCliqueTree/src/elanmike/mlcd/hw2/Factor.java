@@ -124,7 +124,7 @@ public class Factor {
 	public static int getVariableValueIndex(int varIdx, String val){
 		if(_variableValues == null)
 			return -1;
-		return _variableValues.indexOf(val);
+		return _variableValues.get(varIdx).indexOf(val);
 	}
 	public static String getVariableName(int varIdx, int valueIdx){
 		if(_variableNames == null)
