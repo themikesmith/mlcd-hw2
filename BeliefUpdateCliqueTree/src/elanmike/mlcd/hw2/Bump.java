@@ -273,7 +273,7 @@ public class Bump {
 		Tree makeCopy() {
 			Tree t = new Tree();
 			//TODO make deep copy
-			return null;
+			return t;
 		}
 		
 		public String toString(){
@@ -308,7 +308,8 @@ public class Bump {
 		void initCliques() {
 			//TODO implement init cliques
 			for(Vertex v : _vertices.values()) {
-				
+				// print clique data
+				if(DEBUG) System.out.println(v.getLongInfo());
 			}
 		}
 	}
