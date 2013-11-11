@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import java.util.TreeSet;
  */
 public class Bump {
 	public static final int NO_EVIDENCE = -1;
-	private static int nextVertexID = 0;
 	/**
 	 * Small clique class that holds a list of variables
 	 * We compare cliques by their number of shared variables
@@ -35,18 +33,18 @@ public class Bump {
 		Clique(String[] varNames) {
 			super(varNames);
 		}
-		void addVariable(int var) {
-			_variables.add(var);
-		}
-		/**
-		 * @param other the other clique
-		 * @return the number of variables this clique has in common with the other
-		 */
-		int getCardinalityOfIntersectionWith(Clique other) {
-			Set<Integer> intersection = new HashSet<Integer>(this._variables);
-			intersection.retainAll(other._variables);
-			return intersection.size();
-		}
+//		void addVariable(int var) {
+//			_variables.add(var);
+//		}
+//		/**
+//		 * @param other the other clique
+//		 * @return the number of variables this clique has in common with the other
+//		 */
+//		int getCardinalityOfIntersectionWith(Clique other) {
+//			Set<Integer> intersection = new HashSet<Integer>(this._variables);
+//			intersection.retainAll(other._variables);
+//			return intersection.size();
+//		}
 		/**
 		 * A clique is equal to another clique if their sets of variables are equal
 		 */
@@ -71,26 +69,30 @@ public class Bump {
 	private class Vertex extends Clique{
 		private Integer _orderID;
 
-		private Set<Edge> _neighborEdges, _incomingEdges, _outgoingEdges;
+		private Set<Edge> _neighborEdges, _outgoingEdges;
+		/**
+		 * Stores each neighboring edge, initializes with the fact that we
+		 * have not yet received an informed message via that edge.
+		 * Tracks our 'informed' status - whether or not we've received
+		 * informed messages on all edges
+		 */
 		private Map<Edge, Boolean> _recvdMsgStatus;
 		private boolean _isInformed, _onUpwardPass;
 		Vertex(String[] varsContained){
 			super(varsContained);
 			_neighborEdges = new TreeSet<Edge>();
-			_incomingEdges = new TreeSet<Edge>();
 			_outgoingEdges = new TreeSet<Edge>();
-			_orderID = nextVertexID++;
+			_orderID = -1;
 			_recvdMsgStatus = new HashMap<Edge, Boolean>();
 			_isInformed = false;
 			_onUpwardPass = false;
 		}
-		int getOrderID() {return _orderID;}
 		void setOrderID(int o) {this._orderID = o;}
-		Set<Edge> getNeighborEdges() {return _neighborEdges;}
 		/**
-		 * Adds a neighbor.
+		 * Adds a neighbor edge
 		 * checks for duplicates.
-		 * @param v
+		 * initializes our received message status for that edge.
+		 * @param e
 		 */
 		void addNeighborEdge(Edge e) {
 			if(_recvdMsgStatus.containsKey(e)) {
@@ -121,32 +123,6 @@ public class Bump {
 			if(v._isInformed) { // if we've altered our state, recheck
 				_isInformed = isInformed();
 			} // else don't bother, as we know it's impossible
-		}
-		/**
-		 * @return a list of all incoming neighbors, as defined by our stream direction.
-		 */
-		Set<Edge> getIncomingNeighborEdges() {
-			// only compute if we have to
-			if(_incomingEdges.size() == 0 || this._onUpwardPass != _bumpOnUpwardPass) {
-				Set<Edge> incomingEdges = new TreeSet<Edge>();
-				Iterator<Edge> it = _neighborEdges.iterator();
-				while(it.hasNext()) {
-					Edge e = it.next();
-					Vertex v = e.getOtherVertex(this);
-					if(_onUpwardPass) { // check order id is less than this order id
-						if(this._orderID < v._orderID) {
-							incomingEdges.add(e);
-						}
-					}
-					else { // check order id is greater than this order id
-						if(this._orderID > v._orderID) {
-							incomingEdges.add(e);
-						}
-					}
-				}
-				_incomingEdges = incomingEdges;
-			}
-			return _incomingEdges;
 		}
 		/**
 		 * @return a list of all outgoing neighbors, as defined by our stream direction.
@@ -247,7 +223,7 @@ public class Bump {
 			_edges = new HashMap<String,Edge>();
 		}
 		void addVertex(Vertex v) {
-			_vertices.put(v._variables.toString(),v);
+			_vertices.put(v.makeKey(),v);
 			//System.out.println("adding vertice with key: "+ v._variables.toString());
 		}
 		/**
@@ -256,10 +232,13 @@ public class Bump {
 		 * @param e
 		 */
 		void addEdge(Edge e) {
-			if(!_edges.containsKey(e._variables.toString())) {
+			if(!_edges.containsKey(e.makeKey())) {
 				//_vertices.put(e._one._variables.toString(),e._one);
 				//_vertices.put(e._two._variables.toString(),e._two);
-				_edges.put(e._variables.toString(),e);
+				_edges.put(e.makeKey(),e);
+				// for each involved vertex V, add the edge to its 'informed' check
+				e._one.addNeighborEdge(e);
+				e._two.addNeighborEdge(e);
 			}
 		}
 		Tree makeCopy() {
@@ -281,6 +260,25 @@ public class Bump {
 			}
 			return output;
 		}
+		/**
+		 * Run DFS to init ordering.
+		 * Initialize beliefs at each vertex of the tree
+		 * @return the ordering as an array of vertices
+		 */
+		ArrayList<Vertex> assignOrderingAndInitBeliefs() {
+			ArrayList<Vertex> ordering = new ArrayList<Vertex>();
+			if(_vertices.size() == 0) return ordering;
+			Vertex root = _vertices.values().iterator().next();
+			root.setOrderID(0);
+			//TODO implement assign ordering
+			// giving a number is equivalent to adding to ordering, giving index
+			// choose root
+			// while all vertices don't have a number
+			// 		depth first search from root, assigning numbers and init'ing beliefs
+			// 		if DFS ends before all vertices have numbers,
+			// 		choose another root, repeat
+			return ordering;
+		}
 	}
 	private static final boolean DEBUG = true;
 	/**
@@ -290,7 +288,6 @@ public class Bump {
 	 */
 	private boolean _bumpOnUpwardPass;
 	private Tree _tree, _queryTree;
-	private ArrayList<Vertex> _orderedVertices;
 	private boolean _useSumProduct;
 	
 	/**
@@ -301,7 +298,6 @@ public class Bump {
 		_tree = new Tree();
 		_bumpOnUpwardPass = false;
 		_queryContexts = new HashMap<Integer, Integer>();
-		_orderedVertices = new ArrayList<Vertex>();
 		_useSumProduct = true;
 	}
 	/**
@@ -316,40 +312,28 @@ public class Bump {
 	/**
 	 * Runs belief update message passing to calibrate the tree.
 	 * Resets, assigns an ordering, inits beliefs, calibrates the tree.
+	 * copies this calibrated tree such that we might alter it with query evidence
 	 */
 	public void runBump() {
-		assignOrderingAndInitBeliefs();
-		calibrateTree();
-	}
-	/**
-	 * Run DFS to init ordering.
-	 * Initialize beliefs at each vertex of the tree
-	 */
-	void assignOrderingAndInitBeliefs() {
-		_orderedVertices.clear();
-		//TODO implement assign ordering
-		// giving a number is equivalent to adding to ordering, giving index
-		// choose root
-		// while all vertices don't have a number
-		// 		depth first search from root, assigning numbers and init'ing beliefs
-		// 		if DFS ends before all vertices have numbers,
-		// 		choose another root, repeat
+		calibrateTree(_tree.assignOrderingAndInitBeliefs());
+		resetTreeForQueries();
 	}
 	/**
 	 * Calibrate the tree with two passes of belief-update message passing.
-	 * Begin with our ordering.
+	 * As the starting point doesn't matter,
+	 * Use our ordering that we created when initializing.
 	 */
-	void calibrateTree() {
+	void calibrateTree(List<Vertex> orderedVertices) {
 		_bumpOnUpwardPass = false;
-		for(int i = 0; i < _orderedVertices.size(); i++) {
-			Vertex v = _orderedVertices.get(i);
+		for(int i = 0; i < orderedVertices.size(); i++) {
+			Vertex v = orderedVertices.get(i);
 			for(Edge e : v.getOutgoingNeighborEdges()) {
 				v.sendMessage(e);
 			}
 		}
 		_bumpOnUpwardPass = true;
-		for(int i = _orderedVertices.size() - 1; i >= 0; i--) {
-			Vertex v = _orderedVertices.get(i);
+		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
+			Vertex v = orderedVertices.get(i);
 			for(Edge e : v.getOutgoingNeighborEdges()) {
 				v.sendMessage(e);
 			}
@@ -358,7 +342,8 @@ public class Bump {
 	/**
 	 * Conducts one downward pass of belief update message passing
 	 * with a designated root.
-	 * Conducts depth-first search of the query tree, sends messages in that order.
+	 * Conducts depth-first or breadth-first search of the query tree, 
+	 * sends messages in that order.
 	 * 
 	 * @param root
 	 * @return a stack of the reverse order of this pass, for the upward pass.
@@ -370,7 +355,9 @@ public class Bump {
 		return null;
 	}
 	/**
-	 * Resets the query tree in preparation for queries
+	 * Resets the query tree in preparation for queries.
+	 * makes a fresh copy of the tree in our query tree variable,
+	 * and clears our stored contexts.
 	 */
 	void resetTreeForQueries() {
 		_queryTree = _tree.makeCopy();
@@ -379,10 +366,10 @@ public class Bump {
 	/**
 	 * find a vertex with a clique containing the given set of variables
 	 * in the QUERY TREE
-	 * @param vars
-	 * @return vertex if found, null otherwise.  should always return a vertex.
+	 * @param vars the variable integers
+	 * @return a suitable vertex, or null otherwise.  should always return a vertex.
 	 */
-	Vertex findVertexQuery(int... vars) {
+	Vertex findVertexInQueryTree(int... vars) {
 		Tree t = _queryTree;
 		for(Vertex v : t._vertices.values()) {
 			boolean containsAll = true;
@@ -397,29 +384,14 @@ public class Bump {
 		return null;
 	}
 	/**
-	 * find a vertex with a clique containing the given variable
-	 * in the QUERY TREE
-	 * @param var if found, null if not found
-	 * @return vertex if found, null otherwise.  should always return a vertex.
-	 */
-	Vertex findVertexQuery(String var) {
-		Tree t = _queryTree;
-		for(Vertex v : t._vertices.values()) {
-			if(v._variables.contains(var)) {
-				return v;
-			}
-		}
-		return null;
-	}
-	/**
 	 * Given that our tree is calibrated, incorporate the evidence
 	 * into our QUERY COPY
 	 * 
 	 * @param pairs list of Pair<Integer, Integer>... pairs pairs of variable=value
 	 */
 	void incorporateQueryEvidence(int varInt, int varValue) {
-		// Find a clique with the variable, C
-		Vertex newRoot = findVertexQuery(varInt);
+		// Find a clique with the variable, C, in the query tree
+		Vertex newRoot = findVertexInQueryTree(varInt);
 		if(newRoot == null) {
 			System.err.println("can't find vertex - whoops!");
 		}
@@ -481,6 +453,7 @@ public class Bump {
 				System.err.println("this should never occur. investigate handling of retractive evidence.");
 			}
 		}
+		// now process lhs
 		for(String s : lhs) {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
@@ -535,6 +508,7 @@ public class Bump {
 				// we've already reset so this should never occur
 			}
 		}
+		// now process lhs
 		for(String s : lhs) {
 			String[] varValue = s.split("=");
 			String var = varValue[0], value = varValue[1];
@@ -557,8 +531,7 @@ public class Bump {
 	public void readCliqueTreeFile(String cliqueTreeFilename) 
 			throws IOException, NumberFormatException {
 		BufferedReader br = new BufferedReader(new FileReader(cliqueTreeFilename));
-		String line;
-		
+		String line;		
 		// on the first line is the number of following lines that describe vertices
 		int numCliques = -1;
 		if((line = br.readLine()) != null){
@@ -576,16 +549,14 @@ public class Bump {
 		for(int i = 0;i<numCliques;i++){
 			if((line = br.readLine()) != null){
 				String[] containedVars = line.split(",");
-				//System.out.println("Adding verticie: " + Factor.variableNamesToIndicies(containedVars) );
+				if(DEBUG) System.out.println("Adding vertex: " + Factor.variableNamesToIndicies(containedVars) );
 				Vertex v = new Vertex(containedVars);
 				_tree.addVertex(v);
-				
 			}else{
 				br.close();
 				throw new IOException("inconsistant network file.");
 			}
 		}
-		//edges
 		while ((line = br.readLine()) != null) {
 			// edges
 			String[] tokenized = line.split(" ");
@@ -593,9 +564,8 @@ public class Bump {
 			String[] left_variables = tokenized[0].split(",");
 			String[] right_variables = tokenized[2].split(",");
 			
-			
-			ArrayList<Integer> left = Factor.variableNamesToIndicies(new ArrayList<String>(Arrays.asList(left_variables)));
-			ArrayList<Integer> right = Factor.variableNamesToIndicies(new ArrayList<String>(Arrays.asList(right_variables)));
+			ArrayList<Integer> left = Factor.variableNamesToIndicies(left_variables);
+			ArrayList<Integer> right = Factor.variableNamesToIndicies(right_variables);
 			
 			Collections.sort(left);
 			Collections.sort(right);
@@ -606,10 +576,7 @@ public class Bump {
 //					,1
 					));
 		}
-		
-		
-		System.out.println(_tree.toString());
-		
+		if(DEBUG) System.out.println(_tree.toString());
 		br.close();
 	}
 
@@ -638,7 +605,7 @@ public class Bump {
 				Factor.addVariable(variableName, new ArrayList<String>(Arrays.asList(tokenized)));
 			}else{
 				br.close();
-				throw new IOException("inconsistant network file.");
+				throw new IOException("inconsistent network file.");
 			}
 		}
 		br.close();
@@ -661,7 +628,7 @@ public class Bump {
 			System.out.println(tokenized[tokenized.length-1]);
 			double prob = Double.valueOf(tokenized[tokenized.length-1]);
 			//Put into appropriate clique
-			//System.out.println(variables);
+			if(DEBUG) System.out.println(variables);
 			System.out.println(variables+" "+var_value+" "+ prob);
 			
 			System.out.println(Factor.variableNamesToIndicies(variables).toString());

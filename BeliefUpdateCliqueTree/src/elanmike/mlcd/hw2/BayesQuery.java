@@ -1,8 +1,6 @@
 package elanmike.mlcd.hw2;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.ArrayBlockingQueue;
 
 public class BayesQuery {
 
@@ -32,8 +30,8 @@ public class BayesQuery {
 		b.setUseSumProduct(useSumProduct);
 		try {
 			b.readNetworkFile(args[0]);
-			b.readCliqueTreeFile(args[2]);
 			b.readCPDFile(args[1]);
+			b.readCliqueTreeFile(args[2]);
 		} catch (NumberFormatException e1) {
 			e1.printStackTrace();
 			return;

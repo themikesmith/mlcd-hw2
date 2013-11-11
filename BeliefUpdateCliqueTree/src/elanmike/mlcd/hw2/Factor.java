@@ -49,7 +49,14 @@ public class Factor {
 			indicies.add(_variableNames.indexOf(s));
 		}
 		return indicies;
-	}	
+	}
+	public static ArrayList<Integer> variableNamesToIndicies(String[] variables){
+		ArrayList<Integer> indicies = new ArrayList<Integer>();
+		for(String s:variables){
+			indicies.add(_variableNames.indexOf(s));
+		}
+		return indicies;
+	}
 	
 	public static int getVariableValueIndex(int varIdx, String val){
 		if(_variableValues == null)
@@ -364,7 +371,14 @@ public class Factor {
 		}
 		return result;
 	}
-	
+	/**
+	 * Creates and returns a key representation of this factor.
+	 * This is a string representation of the variables array list
+	 * @return a key representation of this factor
+	 */
+	protected String makeKey() {
+		return _variables.toString();
+	}
 	
 //	public static void main(String args[]) throws Exception{
 //		
