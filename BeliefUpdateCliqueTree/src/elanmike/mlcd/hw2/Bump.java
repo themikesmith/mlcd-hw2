@@ -576,23 +576,22 @@ public class Bump {
 			System.err.println("uh oh! query vars size must equal query values size");
 			return null;
 		}
-		// at our target, we multiply indicator functions
+		// marginalize out variables not in the query's LHS
+		Factor f = target.marginalize(target.difference(vars));
+		// check the LHS for evidence...
+		ArrayList<Integer> eVars = new ArrayList<Integer>(), 
+				eValues = new ArrayList<Integer>();
 		for(int i = 0; i < vars.size(); i++) {
 			int var = vars.get(i), value = values.get(i);
 			if(value != QueryProcessor.NO_EVIDENCE) {
-				// if we have evidence specified in this pair, we apply an indicator function
-				target.product(Factor.indicatorFunction(var, value));
+				eVars.add(var);
+				eValues.add(value);
 			}
 		}
-		// and then marginalize out variables not in query
-		Factor f = target.marginalize(target.difference(vars));
+
 		// TODO normalize here maybe?
 		f.normalize();
-		ArrayList<Integer> heldVars = new ArrayList<Integer>();
-		heldVars.add(f._variables.get(0));
-		ArrayList<Integer> heldValues = new ArrayList<Integer>();
-		heldValues.add(0);
-		f = f.reduce(heldVars, heldValues);
+
 		return f;
 	}
 	/**
