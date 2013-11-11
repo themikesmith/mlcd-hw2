@@ -507,7 +507,7 @@ public class Factor {
 		}
 		
 	}
-
+	
 	public Factor reduce(ArrayList<Integer> heldVars, ArrayList<Integer> heldValues){
 		Factor result = new Factor(this.difference(heldVars));
 		
