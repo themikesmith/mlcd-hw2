@@ -115,28 +115,32 @@ public class Bump {
 		/**
 		 * Sends a message to its neighbor.
 		 * Calls the neighbor's onReceiveMessage method
-		 * @param recvingNeighbor
+		 * @param edgeToJ
+		 * @throws FactorIndexException 
 		 */
-		void sendMessage(Edge recvingNeighborEdge) {
-			// calculate message, and send
-			// TODO compose message
-			Factor message = null;
-			recvingNeighborEdge.getOtherVertex(this).
-				onReceiveMessage(recvingNeighborEdge, message);
+		void sendMessage(Edge edgeToJ) throws FactorException {
+			// calculate message - marginalize out all variables not in sepset ij
+			Factor sigmaItoJ = this.marginalize(this.difference(edgeToJ._variables));
+			// send: make J receive
+			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ, sigmaItoJ);
+			// update edge potential
+			edgeToJ.setFactorData(sigmaItoJ);
 		}
 		/**
 		 * When we receive a message...
 		 * (called by our 'send message' function when our neighbor sends
-		 * @param sendingNeighborEdge
-		 * @param message
+		 * @param edgeItoJ
+		 * @param sigmaItoJ
 		 */
-		private void onReceiveMessage(Edge sendingNeighborEdge, Factor message) {
-			// TODO process message
-			Vertex v = sendingNeighborEdge.getOtherVertex(this);
-			_recvdMsgStatus.put(sendingNeighborEdge, v._isInformed);
-			if(v._isInformed) { // if we've altered our state, recheck
-				_isInformed = isInformed();
-			} // else don't bother, as we know it's impossible
+		private void onReceiveMessage(Edge edgeItoJ, Factor sigmaItoJ) throws FactorException {
+			// belief j = belief j * (sigma ij / mu ij)
+			this.setFactorData(this.product(sigmaItoJ.divide(edgeItoJ)));
+			// check if I was informed when sending
+			Vertex i = edgeItoJ.getOtherVertex(this);
+			_recvdMsgStatus.put(edgeItoJ, i._isInformed);
+			if(i._isInformed) { // if vertex I was informed....
+				_isInformed = isInformed(); // recheck if we are informed
+			}
 		}
 		/**
 		 * Return a list of all outgoing neighbors for the upward pass,
@@ -189,7 +193,6 @@ public class Bump {
 			sb.append("recvdMsgStatus:").append(_recvdMsgStatus);
 			return sb.toString();
 		}
-		
 	}
 	private class Edge extends Factor{
 		public static final String EDGE = " -- ";
@@ -342,17 +345,25 @@ public class Bump {
 	 * Runs belief update message passing to calibrate the tree.
 	 * Resets, inits beliefs, calibrates the tree.
 	 * copies this calibrated tree such that we might alter it with query evidence
+	 * @return true if successful, false otherwise
 	 */
-	public void runBump() {
+	public boolean runBump() {
 		_tree.initCliques();
-		upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
+		try {
+			upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
+		} catch (FactorException e) {
+			e.printStackTrace();
+			return false;
+		}
 		resetTreeForQueries();
+		return true;
 	}
 	/**
 	 * Calibrate the tree with the upward pass of belief-update message passing.
 	 * Use the reverse of our ordering that we created in the downward pass.
+	 * @throws FactorException 
 	 */
-	void upwardPassBeliefUpdate(List<Vertex> orderedVertices) {
+	void upwardPassBeliefUpdate(List<Vertex> orderedVertices) throws FactorException {
 		_bumpOnUpwardPass = true;
 		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
 		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
@@ -378,8 +389,9 @@ public class Bump {
 	 * 
 	 * @param t the tree in question
 	 * @return a list of the order of this pass, so we can reverse it in the upward pass
+	 * @throws FactorException 
 	 */
-	List<Vertex> downwardPassBeliefUpdate(Tree t) {
+	List<Vertex> downwardPassBeliefUpdate(Tree t) throws FactorException {
 		return downwardPassBeliefUpdate(t, t._vertices.values().iterator().next());
 	}
 	/**
@@ -391,8 +403,9 @@ public class Bump {
 	 * @param t the tree in question.
 	 * @param root
 	 * @return a list of the order of this pass, so the upward pass can reverse it
+	 * @throws FactorException 
 	 */
-	List<Vertex> downwardPassBeliefUpdate(Tree t, Vertex root) {
+	List<Vertex> downwardPassBeliefUpdate(Tree t, Vertex root) throws FactorException {
 		_bumpOnUpwardPass = false;
 		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
 		nextOrderID = UNMARKED; // begin again at 0
@@ -470,15 +483,18 @@ public class Bump {
 	 * into our QUERY COPY
 	 * 
 	 * @param pairs list of Pair<Integer, Integer>... pairs pairs of variable=value
+	 * @throws FactorException 
 	 */
-	void incorporateQueryEvidence(int varInt, int varValue) {
+	void incorporateQueryEvidence(int varInt, int varValue) throws FactorException {
 		// Find a clique with the variable, C, in the query tree
 		Vertex newRoot = findVertexInTree(_queryTree, varInt);
 		if(newRoot == null) {
 			System.err.println("can't find vertex - whoops!");
 		}
 		// multiply in a new indicator factor
-		// TODO multiply in new indicator
+		// TODO write factor indicator function
+		Factor indicator = null;
+		newRoot.product(indicator);
 		// conduct one pass of B-U with C as the root
 		downwardPassBeliefUpdate(_queryTree, newRoot);
 	}
@@ -525,7 +541,12 @@ public class Bump {
 				valueInt = Factor.getVariableValueIndex(varInt, value);
 			if(!_queryContexts.containsKey(varInt)) {
 				// additional evidence - we've never seen it before
-				incorporateQueryEvidence(varInt, varInt);
+				try {
+					incorporateQueryEvidence(varInt, varInt);
+				} catch (FactorException e) {
+					e.printStackTrace();
+					return e.getMessage();
+				}
 			}
 			else if(_queryContexts.get(varInt) == valueInt) {
 				// already have this context variable = value pair, do nothing
@@ -542,7 +563,7 @@ public class Bump {
 			int varInt = Factor.getVariableIndex(var),
 				valueInt = Factor.getVariableValueIndex(varInt, value);
 			if(valueInt != NO_EVIDENCE) {
-				// TODO conduct query
+				// TODO conduct query sum product
 			}
 		}
 		return null;
@@ -581,7 +602,12 @@ public class Bump {
 					valueInt = Factor.getVariableValueIndex(varInt, value);
 			if(!_queryContexts.containsKey(varInt)) {
 				// additional evidence - we've never seen it before
-				incorporateQueryEvidence(varInt, varInt);
+				try {
+					incorporateQueryEvidence(varInt, varInt);
+				} catch (FactorException e) {
+					e.printStackTrace();
+					return e.getMessage();
+				}
 			}
 			else if(_queryContexts.get(varInt) == valueInt) {
 				// already have this context variable = value pair, do nothing
@@ -597,7 +623,7 @@ public class Bump {
 			int varInt = Factor.getVariableIndex(var),
 				valueInt = Factor.getVariableValueIndex(varInt, value);
 			if(valueInt != NO_EVIDENCE) {
-				// TODO conduct query
+				// TODO conduct query max product
 			}
 		}
 		return null;
