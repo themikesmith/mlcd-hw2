@@ -325,7 +325,10 @@ public class Factor {
 		
 		for(int datum_index = 0; datum_index < data.size(); datum_index++){
 			for(int var_idx=0; var_idx < _variables.size(); var_idx ++){
-				output += String.format("%01d       ", ((datum_index/_stride.get(var_idx))%_variableCard.get(var_idx)));
+				//output += String.format("%01d       ", ((datum_index/_stride.get(var_idx))%_variableCard.get(var_idx)));
+				output += String.format("%s\t", 
+					Factor.getVariableName(var_idx,
+							((datum_index/_stride.get(var_idx))%_variableCard.get(var_idx))));
 			}
 			output += Math.exp(data.get(datum_index))+"\n";
 		}
