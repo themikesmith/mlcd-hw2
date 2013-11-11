@@ -49,7 +49,28 @@ public class Factor {
 			indicies.add(_variableNames.indexOf(s));
 		}
 		return indicies;
-	}	
+	}
+	public static ArrayList<Integer> variableNamesToIndicies(String[] variables){
+		ArrayList<Integer> indicies = new ArrayList<Integer>();
+		for(String s:variables){
+			indicies.add(_variableNames.indexOf(s));
+		}
+		return indicies;
+	}
+	public static ArrayList<String> variableIndicesToNames(ArrayList<Integer> variables){
+		ArrayList<String> names = new ArrayList<String>();
+		for(int s:variables){
+			names.add(_variableNames.get(s));
+		}
+		return names;
+	}
+	public static ArrayList<String> variableIndicesToNames(int... variables){
+		ArrayList<String> names = new ArrayList<String>();
+		for(int s:variables){
+			names.add(_variableNames.get(s));
+		}
+		return names;
+	}
 	
 	public static int getVariableValueIndex(int varIdx, String val){
 		if(_variableValues == null)
@@ -208,7 +229,7 @@ public class Factor {
 		output += ")\n";
 		
 		for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
-			output += _variableNames.get(var_idx) + "\t";
+			output += _variableNames.get(_variables.get(var_idx)) + "\t";
 		output += "Value\n";
 		
 		for(int datum_index = 0; datum_index < data.size(); datum_index++){
@@ -361,136 +382,147 @@ public class Factor {
 			}
 			result.data.set(result.index(f_indicies_of_values), result.data.get(result.index(f_indicies_of_values))+this.data.get(datum_idx));
 			
+			
 		}
 		return result;
 	}
-	
+
 
 	public void multiplyInCpdValue(ArrayList<Integer> key, double prob) {
 		
 	}
 	
-	public static void main(String args[]) throws Exception{
-		
-		/*
-		//Margin Test
-		ArrayList<String> A_vals = new ArrayList<String>();
-		A_vals.add("1");
-		A_vals.add("2");
-		A_vals.add("3");
-		
-		ArrayList<String> B_vals = new ArrayList<String>();
-		B_vals.add("1");
-		B_vals.add("2");
-		
-		Factor.addVariable("A", A_vals);
-		Factor.addVariable("B", B_vals);
-		Factor.addVariable("C", B_vals);
-		System.out.println(Factor.variableInfo());
-		
-		String[] fac1_vars = {"A","B","C"}; 
-		Factor fac1 = new Factor(fac1_vars);
-		fac1.addJointProbByIndex(0, .25);// 1 1 1
-		fac1.addJointProbByIndex(1, .05);// 2 1 1
-		fac1.addJointProbByIndex(2, .15);// 3 1 1
-		
-		fac1.addJointProbByIndex(3, .08);// 1 2 1 
-		fac1.addJointProbByIndex(4, 0);  // 2 2 1
-		fac1.addJointProbByIndex(5, .09);// 3 2 1
-		
-		fac1.addJointProbByIndex(6, .35);// 1 1 2
-		fac1.addJointProbByIndex(7, .07);// 2 1 2
-		fac1.addJointProbByIndex(8, .21);// 3 1 2
-		
-		fac1.addJointProbByIndex(9, .16); //1 2 2
-		fac1.addJointProbByIndex(10, 0);  //2 2 2
-		fac1.addJointProbByIndex(11, .18);//3 2 2
-		System.out.println(fac1);
-		
-		ArrayList<Integer> elim_vars = new ArrayList<Integer>();
-		elim_vars.add(1);
-		System.out.println(fac1.marginalize(elim_vars));
-		*/
-		/*
-		 
-		//Division Test
-		ArrayList<String> A_vals = new ArrayList<String>();
-		A_vals.add("1");
-		A_vals.add("2");
-		A_vals.add("3");
-		
-		ArrayList<String> B_vals = new ArrayList<String>();
-		B_vals.add("1");
-		B_vals.add("2");
-		
-		Factor.addVariable("A", A_vals);
-		Factor.addVariable("B", B_vals);
-		System.out.println(Factor.variableInfo());
-		
-		String[] fac1_vars = {"A","B"}; 
-		Factor fac1 = new Factor(fac1_vars);
-		fac1.addJointProbByIndex(0, .5);
-		fac1.addJointProbByIndex(1, 0);
-		fac1.addJointProbByIndex(2, .3);
-		fac1.addJointProbByIndex(3, .2);
-		fac1.addJointProbByIndex(4, 0);
-		fac1.addJointProbByIndex(5, .45);
-		System.out.println(fac1);
-		
-		String[] fac2_vars = {"A"}; 
-		Factor fac2 = new Factor(fac2_vars);
-		fac2.addJointProbByIndex(0, .8);
-		fac2.addJointProbByIndex(1, .0);
-		fac2.addJointProbByIndex(2, .6);
-		System.out.println(fac2);
-		
-		
-		System.out.println(fac1.divide(fac2));
-		*/
-		
-		
-		
-		/*//Product Test
-		ArrayList<String> A_vals = new ArrayList<String>();
-		A_vals.add("1");
-		A_vals.add("2");
-		A_vals.add("3");
-		
-		ArrayList<String> B_vals = new ArrayList<String>();
-		B_vals.add("1");
-		B_vals.add("2");
-		
-		ArrayList<String> C_vals = new ArrayList<String>();
-		C_vals.add("1");
-		C_vals.add("2");
-		
-		Factor.addVariable("A", A_vals);
-		Factor.addVariable("B", B_vals);
-		Factor.addVariable("C", C_vals);
-		System.out.println(Factor.variableInfo());
-		
-		String[] fac1_vars = {"A","B"}; 
-		Factor fac1 = new Factor(fac1_vars);
-		fac1.addJointProbByIndex(0, .5);
-		fac1.addJointProbByIndex(1, .1);
-		fac1.addJointProbByIndex(2, .3);
-		fac1.addJointProbByIndex(3, .8);
-		fac1.addJointProbByIndex(4, 0);
-		fac1.addJointProbByIndex(5, .9);
-		System.out.println(fac1);
-		
-		String[] fac2_vars = {"B","C"}; 
-		Factor fac2 = new Factor(fac2_vars);
-		fac2.addJointProbByIndex(0, .5);
-		fac2.addJointProbByIndex(1, .1);
-		fac2.addJointProbByIndex(2, .7);
-		fac2.addJointProbByIndex(3, .2);
-		System.out.println(fac2);
-		
-		
-		System.out.println(fac1.product(fac2));
-		
-		*/
+	/**
+	 * Creates and returns a key representation of this factor.
+	 * This is a string representation of the variables array list
+	 * @return a key representation of this factor
+	 */
+	protected String makeKey() {
+		return _variables.toString();
+
 	}
+	
+//	public static void main(String args[]) throws Exception{
+//		
+//		/*
+//		//Margin Test
+//		ArrayList<String> A_vals = new ArrayList<String>();
+//		A_vals.add("1");
+//		A_vals.add("2");
+//		A_vals.add("3");
+//		
+//		ArrayList<String> B_vals = new ArrayList<String>();
+//		B_vals.add("1");
+//		B_vals.add("2");
+//		
+//		Factor.addVariable("A", A_vals);
+//		Factor.addVariable("B", B_vals);
+//		Factor.addVariable("C", B_vals);
+//		System.out.println(Factor.variableInfo());
+//		
+//		String[] fac1_vars = {"A","B","C"}; 
+//		Factor fac1 = new Factor(fac1_vars);
+//		fac1.addJointProbByIndex(0, .25);// 1 1 1
+//		fac1.addJointProbByIndex(1, .05);// 2 1 1
+//		fac1.addJointProbByIndex(2, .15);// 3 1 1
+//		
+//		fac1.addJointProbByIndex(3, .08);// 1 2 1 
+//		fac1.addJointProbByIndex(4, 0);  // 2 2 1
+//		fac1.addJointProbByIndex(5, .09);// 3 2 1
+//		
+//		fac1.addJointProbByIndex(6, .35);// 1 1 2
+//		fac1.addJointProbByIndex(7, .07);// 2 1 2
+//		fac1.addJointProbByIndex(8, .21);// 3 1 2
+//		
+//		fac1.addJointProbByIndex(9, .16); //1 2 2
+//		fac1.addJointProbByIndex(10, 0);  //2 2 2
+//		fac1.addJointProbByIndex(11, .18);//3 2 2
+//		System.out.println(fac1);
+//		
+//		ArrayList<Integer> elim_vars = new ArrayList<Integer>();
+//		elim_vars.add(1);
+//		System.out.println(fac1.marginalize(elim_vars));
+//		*/
+//		/*
+//		 
+//		//Division Test
+//		ArrayList<String> A_vals = new ArrayList<String>();
+//		A_vals.add("1");
+//		A_vals.add("2");
+//		A_vals.add("3");
+//		
+//		ArrayList<String> B_vals = new ArrayList<String>();
+//		B_vals.add("1");
+//		B_vals.add("2");
+//		
+//		Factor.addVariable("A", A_vals);
+//		Factor.addVariable("B", B_vals);
+//		System.out.println(Factor.variableInfo());
+//		
+//		String[] fac1_vars = {"A","B"}; 
+//		Factor fac1 = new Factor(fac1_vars);
+//		fac1.addJointProbByIndex(0, .5);
+//		fac1.addJointProbByIndex(1, 0);
+//		fac1.addJointProbByIndex(2, .3);
+//		fac1.addJointProbByIndex(3, .2);
+//		fac1.addJointProbByIndex(4, 0);
+//		fac1.addJointProbByIndex(5, .45);
+//		System.out.println(fac1);
+//		
+//		String[] fac2_vars = {"A"}; 
+//		Factor fac2 = new Factor(fac2_vars);
+//		fac2.addJointProbByIndex(0, .8);
+//		fac2.addJointProbByIndex(1, .0);
+//		fac2.addJointProbByIndex(2, .6);
+//		System.out.println(fac2);
+//		
+//		
+//		System.out.println(fac1.divide(fac2));
+//		*/
+//		
+//		
+//		
+//		/*//Product Test
+//		ArrayList<String> A_vals = new ArrayList<String>();
+//		A_vals.add("1");
+//		A_vals.add("2");
+//		A_vals.add("3");
+//		
+//		ArrayList<String> B_vals = new ArrayList<String>();
+//		B_vals.add("1");
+//		B_vals.add("2");
+//		
+//		ArrayList<String> C_vals = new ArrayList<String>();
+//		C_vals.add("1");
+//		C_vals.add("2");
+//		
+//		Factor.addVariable("A", A_vals);
+//		Factor.addVariable("B", B_vals);
+//		Factor.addVariable("C", C_vals);
+//		System.out.println(Factor.variableInfo());
+//		
+//		String[] fac1_vars = {"A","B"}; 
+//		Factor fac1 = new Factor(fac1_vars);
+//		fac1.addJointProbByIndex(0, .5);
+//		fac1.addJointProbByIndex(1, .1);
+//		fac1.addJointProbByIndex(2, .3);
+//		fac1.addJointProbByIndex(3, .8);
+//		fac1.addJointProbByIndex(4, 0);
+//		fac1.addJointProbByIndex(5, .9);
+//		System.out.println(fac1);
+//		
+//		String[] fac2_vars = {"B","C"}; 
+//		Factor fac2 = new Factor(fac2_vars);
+//		fac2.addJointProbByIndex(0, .5);
+//		fac2.addJointProbByIndex(1, .1);
+//		fac2.addJointProbByIndex(2, .7);
+//		fac2.addJointProbByIndex(3, .2);
+//		System.out.println(fac2);
+//		
+//		
+//		System.out.println(fac1.product(fac2));
+//		
+//		*/
+//	}
 	
 }
