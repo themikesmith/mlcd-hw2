@@ -485,6 +485,19 @@ public class Factor {
 		return result;
 	}
 
+	public void normalize(){
+		double Z = 0;
+		for(int i = 0; i<data.size(); i++){
+			Z += Math.exp(data.get(i));
+		}
+		
+		double logZ = Math.log(Z);
+		for(int i = 0; i<data.size(); i++){
+			data.set(i,data.get(i)-logZ);
+		}
+		
+	}
+	
 	/**
 	 * Creates and returns a key representation of this factor.
 	 * This is a string representation of the variables array list
