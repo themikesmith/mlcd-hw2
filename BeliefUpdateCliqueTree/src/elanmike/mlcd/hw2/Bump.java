@@ -37,6 +37,11 @@ public class Bump {
 		Clique(String[] varNames) {
 			super(varNames);
 		}
+		
+		Clique(Clique cliqueToCopy) {
+			super(cliqueToCopy);
+		}
+		
 //		void addVariable(int var) {
 //			_variables.add(var);
 //		}
@@ -85,6 +90,14 @@ public class Bump {
 			_recvdMsgStatus = new HashMap<Edge, Boolean>();
 			reset();
 		}
+		
+		Vertex(Vertex vertexToCopy) {
+			super(vertexToCopy);
+			_outgoingEdges = new HashSet<Edge>();
+			_recvdMsgStatus = new HashMap<Edge, Boolean>();
+			reset();
+		}
+		
 		/**
 		 * Resets this vertex to prepare for the running of the algorithm
 		 */
