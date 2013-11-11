@@ -362,6 +362,13 @@ public class Factor {
 			union.add((Integer) o);
 		return union;
 	}
+
+	public boolean contains(ArrayList<Integer> other){
+			Set<Integer> myVars = new TreeSet<Integer>(this._variables);
+			Set<Integer> theirVars = new TreeSet<Integer>(other);
+			//System.out.println(myVars + " ?= "+ theirVars);
+			return myVars.containsAll(theirVars);
+		}
 	
 	public Factor product(Factor f) throws ArrayIndexOutOfBoundsException {
 		ArrayList<Integer> unionScope = this.union(f._variables);

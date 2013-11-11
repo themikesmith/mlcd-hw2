@@ -717,7 +717,7 @@ public class Bump {
 			//System.out.println(tokenized[tokenized.length-1]);
 			double prob = Double.valueOf(tokenized[tokenized.length-1]);
 			//Put into appropriate clique
-			if(DEBUG) System.out.println(variables);
+			//if(DEBUG) System.out.println(variables);
 			//System.out.println(variables+" "+var_value+" "+ prob);
 			
 			
@@ -762,7 +762,7 @@ public class Bump {
 			
 			boolean foundSuperset = false;
 			for(String cliquesKeys:_tree._vertices.keySet()){
-				if(_tree._vertices.get(cliquesKeys).difference(vars).size() ==0 ){//we're a subset
+				if(_tree._vertices.get(cliquesKeys).contains(vars)){//we're a subset
 					if(DEBUG) System.out.println(initFactors + " is a subset of "+cliquesKeys );
 					_tree._vertices.get(cliquesKeys).setFactorData(_tree._vertices.get(cliquesKeys).product(initialFactors.get(initFactors)));
 					foundSuperset = true;
@@ -775,6 +775,13 @@ public class Bump {
 			
 		}
 		br.close();
+		
+		if(DEBUG){
+			System.out.println("==initialBeliefs==");
+			for(String cliquesKeys:_tree._vertices.keySet()){
+				System.out.println(_tree._vertices.get(cliquesKeys));
+			}
+		}
 	}
 
 	public void processQueries(String queryFile, boolean useSumProduct) throws IOException {
