@@ -57,6 +57,20 @@ public class Factor {
 		}
 		return indicies;
 	}
+	public static ArrayList<String> variableIndicesToNames(ArrayList<Integer> variables){
+		ArrayList<String> names = new ArrayList<String>();
+		for(int s:variables){
+			names.add(_variableNames.get(s));
+		}
+		return names;
+	}
+	public static ArrayList<String> variableIndicesToNames(int... variables){
+		ArrayList<String> names = new ArrayList<String>();
+		for(int s:variables){
+			names.add(_variableNames.get(s));
+		}
+		return names;
+	}
 	
 	public static int getVariableValueIndex(int varIdx, String val){
 		if(_variableValues == null)

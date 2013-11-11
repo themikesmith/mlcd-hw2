@@ -59,7 +59,7 @@ public class Bump {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			for(Integer var : _variables) {
+			for(String var : Factor.variableIndicesToNames(_variables)) {
 				sb.append(var).append(',');
 			}
 			sb.deleteCharAt(sb.length()-1); // delete final comma
@@ -199,7 +199,7 @@ public class Bump {
 			sb.append(_one.toString());
 //			if(DEBUG) sb.append(" --").append(_weight).append("-- ");
 //			else
-				sb.append(EDGE);
+			sb.append(EDGE).append(Factor.variableIndicesToNames(_variables)).append(EDGE);
 			sb.append(_two.toString());
 			return sb.toString();
 		}
@@ -248,15 +248,16 @@ public class Bump {
 		}
 		
 		public String toString(){
-			String output = "=== Verticies ===\n";
+			String output = "=== Vertices ===\n";
 			Set<String> keys = _vertices.keySet();
 			for(String k:keys){
-				output += _vertices.get(k)._variables.toString()+"\n";
+				output += Factor.variableIndicesToNames(_vertices.get(k)._variables)+"\n";
 			}
 			output += "=== Edges ===\n";
 			keys = _edges.keySet();
 			for(String k:keys){
-				output += _edges.get(k)._variables.toString()+"\n";
+				output += _edges.get(k).toString()+"\n";
+//				output += Factor.variableIndicesToNames(_edges.get(k)._variables)+"\n";
 			}
 			return output;
 		}
