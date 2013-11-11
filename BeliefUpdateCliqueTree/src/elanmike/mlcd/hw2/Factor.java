@@ -521,8 +521,8 @@ public class Factor {
 				int that_ind = f._variables.indexOf(s);//index of variable in sepset in this factor
 				f_indicies_of_values[that_ind] = values.get(this_ind);
 			}
-			if(Math.exp(this.data.get(datum_idx)) == 0.0 && Math.exp(f.getProbByValues(f_indicies_of_values)) == Math.log(0.0) ){
-				result.data.set(datum_idx, Math.log(0.0));
+			if(this.data.get(datum_idx).equals(Double.NEGATIVE_INFINITY) && f.getProbByValues(f_indicies_of_values) == Double.NEGATIVE_INFINITY ){
+				result.data.set(datum_idx, Double.NEGATIVE_INFINITY);
 			}else{
 				result.data.set(datum_idx, this.data.get(datum_idx) - f.getProbByValues(f_indicies_of_values));
 			}
@@ -681,8 +681,8 @@ public class Factor {
 		elim_vars.add(1);
 		System.out.println(fac1.marginalize(elim_vars));
 		*/
-		/*
-		 
+		
+		{
 		//Division Test
 		ArrayList<String> A_vals = new ArrayList<String>();
 		A_vals.add("1");
@@ -699,27 +699,27 @@ public class Factor {
 		
 		String[] fac1_vars = {"A","B"}; 
 		Factor fac1 = new Factor(fac1_vars);
-		fac1.addJointProbByIndex(0, .5);
-		fac1.addJointProbByIndex(1, 0);
-		fac1.addJointProbByIndex(2, .3);
-		fac1.addJointProbByIndex(3, .2);
-		fac1.addJointProbByIndex(4, 0);
-		fac1.addJointProbByIndex(5, .45);
+		fac1.putProbByValues(.5,0, 0);
+		fac1.putProbByValues(.2, 0, 1);
+		fac1.putProbByValues(0, 1, 0);
+		fac1.putProbByValues(1, 1, 1);
+		fac1.putProbByValues(.3, 2, 0);
+		fac1.putProbByValues(.45, 2, 1);
 		System.out.println(fac1);
 		
 		String[] fac2_vars = {"A"}; 
 		Factor fac2 = new Factor(fac2_vars);
-		fac2.addJointProbByIndex(0, .8);
-		fac2.addJointProbByIndex(1, .0);
-		fac2.addJointProbByIndex(2, .6);
+		fac2.putProbByValues(.8, 0);
+		fac2.putProbByValues(.0, 1);
+		fac2.putProbByValues(.6, 2);
 		System.out.println(fac2);
 		
-		
+		System.out.println("A / B = ");
 		System.out.println(fac1.divide(fac2));
-		*/
+		}
 		
 		
-		
+		{
 		//Product Test
 		ArrayList<String> A_vals = new ArrayList<String>();
 		A_vals.add("1");
@@ -759,9 +759,9 @@ public class Factor {
 
 		System.out.println(fac2);
 		System.out.println(fac2.data.toString());
-		
+		System.out.println("A x B = ");
 		System.out.println(fac1.product(fac2));
-		
+		}
 		
 	}
 	
