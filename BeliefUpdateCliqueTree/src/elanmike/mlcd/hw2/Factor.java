@@ -208,7 +208,7 @@ public class Factor {
 		}
 		
 		this.data = new ArrayList<Double>(strideTot);
-		for(int i = 0; i<strideTot; i++) data.add(0.0);
+		for(int i = 0; i<strideTot; i++) data.add(1.0);
 	}
 	
 	public void setFactorData(Factor f) throws FactorScopeException {
