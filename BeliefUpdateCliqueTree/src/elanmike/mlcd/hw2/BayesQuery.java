@@ -32,8 +32,8 @@ public class BayesQuery {
 		b.setUseSumProduct(useSumProduct);
 		try {
 			b.readNetworkFile(args[0]);
-			b.readCPDFile(args[1]);
 			b.readCliqueTreeFile(args[2]);
+			b.readCPDFile(args[1]);
 		} catch (NumberFormatException e1) {
 			e1.printStackTrace();
 			return;

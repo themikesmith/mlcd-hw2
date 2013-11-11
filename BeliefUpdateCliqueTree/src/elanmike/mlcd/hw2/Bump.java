@@ -61,10 +61,7 @@ public class Bump {
 			}
 			return false;
 		}
-		@Override
-		public String toString() {
-			return Factor.variableIndicesToNames(_variables).toString();
-		}
+		
 		public String getLongInfo() {
 			StringBuilder sb = new StringBuilder(toString());
 			// add factor result
@@ -770,27 +767,27 @@ public class Bump {
 		}		
 		
 		
-		if(DEBUG){
-			System.out.println("==initialFactors==");
-			for(String s:initialFactors.keySet()){
-				System.out.println(Factor.variableIndicesToNames(initialFactors.get(s)._variables));
-			}
-			
-			System.out.println("==Cliques==");
-			for(String s:_tree._vertices.keySet()){
-				System.out.println(Factor.variableIndicesToNames(_tree._vertices.get(s)._variables));
-			}
-		}
+//		if(DEBUG){
+//			System.out.println("==initialFactors==");
+//			for(String s:initialFactors.keySet()){
+//				System.out.println(Factor.variableIndicesToNames(initialFactors.get(s)._variables));
+//			}
+//			
+//			System.out.println("==Cliques==");
+//			for(String s:_tree._vertices.keySet()){
+//				System.out.println(Factor.variableIndicesToNames(_tree._vertices.get(s)._variables));
+//			}
+//		}
 		
 		for(String initFactors:initialFactors.keySet()){
 			ArrayList<Integer> vars = initialFactors.get(initFactors)._variables;
 			
-			if(DEBUG) System.out.println("Itinital Factor: " + initialFactors.get(initFactors));
+			//if(DEBUG) System.out.println("Itinital Factor: " + initialFactors.get(initFactors));
 			
 			boolean foundSuperset = false;
 			for(String cliquesKeys:_tree._vertices.keySet()){
 				if(_tree._vertices.get(cliquesKeys).contains(vars)){//we're a subset
-					if(DEBUG) System.out.println(initFactors + " is a subset of "+cliquesKeys );
+					//if(DEBUG) System.out.println(initFactors + " is a subset of "+cliquesKeys );
 					_tree._vertices.get(cliquesKeys).setFactorData(_tree._vertices.get(cliquesKeys).product(initialFactors.get(initFactors)));
 					foundSuperset = true;
 					break;
@@ -806,7 +803,7 @@ public class Bump {
 		if(DEBUG){
 			System.out.println("==initialBeliefs==");
 			for(String cliquesKeys:_tree._vertices.keySet()){
-				System.out.println(_tree._vertices.get(cliquesKeys));
+				System.out.println(_tree._vertices.get(cliquesKeys).toString());
 			}
 		}
 	}
