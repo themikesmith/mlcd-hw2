@@ -42,6 +42,7 @@ public class BayesQuery {
 			return;
 		} catch (FactorException e) {
 			e.printStackTrace();
+			return;
 		}
 		b.runBump();
 		try {
