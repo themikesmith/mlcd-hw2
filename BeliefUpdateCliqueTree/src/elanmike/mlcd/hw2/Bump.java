@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.TreeSet;
 
 /**
  * Belief Update Message Passing class
@@ -58,20 +58,19 @@ public class Bump {
 		}
 		@Override
 		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			for(String var : Factor.variableIndicesToNames(_variables)) {
-				sb.append(var).append(',');
-			}
-			sb.deleteCharAt(sb.length()-1); // delete final comma
+			return Factor.variableIndicesToNames(_variables).toString();
+		}
+		public String getLongInfo() {
+			StringBuilder sb = new StringBuilder(toString());
 			// add factor result
 			sb.append("\n").append(super.toString());
 			return sb.toString();
 		}
 	}
-	private class Vertex extends Clique{
-		private Integer _orderID;
+	private class Vertex extends Clique {
+		private int _orderID;
 
-		private Set<Edge> _neighborEdges, _outgoingEdges;
+		private Set<Edge> _outgoingEdges;
 		/**
 		 * Stores each neighboring edge, initializes with the fact that we
 		 * have not yet received an informed message via that edge.
@@ -82,8 +81,7 @@ public class Bump {
 		private boolean _isInformed, _onUpwardPass;
 		Vertex(String[] varsContained){
 			super(varsContained);
-			_neighborEdges = new TreeSet<Edge>();
-			_outgoingEdges = new TreeSet<Edge>();
+			_outgoingEdges = new HashSet<Edge>();
 			_orderID = -1;
 			_recvdMsgStatus = new HashMap<Edge, Boolean>();
 			_isInformed = false;
@@ -97,9 +95,8 @@ public class Bump {
 		 * @param e
 		 */
 		void addNeighborEdge(Edge e) {
-			if(_recvdMsgStatus.containsKey(e)) {
+			if(!_recvdMsgStatus.containsKey(e)) {
 				_recvdMsgStatus.put(e, false);
-				_neighborEdges.add(e);
 			}
 		}
 		/**
@@ -132,8 +129,8 @@ public class Bump {
 		Set<Edge> getOutgoingNeighborEdges() {
 			// only compute if we have to
 			if(_outgoingEdges.size() == 0 || this._onUpwardPass != _bumpOnUpwardPass) {
-				Set<Edge> outgoingEdges = new TreeSet<Edge>();
-				Iterator<Edge> it = _neighborEdges.iterator();
+				Set<Edge> outgoingEdges = new HashSet<Edge>();
+				Iterator<Edge> it = _recvdMsgStatus.keySet().iterator();
 				while(it.hasNext()) {
 					Edge e = it.next();
 					Vertex v = e.getOtherVertex(this);
@@ -168,15 +165,14 @@ public class Bump {
 		public boolean equals(Object o) {
 			if(o instanceof Vertex) {
 				Vertex v = (Vertex) o;
-				return v._orderID == this._orderID;
+				return v._variables == this._variables;
 			}
 			return false;
 		}
-		@Override
-		public String toString() {
+		public String getLongInfo() {
 			StringBuilder sb = new StringBuilder("Vertex:\n");
 			// add clique string
-			sb.append(super.toString());
+			sb.append(super.getLongInfo());
 			// add edge info
 			sb.append("recvdMsgStatus:").append(_recvdMsgStatus);
 			return sb.toString();
@@ -206,10 +202,16 @@ public class Bump {
 		}
 		@Override
 		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(Factor.variableIndicesToNames(_one._variables));
+			sb.append(EDGE);
+			sb.append(Factor.variableIndicesToNames(_two._variables));
+			return sb.toString();
+		}
+		public String getLongInfo() {
 			StringBuilder sb = new StringBuilder("edge:\n");
 			sb.append(Factor.variableIndicesToNames(_one._variables));
-			if(DEBUG) sb.append(" --").append(Factor.variableIndicesToNames(_variables)).append("-- ");
-			else sb.append(EDGE);
+			sb.append(" --").append(Factor.variableIndicesToNames(_variables)).append("-- ");
 			sb.append(Factor.variableIndicesToNames(_two._variables));
 			sb.append("\nmu:\n").append(super.toString());
 			return sb.toString();
@@ -268,6 +270,19 @@ public class Bump {
 			keys = _edges.keySet();
 			for(String k:keys){
 				output.append(_edges.get(k).toString()).append("\n");
+			}
+			return output.toString();
+		}
+		public String getLongInfo() {
+			StringBuilder output = new StringBuilder("=== Vertices ===\n");
+			Set<String> keys = _vertices.keySet();
+			for(String k:keys){
+				output.append(_vertices.get(k).getLongInfo()).append("\n\n");
+			}
+			output.append("=== Edges ===\n");
+			keys = _edges.keySet();
+			for(String k:keys){
+				output.append(_edges.get(k).getLongInfo()).append("\n");
 			}
 			return output.toString();
 		}
@@ -592,7 +607,7 @@ public class Bump {
 //					,1
 					));
 		}
-		if(DEBUG) System.out.println(_tree.toString());
+		if(DEBUG) System.out.println(_tree.getLongInfo());
 		br.close();
 	}
 
