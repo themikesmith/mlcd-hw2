@@ -507,7 +507,7 @@ public class Bump {
 	public void incorporateQueryEvidence(ArrayList<Integer> vars, ArrayList<Integer> values) 
 			throws FactorException {
 		if(vars.size() != values.size()) {
-			throw new FactorIndexException("vars size must equal values size");
+			System.err.println("uh oh! vars size must equal values size");
 		}
 		for(int i = 0; i < vars.size(); i++) {
 			int var = vars.get(i), value = values.get(i);
