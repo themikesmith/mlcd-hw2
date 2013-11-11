@@ -682,53 +682,53 @@ public class Factor {
 		System.out.println(fac1.marginalize(elim_vars));
 		*/
 		
-		{
-		//Division Test
-		ArrayList<String> A_vals = new ArrayList<String>();
-		A_vals.add("1");
-		A_vals.add("2");
-		A_vals.add("3");
-		
-		ArrayList<String> B_vals = new ArrayList<String>();
-		B_vals.add("1");
-		B_vals.add("2");
-		
-		ArrayList<String> C_vals = new ArrayList<String>();
-		C_vals.add("1");
-		C_vals.add("2");
-		
-		Factor.addVariable("A", A_vals);
-		Factor.addVariable("B", B_vals);
-		Factor.addVariable("C", C_vals);
-		System.out.println(Factor.variableInfo());
-		
-		String[] fac1_vars = {"A","B"}; 
-		Factor fac1 = new Factor(fac1_vars);
-		fac1.putProbByValues(.5, 0, 0);
-		fac1.putProbByValues(.2, 0, 1);
-		fac1.putProbByValues(0, 1, 0);
-		fac1.putProbByValues(1, 1, 1);
-		fac1.putProbByValues(.3, 2, 0);
-		fac1.putProbByValues(.45, 2, 1);
-		System.out.println(fac1);
-		
-		String[] fac2_vars = {"A"}; 
-		Factor fac2 = new Factor(fac2_vars);
-		fac2.putProbByValues(.8, 0);
-		fac2.putProbByValues(.0, 1);
-		fac2.putProbByValues(.6, 2);
-		System.out.println(fac2);
-		
-		String[] fac3_vars = {"A"}; 
-		Factor fac3 = new Factor(fac3_vars);
-		fac3.putProbByValues(.8, 0);
-		fac3.putProbByValues(.0, 1);
-		fac3.putProbByValues(.6, 2);
-		System.out.println(fac3);
-		
-		System.out.println("f2 / f3 = ");
-		System.out.println(fac2.divide(fac3));
-		}
+//		{
+//		//Division Test
+//		ArrayList<String> A_vals = new ArrayList<String>();
+//		A_vals.add("1");
+//		A_vals.add("2");
+//		A_vals.add("3");
+//		
+//		ArrayList<String> B_vals = new ArrayList<String>();
+//		B_vals.add("1");
+//		B_vals.add("2");
+//		
+//		ArrayList<String> C_vals = new ArrayList<String>();
+//		C_vals.add("1");
+//		C_vals.add("2");
+//		
+//		Factor.addVariable("A", A_vals);
+//		Factor.addVariable("B", B_vals);
+//		Factor.addVariable("C", C_vals);
+//		System.out.println(Factor.variableInfo());
+//		
+//		String[] fac1_vars = {"A","B"}; 
+//		Factor fac1 = new Factor(fac1_vars);
+//		fac1.putProbByValues(.5, 0, 0);
+//		fac1.putProbByValues(.2, 0, 1);
+//		fac1.putProbByValues(0, 1, 0);
+//		fac1.putProbByValues(1, 1, 1);
+//		fac1.putProbByValues(.3, 2, 0);
+//		fac1.putProbByValues(.45, 2, 1);
+//		System.out.println(fac1);
+//		
+//		String[] fac2_vars = {"A"}; 
+//		Factor fac2 = new Factor(fac2_vars);
+//		fac2.putProbByValues(.8, 0);
+//		fac2.putProbByValues(.0, 1);
+//		fac2.putProbByValues(.6, 2);
+//		System.out.println(fac2);
+//		
+//		String[] fac3_vars = {"A"}; 
+//		Factor fac3 = new Factor(fac3_vars);
+//		fac3.putProbByValues(.8, 0);
+//		fac3.putProbByValues(.0, 1);
+//		fac3.putProbByValues(.6, 2);
+//		System.out.println(fac3);
+//		
+//		System.out.println("f1 / f2 = ");
+//		System.out.println(fac1.divide(fac2));
+//		}
 		
 		
 //		{
