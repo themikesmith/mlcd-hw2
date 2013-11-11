@@ -382,9 +382,16 @@ public class Factor {
 			}
 			result.data.set(result.index(f_indicies_of_values), result.data.get(result.index(f_indicies_of_values))+this.data.get(datum_idx));
 			
+			
 		}
 		return result;
 	}
+
+
+	public void multiplyInCpdValue(ArrayList<Integer> key, double prob) {
+		
+	}
+	
 	/**
 	 * Creates and returns a key representation of this factor.
 	 * This is a string representation of the variables array list
@@ -392,49 +399,50 @@ public class Factor {
 	 */
 	protected String makeKey() {
 		return _variables.toString();
+
 	}
 	
 //	public static void main(String args[]) throws Exception{
 //		
+//		/*
+//		//Margin Test
+//		ArrayList<String> A_vals = new ArrayList<String>();
+//		A_vals.add("1");
+//		A_vals.add("2");
+//		A_vals.add("3");
 //		
-//		//Division Test
-//				ArrayList<String> A_vals = new ArrayList<String>();
-//				A_vals.add("1");
-//				A_vals.add("2");
-//				A_vals.add("3");
-//				
-//				ArrayList<String> B_vals = new ArrayList<String>();
-//				B_vals.add("1");
-//				B_vals.add("2");
-//				
-//				Factor.addVariable("A", A_vals);
-//				Factor.addVariable("B", B_vals);
-//				Factor.addVariable("C", B_vals);
-//				System.out.println(Factor.variableInfo());
-//				
-//				String[] fac1_vars = {"A","B","C"}; 
-//				Factor fac1 = new Factor(fac1_vars);
-//				fac1.addJointProbByIndex(0, .25);// 1 1 1
-//				fac1.addJointProbByIndex(1, .05);// 2 1 1
-//				fac1.addJointProbByIndex(2, .15);// 3 1 1
-//				
-//				fac1.addJointProbByIndex(3, .08);// 1 2 1 
-//				fac1.addJointProbByIndex(4, 0);  // 2 2 1
-//				fac1.addJointProbByIndex(5, .09);// 3 2 1
-//				
-//				fac1.addJointProbByIndex(6, .35);// 1 1 2
-//				fac1.addJointProbByIndex(7, .07);// 2 1 2
-//				fac1.addJointProbByIndex(8, .21);// 3 1 2
-//				
-//				fac1.addJointProbByIndex(9, .16); //1 2 2
-//				fac1.addJointProbByIndex(10, 0);  //2 2 2
-//				fac1.addJointProbByIndex(11, .18);//3 2 2
-//				System.out.println(fac1);
-//				
-//				ArrayList<Integer> elim_vars = new ArrayList<Integer>();
-//				elim_vars.add(1);
-//				System.out.println(fac1.marginalize(elim_vars));
+//		ArrayList<String> B_vals = new ArrayList<String>();
+//		B_vals.add("1");
+//		B_vals.add("2");
 //		
+//		Factor.addVariable("A", A_vals);
+//		Factor.addVariable("B", B_vals);
+//		Factor.addVariable("C", B_vals);
+//		System.out.println(Factor.variableInfo());
+//		
+//		String[] fac1_vars = {"A","B","C"}; 
+//		Factor fac1 = new Factor(fac1_vars);
+//		fac1.addJointProbByIndex(0, .25);// 1 1 1
+//		fac1.addJointProbByIndex(1, .05);// 2 1 1
+//		fac1.addJointProbByIndex(2, .15);// 3 1 1
+//		
+//		fac1.addJointProbByIndex(3, .08);// 1 2 1 
+//		fac1.addJointProbByIndex(4, 0);  // 2 2 1
+//		fac1.addJointProbByIndex(5, .09);// 3 2 1
+//		
+//		fac1.addJointProbByIndex(6, .35);// 1 1 2
+//		fac1.addJointProbByIndex(7, .07);// 2 1 2
+//		fac1.addJointProbByIndex(8, .21);// 3 1 2
+//		
+//		fac1.addJointProbByIndex(9, .16); //1 2 2
+//		fac1.addJointProbByIndex(10, 0);  //2 2 2
+//		fac1.addJointProbByIndex(11, .18);//3 2 2
+//		System.out.println(fac1);
+//		
+//		ArrayList<Integer> elim_vars = new ArrayList<Integer>();
+//		elim_vars.add(1);
+//		System.out.println(fac1.marginalize(elim_vars));
+//		*/
 //		/*
 //		 
 //		//Division Test

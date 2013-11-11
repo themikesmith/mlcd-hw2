@@ -651,12 +651,12 @@ public class Bump {
 			ArrayList<String> variables = new ArrayList<String>();
 			ArrayList<String> var_value = new ArrayList<String>();
 			for(int i = 0; i<tokenized.length-1; i++){
-				System.out.println(tokenized[i]);
+				//System.out.println(tokenized[i]);
 				String[] var_pair = tokenized[i].split("=");
 				variables.add(var_pair[0]);
 				var_value.add(var_pair[1]);
 			}
-			System.out.println(tokenized[tokenized.length-1]);
+			//System.out.println(tokenized[tokenized.length-1]);
 			double prob = Double.valueOf(tokenized[tokenized.length-1]);
 			//Put into appropriate clique
 			if(DEBUG) System.out.println(variables);
@@ -669,7 +669,7 @@ public class Bump {
 			Collections.sort(key);
 			
 			if(_tree._vertices.containsKey(key.toString())){// CDP is covers an entire clique
-				System.out.println("fail");
+				//_tree._vertices.get(key.toSt ring()).multiplyInCpdValue(key, prob);
 			}else{// Cpd is a subfactor of one of our cliques.
 				
 			}
