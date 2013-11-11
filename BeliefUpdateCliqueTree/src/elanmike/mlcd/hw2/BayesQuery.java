@@ -1,6 +1,7 @@
 package elanmike.mlcd.hw2;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import elanmike.mlcd.hw2.Factor.FactorException;
 
@@ -32,6 +33,8 @@ public class BayesQuery {
 		b = new Bump();
 		try {
 			b.init(args[0],args[2],args[1]);
+			
+			
 		} catch (NumberFormatException e1) {
 			e1.printStackTrace();
 			return;

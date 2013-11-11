@@ -219,6 +219,20 @@ public class Factor {
 		for(int i = 0; i<factToCopy.data.size(); i++) data.add(factToCopy.data.get(i));
 	}
 	
+	public Factor(ArrayList<Integer> vars, double d) {
+		this._variables = vars;
+		
+		this._stride = new ArrayList<Integer>(_variables.size());
+		int strideTot = 1;
+		for(int index:_variables){
+			_stride.add(strideTot);
+			strideTot*=_variableCard.get(index);
+		}
+		
+		this.data = new ArrayList<Double>(strideTot);
+		for(int i = 0; i<strideTot; i++) data.add(d);
+	}
+
 	public void setFactorData(Factor f) throws FactorScopeException {
 		if(this._variables.equals(f._variables)){
 			this.data = f.data;
@@ -477,6 +491,25 @@ public class Factor {
 	protected String makeKey() {
 		return _variables.toString();
 
+	}
+	
+	public static Factor indicatorFunction(ArrayList<Integer> vars, ArrayList<Integer> values){
+		Factor result = new Factor(vars,0.0);
+		
+		for(int i = 0; i<result.data.size(); i++){
+			boolean match = true;
+			for(int varIdx = 0; varIdx < vars.size(); varIdx++){
+				int valueOfVarAtIndex = (i/result._stride.get(varIdx))%_variableCard.get(vars.get(varIdx));
+				if(valueOfVarAtIndex != values.get(varIdx)){
+					match = false;
+					break;
+				}
+			}
+			if(match) result.data.set(i, 1.0);
+			else result.data.set(i, 0.0);
+		}
+		
+		return result;
 	}
 	
 //	public static void main(String args[]) throws Exception{
