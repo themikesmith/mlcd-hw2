@@ -585,8 +585,9 @@ public class Bump {
 			}
 		}
 		// and then marginalize out variables not in query
-		target.marginalize(target.difference(vars));
-		return target;
+		Factor f = target.marginalize(target.difference(vars));
+		// TODO normalize here maybe?
+		return f;
 	}
 	/**
 	 * Reads in the tree from the clique file.
