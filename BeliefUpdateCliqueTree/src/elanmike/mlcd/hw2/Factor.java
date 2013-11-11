@@ -90,6 +90,14 @@ public class Factor {
 		}
 		return indicies;
 	}
+	public static ArrayList<String> valueIndiciesToNames(ArrayList<Integer> variables, ArrayList<Integer> var_value){
+		ArrayList<String> valueNames = new ArrayList<String>();
+		
+		for(int i = 0; i < variables.size(); i++){
+			valueNames.add(_variableValues.get(variables.get(i)).get(var_value.get(i)));
+		}
+		return valueNames;
+	}
 	
 	public static String variableInfo(){
 		String output = "";

@@ -736,8 +736,18 @@ public class Bump {
 		}		
 		
 		
-		if(DEBUG) System.out.println("initialFactors: " + initialFactors.keySet().toString());
-		if(DEBUG) System.out.println("_tree._vertices:"+_tree._vertices.keySet().toString());
+		if(DEBUG){
+			System.out.println("==initialFactors==");
+			for(String s:initialFactors.keySet()){
+				System.out.println(Factor.variableIndicesToNames(initialFactors.get(s)._variables));
+			}
+			
+			System.out.println("==Cliques==");
+			for(String s:_tree._vertices.keySet()){
+				System.out.println(Factor.variableIndicesToNames(_tree._vertices.get(s)._variables));
+			}
+		}
+		
 		for(String initFactors:initialFactors.keySet()){
 			ArrayList<Integer> vars = initialFactors.get(initFactors)._variables;
 			
@@ -753,7 +763,7 @@ public class Bump {
 				}
 			}
 			if(!foundSuperset)
-				if(DEBUG) System.out.println("Hmmm... " + initFactors + " has no supersets");
+				if(DEBUG) System.out.println("Hmmm... " + Factor.variableIndicesToNames(initialFactors.get(initFactors)._variables) + " has no supersets");
 			//System.out.println("initialFact "+ initialFactors.get(s));
 			
 		}
