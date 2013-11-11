@@ -676,7 +676,12 @@ public class Bump {
 		if(DEBUG) System.out.println(_tree.getLongInfo());
 		br.close();
 	}
-
+	/**
+	 * Read in the network file, creating factors part A
+	 * @param networkFilename
+	 * @throws IOException
+	 * @throws NumberFormatException
+	 */
 	public void readNetworkFile(String networkFilename)
 		throws IOException, NumberFormatException {
 		System.out.println("reading network file from:"+networkFilename);
@@ -708,7 +713,15 @@ public class Bump {
 		}
 		br.close();
 	}
-
+	/**
+	 * Read in CPD from a file, creating our factors part B,
+	 *  and calculating initial beliefs
+	 * @param cpdFilename
+	 * @throws IOException
+	 * @throws ArrayIndexOutOfBoundsException
+	 * @throws IllegalArgumentException
+	 * @throws FactorException
+	 */
 	public void readCPDFile(String cpdFilename) 
 			throws IOException, ArrayIndexOutOfBoundsException,
 			IllegalArgumentException, FactorException {
@@ -797,7 +810,12 @@ public class Bump {
 			}
 		}
 	}
-
+	/**
+	 * Process queries in a query file according to a semiring
+	 * @param queryFile
+	 * @param useSumProduct
+	 * @throws IOException
+	 */
 	public void processQueries(String queryFile, boolean useSumProduct) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(queryFile));
 		String line;
