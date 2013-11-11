@@ -589,7 +589,7 @@ public class Bump {
 			}
 		}
 		// and then reduce using the evidence given
-		Factor f = target.reduce(eVars, eValues);
+		f = target.reduce(eVars, eValues);
 		// return the factor, normalized
 		return f.normalize();
 	}
