@@ -576,9 +576,9 @@ public class Bump {
 			System.err.println("uh oh! query vars size must equal query values size");
 			return null;
 		}
-		// marginalize out variables not in query
+		// marginalize out variables not in the query's LHS
 		Factor f = target.marginalize(target.difference(vars));
-		// check our LHS for evidence...
+		// check the LHS for evidence...
 		ArrayList<Integer> eVars = new ArrayList<Integer>(), 
 				eValues = new ArrayList<Integer>();
 		for(int i = 0; i < vars.size(); i++) {
@@ -590,7 +590,7 @@ public class Bump {
 		}
 		// and then reduce using the evidence given
 		Factor f = target.reduce(eVars, eValues);
-		// return normalized factor
+		// return the factor, normalized
 		return f.normalize();
 	}
 	/**
