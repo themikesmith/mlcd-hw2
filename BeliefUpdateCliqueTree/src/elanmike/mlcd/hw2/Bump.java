@@ -121,15 +121,15 @@ public class Bump {
 		 * @throws FactorIndexException 
 		 */
 		void sendMessage(Edge edgeToJ) throws FactorException {
-			if(DEBUG) System.out.println(this.toString()+" sending message to:"+edgeToJ.getOtherVertex(this));
+//			if(DEBUG) System.out.println(this.toString()+" sending message to:"+edgeToJ.getOtherVertex(this));
 			// calculate message - marginalize out all variables not in sepset ij
 			Factor sigmaItoJ = this.marginalize(this.difference(edgeToJ._variables));
-			if(DEBUG) System.out.println("sigma I,J:\n"+sigmaItoJ);
+//			if(DEBUG) System.out.println("sigma I,J:\n"+sigmaItoJ);
 			// send: make J receive
 			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ, sigmaItoJ);
 			// update edge potential
 			edgeToJ.setFactorData(sigmaItoJ);
-			if(DEBUG) System.out.println("mu I,J:\n"+(Factor)edgeToJ);
+//			if(DEBUG) System.out.println("mu I,J:\n"+(Factor)edgeToJ);
 		}
 		/**
 		 * When we receive a message...
@@ -138,17 +138,17 @@ public class Bump {
 		 * @param sigmaItoJ
 		 */
 		private void onReceiveMessage(Edge edgeItoJ, Factor sigmaItoJ) throws FactorException {
-			if(DEBUG) System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
+//			if(DEBUG) System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
 			// belief j = belief j * (sigma ij / mu ij)
 			this.setFactorData(this.product(sigmaItoJ.divide(edgeItoJ)));
-			if(DEBUG) System.out.println("belief J:\n"+(Factor)this);
+//			if(DEBUG) System.out.println("belief J:\n"+(Factor)this);
 			// check if I was informed when sending
 			Vertex i = edgeItoJ.getOtherVertex(this);
 			_recvdMsgStatus.put(edgeItoJ, i._isInformed);
 			if(i._isInformed) { // if vertex I was informed....
 				_isInformed = isInformed(); // recheck if we are informed
 			}
-			if(DEBUG) System.out.println("informed status:\n"+_recvdMsgStatus);
+//			if(DEBUG) System.out.println("informed status:\n"+_recvdMsgStatus);
 		}
 		/**
 		 * Return a list of all outgoing neighbors for the upward pass,
@@ -380,7 +380,7 @@ public class Bump {
 		}
 		if(DEBUG) {
 			System.out.println("\n\n******\ntree is now calibrated:\n\n");
-			System.out.println(_tree.getLongInfo());
+//			System.out.println(_tree.getLongInfo());
 		}
 		return true;
 	}
@@ -413,7 +413,7 @@ public class Bump {
 	 */
 	List<Vertex> downwardPassBeliefUpdate(Tree t, Vertex root) throws FactorException {
 		_bumpOnUpwardPass = false;
-		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
+//		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
 		nextOrderID = UNMARKED; // begin again at 0
 		List<Vertex> ordering = new ArrayList<Vertex>();
 		if(t._vertices.size() == 0) return ordering;
@@ -435,7 +435,7 @@ public class Bump {
 				}
 			}
 			Vertex curr = toProcess.remove();
-			if(DEBUG) System.out.printf("curr vertex:%s\n",curr);
+//			if(DEBUG) System.out.printf("curr vertex:%s\n",curr);
 			// mark
 			curr.setOrderID();
 			ordering.add(curr); // and add to our ordered list
@@ -445,9 +445,9 @@ public class Bump {
 			// and then for each downstream child...
 			for(Edge e : curr._recvdMsgStatus.keySet()) {
 				Vertex k = e.getOtherVertex(curr);
-				if(DEBUG) System.out.println("check neighbor:"+k);
+//				if(DEBUG) System.out.println("check neighbor:"+k);
 				if(k._orderID == UNMARKED) {
-					if(DEBUG) System.out.println("k is unmarked - it's downstream");
+//					if(DEBUG) System.out.println("k is unmarked - it's downstream");
 					// downstream if we haven't marked it yet
 					// send belief update message to the child
 					curr.sendMessage(e);
@@ -465,7 +465,7 @@ public class Bump {
 	 */
 	void upwardPassBeliefUpdate(List<Vertex> orderedVertices) throws FactorException {
 		_bumpOnUpwardPass = true;
-		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
+//		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
 		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
 			Vertex v = orderedVertices.get(i);
 			// for each edge that is outgoing given our ordering
@@ -530,13 +530,17 @@ public class Bump {
 	 * 
 	/**
 	 * Given that our tree is calibrated, incorporate the evidence
-	 * into our QUERY COPY
+	 * into our QUERY COPY.
+	 * If the evidence is retractive, we will need to calibrate.
+	 * Else we need only one pass, downward from our target vertex.
 	 * 
 	 * @param vars
 	 * @param values
+	 * @param treeNeedsToBeCalibrated
 	 * @throws FactorException
 	 */
-	public void incorporateQueryEvidence(ArrayList<Integer> vars, ArrayList<Integer> values) 
+	public void incorporateQueryEvidence(ArrayList<Integer> vars, 
+			ArrayList<Integer> values, int numNewEvidence) 
 			throws FactorException {
 		if(vars.size() != values.size()) {
 			System.err.println("uh oh! vars size must equal values size");
@@ -551,8 +555,15 @@ public class Bump {
 			// multiply in a new indicator factor
 			Factor indicator = Factor.indicatorFunction(var, value);
 			v.product(indicator);
+			if(numNewEvidence == 1) {
+				// run only one pass of bump
+				if(DEBUG) System.out.println(+numNewEvidence+" new var-> run one pass");
+				downwardPassBeliefUpdate(_queryTree,v);
+				return;
+			} // else run two passes...
 		}
-		// and run bump on our query tree with our evidence
+		// ...since we need at most two to recalibrate
+		if(DEBUG) System.out.println(+numNewEvidence+" new var-> run two passes");
 		upwardPassBeliefUpdate(downwardPassBeliefUpdate(_queryTree));
 	}
 	/**
@@ -629,7 +640,7 @@ public class Bump {
 				_tree.addVertex(v);
 			}else{
 				br.close();
-				throw new IOException("inconsistant network file.");
+				throw new IOException("inconsistent network file.");
 			}
 		}
 		while ((line = br.readLine()) != null) {
@@ -649,7 +660,7 @@ public class Bump {
 					_tree._vertices.get(left.toString()), 
 					_tree._vertices.get(right.toString())));
 		}
-		if(DEBUG) System.out.println("\nclique tree structure:\n"+_tree.toString());
+//		if(DEBUG) System.out.println("\nclique tree structure:\n"+_tree.toString());
 		br.close();
 	}
 	/**
@@ -779,11 +790,11 @@ public class Bump {
 		}
 		br.close();
 		
-		if(DEBUG){
-			System.out.println("==initialBeliefs==");
-			for(String cliquesKeys:_tree._vertices.keySet()){
-				System.out.println(_tree._vertices.get(cliquesKeys).getLongInfo());
-			}
-		}
+//		if(DEBUG){
+//			System.out.println("==initialBeliefs==");
+//			for(String cliquesKeys:_tree._vertices.keySet()){
+//				System.out.println(_tree._vertices.get(cliquesKeys).getLongInfo());
+//			}
+//		}
 	}
 }

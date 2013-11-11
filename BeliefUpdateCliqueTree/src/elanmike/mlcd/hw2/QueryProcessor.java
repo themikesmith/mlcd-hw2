@@ -28,7 +28,6 @@ public class QueryProcessor {
 		_bump.resetTreeForQueries();
 	}
 	public String query(String[] lhs, String[] contexts, boolean useSumProduct) {
-		if(Bump.DEBUG) System.out.println("query"+(useSumProduct?"sp":"mp")+":"+lhs.toString()+" | "+ contexts.toString());
 		if(!_calibrated || (useSumProduct != _bump.useSumProduct())) {
 			// set appropriate method, and run bump to calibrate
 			_bump.setUseSumProduct(useSumProduct);
@@ -42,15 +41,15 @@ public class QueryProcessor {
 	 * queries the structure for p(lhs|contexts)
 	 */
 	String query(String[] lhs, String[] contexts) {
-		System.out.println("query function");
 		// check if evidence is incremental or retractive
 		boolean retractive = false;
 		// then take action
-		// check number of variables
+		// check number of variables in rhs
 		if(contexts.length < _queryContexts.size()) {
 			// retractive -- less evidence than before. reset and treat as incremental
 			retractive = true;
 		}
+		// if it's the same number in rhs, check each variable
 		if(!retractive) {
 			for(String s : contexts) {
 				String[] varValue = s.split("=");
@@ -63,43 +62,40 @@ public class QueryProcessor {
 					break;
 				}
 			}
-		}
-		if(retractive) resetTreeForQueries();
+		} // and reset if we have retractive evidence
+		if(retractive) resetTreeForQueries(); // clears our evidence
+		// treat all new evidence as incremental
+		// note if we cleared, all evidence is new
 		ArrayList<Integer> vars = new ArrayList<Integer>(), 
 				values = new ArrayList<Integer>();
+		int numberNewEvidence = 0;
 		for(int i = 0; i < contexts.length; i++) {
 			String[] varValue = contexts[i].split("=");
 			String var = varValue[0], value = varValue[1];
 			int varInt = Factor.getVariableIndex(var),
 				valueInt = Factor.getVariableValueIndex(varInt, value);
-			boolean incrementalEvidence = false;
 			if(!_queryContexts.containsKey(varInt)) {
 				// additional evidence - we've never seen it before
 				if(Bump.DEBUG) {
 					System.out.printf("\ni:%d add'l evidence:%s=%s\n", i, var, value);
 				}
-				incrementalEvidence = true;
 				vars.add(varInt);
 				values.add(valueInt);
 				_queryContexts.put(varInt,valueInt);
+				numberNewEvidence++;
 			}
-			if(incrementalEvidence) {
-				try {
-					_bump.incorporateQueryEvidence(vars, values);
-				} catch (FactorException e) {
-					e.printStackTrace();
-					return e.getMessage();
-				}
-			}
-			else if(_queryContexts.get(varInt) == valueInt) {
-				// already have this context variable = value pair, do nothing
+			else { // do nothing with repeat evidence
 				if(Bump.DEBUG) {
 					System.out.printf("\ni:%d repeat evidence:%s=%s\n", i, var, value);
 				}
 			}
-			else { // query context variable has other value. reset.
-				// we've already reset so this should never occur
-				System.err.println("this should never occur. investigate handling of retractive evidence.");
+		}
+		if(numberNewEvidence > 0) {
+			try {
+				_bump.incorporateQueryEvidence(vars, values, numberNewEvidence);
+			} catch (FactorException e) {
+				e.printStackTrace();
+				return e.getMessage();
 			}
 		}
 		// now process lhs
@@ -119,6 +115,9 @@ public class QueryProcessor {
 		Factor result;
 		try {
 			result = _bump.getQueryResult(vars, values);
+			if(Bump.DEBUG) {
+				System.out.println("\n******result!!!******\n");
+			}
 			if(result != null) return result.toString();
 			else return "out of clique inference";
 		} catch (FactorIndexException e) {
@@ -136,13 +135,11 @@ public class QueryProcessor {
 		BufferedReader br = new BufferedReader(new FileReader(queryFile));
 		String line;
 		while ((line = br.readLine()) != null) {
-			if(Bump.DEBUG) System.out.println("\n\n### query:\n\n"+line);
+			if(Bump.DEBUG) System.out.println("\n### query:\n\n"+line);
 			String[] stuff = line.split(" ");
 			String[] lhs = stuff[0].split(",");
 			String[] rhs = stuff[1].split(",");
-			if(Bump.DEBUG) {
-				System.out.println("\n\n\n******result!!!******\n"+line+"\n"+query(lhs, rhs, useSumProduct));
-			}
+			System.out.println(query(lhs, rhs, useSumProduct));
 		}
 		br.close();
 	}
