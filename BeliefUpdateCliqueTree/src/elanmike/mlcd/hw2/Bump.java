@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import elanmike.mlcd.hw2.Factor.FactorException;
+
 /**
  * Belief Update Message Passing class
  * 
@@ -610,6 +612,7 @@ public class Bump {
 	 */
 	public void readCliqueTreeFile(String cliqueTreeFilename) 
 			throws IOException, NumberFormatException {
+		System.out.println("reading clique tree from:"+cliqueTreeFilename);
 		BufferedReader br = new BufferedReader(new FileReader(cliqueTreeFilename));
 		String line;		
 		// on the first line is the number of following lines that describe vertices
@@ -662,6 +665,7 @@ public class Bump {
 
 	public void readNetworkFile(String networkFilename)
 		throws IOException, NumberFormatException {
+		System.out.println("reading network file from:"+networkFilename);
 		BufferedReader br = new BufferedReader(new FileReader(networkFilename));
 		String line;
 		// on the first line is the number of following lines that describe vertices
@@ -691,7 +695,10 @@ public class Bump {
 		br.close();
 	}
 
-	public void readCPDFile(String cpdFilename) throws Exception {
+	public void readCPDFile(String cpdFilename) 
+			throws IOException, ArrayIndexOutOfBoundsException,
+			IllegalArgumentException, FactorException {
+		System.out.println("reading cpd from:"+cpdFilename);
 		BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
 		String line;
 		

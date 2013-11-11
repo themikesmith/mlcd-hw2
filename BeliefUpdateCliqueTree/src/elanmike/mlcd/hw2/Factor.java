@@ -7,6 +7,56 @@ import java.util.TreeSet;
 
 public class Factor {
 	
+	public class FactorException extends Exception
+    {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		public FactorException () {super();}
+    	public FactorException (String message) {
+        	super (message);
+        }
+    	public FactorException (Throwable cause) {
+        	super (cause);
+        }
+    	public FactorException (String message, Throwable cause) {
+    		super (message, cause);
+        }
+    }
+	public class FactorIndexException extends FactorException {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		public FactorIndexException () {super();}
+    	public FactorIndexException (String message) {
+        	super (message);
+        }
+    	public FactorIndexException (Throwable cause) {
+        	super (cause);
+        }
+    	public FactorIndexException (String message, Throwable cause) {
+    		super (message, cause);
+        }
+	}
+	public class FactorScopeException extends FactorException {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		public FactorScopeException () {super();}
+    	public FactorScopeException (String message) {
+        	super (message);
+        }
+    	public FactorScopeException (Throwable cause) {
+        	super (cause);
+        }
+    	public FactorScopeException (String message, Throwable cause) {
+    		super (message, cause);
+        }
+	}
+	
 	public class Pair<A, B> {
 	    public A first;
 	    public B second;
@@ -161,11 +211,11 @@ public class Factor {
 		for(int i = 0; i<strideTot; i++) data.add(0.0);
 	}
 	
-	public void setFactorData(Factor f) throws Exception {
+	public void setFactorData(Factor f) throws FactorScopeException {
 		if(this._variables.equals(f._variables)){
 			this.data = f.data;
 		}else{
-			throw new Exception("can't see this factor, does not contain the same varaibles");
+			throw new FactorScopeException("can't see this factor, does not contain the same variables");
 		}
 	}
 	
@@ -190,22 +240,22 @@ public class Factor {
 		}
 	}
 
-	private int index(int[] variableValues) throws Exception{
+	private int index(int[] variableValues) throws FactorIndexException{
 		int searchIndex = 0;
 		if(variableValues.length != _variables.size()) 
-			throw new Exception("FactorIndexError: indexLength("+variableValues.length+") does not match number of variables for this factor("+_variables.size()+")");
+			throw new FactorIndexException("FactorIndexError: indexLength("+variableValues.length+") does not match number of variables for this factor("+_variables.size()+")");
 		for(int index=0; index < _variables.size(); index ++)
 			if(variableValues[index] >= _variableCard.get(_variables.get(index))|| variableValues[index]< 0)
-				throw new Exception("FactorIndexError: variableValue("+variableValues[index]+") was not in the valid range of ( 0 - "+(_variableCard.get(_variables.get(index))-1)+")");
+				throw new FactorIndexException("FactorIndexError: variableValue("+variableValues[index]+") was not in the valid range of ( 0 - "+(_variableCard.get(_variables.get(index))-1)+")");
 			else
 				searchIndex += variableValues[index]*_stride.get(index);
 		
 		return searchIndex;
 	}
 	
-	private int[] valuesFromIndex(int datum_index) throws Exception{
+	private int[] valuesFromIndex(int datum_index) throws FactorIndexException {
 		if(datum_index >= data.size()|| datum_index< 0)
-			throw new Exception("FactorIndexError: index("+datum_index+") was not in the valid range of ( 0 - "+(data.size()-1)+")");
+			throw new FactorIndexException("FactorIndexError: index("+datum_index+") was not in the valid range of ( 0 - "+(data.size()-1)+")");
 		
 		int values[] = new int[_variables.size()];
 		
@@ -216,23 +266,24 @@ public class Factor {
 		return values;
 	}
 	
-	public void addJointProbByName(String[] varVals, double prob) throws Exception{
+	public void addJointProbByName(String[] varVals, double prob) 
+			throws FactorIndexException, FactorScopeException {
 		if(varVals.length != _variables.size()) 
-			throw new Exception("InputLengthError: indexLength("+varVals.length+") does not match number of variables for this factor("+_variables.size()+")");
+			throw new FactorIndexException("InputLengthError: indexLength("+varVals.length+") does not match number of variables for this factor("+_variables.size()+")");
 		ArrayList<Integer> valVarsIndicies = new ArrayList<Integer>();
 		for(int varIdx=0; varIdx < varVals.length; varIdx ++){
 			int integerValOfString = _variableValues.get(varIdx).indexOf(varVals[varIdx]);
 			if(integerValOfString <0)
-				throw new Exception("ValueError: Value("+varVals[varIdx]+") not applicable for "+_variableNames.get(varIdx));
+				throw new FactorScopeException("ValueError: Value("+varVals[varIdx]+") not applicable for "+_variableNames.get(varIdx));
 			valVarsIndicies.add(integerValOfString);
 		}
 		putProbByValues(valVarsIndicies,prob);
 		
 	}
 	
-	public void addJointProbByIndex(int datum_index, double prob) throws Exception{
+	public void addJointProbByIndex(int datum_index, double prob) throws FactorIndexException{
 		if(datum_index < 0 || datum_index > data.size()) 
-			throw new Exception("InputLengthError: datumIndex("+datum_index+") is not in range ( 0 - "+_variables.size()+")");
+			throw new FactorIndexException("InputLengthError: datumIndex("+datum_index+") is not in range ( 0 - "+_variables.size()+")");
 		
 		data.set(datum_index,prob);
 		
@@ -258,21 +309,22 @@ public class Factor {
 		return output;
 	}
 	
-	public void putProbByValues(ArrayList<Integer> arrayList,double prob) throws Exception{
+	public void putProbByValues(ArrayList<Integer> arrayList,double prob) 
+			throws FactorIndexException {
 		
 		int searchIndex = 0;
 		if(arrayList.size() != _variables.size()) 
-			throw new Exception("FactorIndexError: indexLength("+arrayList.size()+") does not match number of variables for this factor("+_variables.size()+")");
+			throw new FactorIndexException("FactorIndexError: indexLength("+arrayList.size()+") does not match number of variables for this factor("+_variables.size()+")");
 		for(int index=0; index < _variables.size(); index ++)
 			if(arrayList.get(index) >= _variableCard.get(_variables.get(index))|| arrayList.get(index)< 0)
-				throw new Exception("FactorIndexError: variableValue("+arrayList.get(index)+") was not in the valid range of ( 0 - "+(_variableCard.get(_variables.get(index))-1)+")");
+				throw new FactorIndexException("FactorIndexError: variableValue("+arrayList.get(index)+") was not in the valid range of ( 0 - "+(_variableCard.get(_variables.get(index))-1)+")");
 			else
 				searchIndex += arrayList.get(index)*_stride.get(index);
 		
 		data.set(searchIndex,prob);
 	}
 	
-	public double getProbByValues(int[] variableValues) throws Exception{
+	public double getProbByValues(int[] variableValues) throws FactorIndexException {
 		return data.get(index(variableValues));
 	}
 	
@@ -311,10 +363,9 @@ public class Factor {
 		return union;
 	}
 	
-	public Factor product(Factor f) throws Exception{
+	public Factor product(Factor f) throws ArrayIndexOutOfBoundsException {
 		ArrayList<Integer> unionScope = this.union(f._variables);
 		Factor psi = new Factor(unionScope);
-		
 		
 		int j =0;
 		int k =0;
@@ -346,9 +397,9 @@ public class Factor {
 		return psi;
 	}
 	
-	public Factor divide(Factor f) throws Exception{
+	public Factor divide(Factor f) throws FactorScopeException, FactorIndexException {
 		if(!this._variables.containsAll(f._variables))
-			throw new Exception("DivionError: Numerator does not contain Denominator");
+			throw new FactorScopeException("DivionError: Numerator does not contain Denominator");
 		
 		Factor result = new Factor(this._variables);
 		
@@ -357,7 +408,7 @@ public class Factor {
 
 		for(int datum_idx = 0; datum_idx < this.data.size(); datum_idx++ ){
 			int[] values = valuesFromIndex(datum_idx);
-			ArrayList<Integer> sharedVarValues = new ArrayList<Integer>();
+			//ArrayList<Integer> sharedVarValues = new ArrayList<Integer>();
 			
 			int[] f_indicies_of_values = new int[sepset.size()];
 			for(int s:sepset){
@@ -378,7 +429,7 @@ public class Factor {
 		return result;
 	}
 	
-	public Factor marginalize(ArrayList<Integer> elimVar) throws Exception{
+	public Factor marginalize(ArrayList<Integer> elimVar) throws FactorIndexException{
 		ArrayList<Integer> finalVars = difference(elimVar);
 		
 		Factor result = new Factor(finalVars);
@@ -386,7 +437,7 @@ public class Factor {
 			int[] values = valuesFromIndex(datum_idx);
 			
 			int[] f_indicies_of_values = new int[finalVars.size()];
-			ArrayList<Integer> sharedVarValues = new ArrayList<Integer>();
+			//ArrayList<Integer> sharedVarValues = new ArrayList<Integer>();
 			
 			for(int s:finalVars){
 				

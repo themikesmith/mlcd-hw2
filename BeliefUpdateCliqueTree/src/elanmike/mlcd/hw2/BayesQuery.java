@@ -2,6 +2,8 @@ package elanmike.mlcd.hw2;
 
 import java.io.IOException;
 
+import elanmike.mlcd.hw2.Factor.FactorException;
+
 public class BayesQuery {
 
 	private static Bump b;
@@ -30,16 +32,15 @@ public class BayesQuery {
 		b.setUseSumProduct(useSumProduct);
 		try {
 			b.readNetworkFile(args[0]);
-			b.readCliqueTreeFile(args[2]);
 			b.readCPDFile(args[1]);
+			b.readCliqueTreeFile(args[2]);
 		} catch (NumberFormatException e1) {
 			e1.printStackTrace();
 			return;
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			return;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
+		} catch (FactorException e) {
 			e.printStackTrace();
 		}
 		b.runBump();
