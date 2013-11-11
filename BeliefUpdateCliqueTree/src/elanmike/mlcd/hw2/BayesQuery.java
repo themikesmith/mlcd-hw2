@@ -28,6 +28,7 @@ public class BayesQuery {
 			usage();
 			return;
 		}
+		// create and init clique tree
 		b = new Bump();
 		b.setUseSumProduct(useSumProduct);
 		try {
@@ -44,10 +45,11 @@ public class BayesQuery {
 			e.printStackTrace();
 			return;
 		}
-		b.runBump();
+		// make a query processor
 		QueryProcessor qp = new QueryProcessor(b);
 		try {
-			qp.processQueries(args[3]);
+			// process the queries
+			qp.processQueries(args[3], useSumProduct);
 		} catch (IOException e) {
 			System.err.println("error processing queries from:"+args[4]);
 			e.printStackTrace();

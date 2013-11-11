@@ -11,7 +11,7 @@ import elanmike.mlcd.hw2.Factor.FactorException;
 public class QueryProcessor {
 	public static final int NO_EVIDENCE = -1;
 	private Bump _bump;
-	private boolean _useSumProduct;
+	private boolean _ready;
 	/**
 	 * A map from variable name to variable value, transformed into integers
 	 */
@@ -19,20 +19,21 @@ public class QueryProcessor {
 	public QueryProcessor(Bump b) {
 		this._bump = b;
 		_queryContexts = new HashMap<Integer, Integer>();
-		_useSumProduct = true;
+		_ready = false;
 	}
 	public void resetTreeForQueries() {
 		_queryContexts = new HashMap<Integer, Integer>();
 		_bump.resetTreeForQueries();
 	}
-	public String query(String[] lhs, String[] contexts) {
-		if(_useSumProduct != _bump.useSumProduct()) {
+	public String query(String[] lhs, String[] contexts, boolean useSumProduct) {
+		if(!_ready || useSumProduct != _bump.useSumProduct()) {
 			System.err.println("oops! not ready.");
 			// set appropriate method, and run bump to calibrate
-			_bump.setUseSumProduct(_useSumProduct);
+			_bump.setUseSumProduct(useSumProduct);
 			_bump.runBump();
+			_ready = true;
 		}
-		if(_useSumProduct) return querySumProduct(lhs, contexts);
+		if(useSumProduct) return querySumProduct(lhs, contexts);
 		else return queryMaxProduct(lhs, contexts);
 	}
 	/**
@@ -158,17 +159,17 @@ public class QueryProcessor {
 	/**
 	 * Process queries in a query file according to a semiring
 	 * @param queryFile
-	 * @param b
+	 * @param useSumProduct true if sum product semiring, false if max product
 	 * @throws IOException
 	 */
-	public void processQueries(String queryFile) throws IOException {
+	public void processQueries(String queryFile, boolean useSumProduct) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(queryFile));
 		String line;
 		while ((line = br.readLine()) != null) {
 			String[] stuff = line.split(" ");
 			String[] lhs = stuff[0].split(",");
 			String[] rhs = stuff[1].split(",");
-			System.out.println(query(lhs, rhs));
+			System.out.println(query(lhs, rhs, useSumProduct));
 		}
 		br.close();
 	}
