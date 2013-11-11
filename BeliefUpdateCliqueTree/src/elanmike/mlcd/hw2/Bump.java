@@ -12,9 +12,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 
+import elanmike.mlcd.hw2.Bump.Edge;
+import elanmike.mlcd.hw2.Bump.Vertex;
 import elanmike.mlcd.hw2.Factor.FactorException;
 
 /**
@@ -235,7 +238,20 @@ public class Bump {
 			_vertices = new HashMap<String,Vertex>();
 			_edges = new HashMap<String,Edge>();
 		}
-		// TODO copy constructor tree
+		Tree(Tree other) {
+			_vertices = new HashMap<String,Vertex>();
+			Iterator<Entry<String, Vertex>> itv = other._vertices.entrySet().iterator();
+			while(itv.hasNext()) {
+				Entry<String,Vertex> entry = itv.next();
+				_vertices.put(entry.getKey(), new Vertex(entry.getValue()));
+			}
+			_edges = new HashMap<String,Edge>();
+			Iterator<Entry<String, Edge>> ite = other._edges.entrySet().iterator();
+			while(ite.hasNext()) {
+				Entry<String, Edge> entry = ite.next();
+				this.addEdge(new Edge(entry.getValue()));
+			}
+		}
 		void addVertex(Vertex v) {
 			_vertices.put(v.makeKey(),v);
 			//System.out.println("adding vertice with key: "+ v._variables.toString());
@@ -255,12 +271,6 @@ public class Bump {
 				e._two.addNeighborEdge(e);
 			}
 		}
-		Tree makeCopy() {
-			Tree t = new Tree();
-			//TODO make deep copy
-			return t;
-		}
-		
 		public String toString(){
 			StringBuilder output = new StringBuilder("=== Vertices ===\n");
 			Set<String> keys = _vertices.keySet();
@@ -437,7 +447,7 @@ public class Bump {
 	 * and clears our stored contexts.
 	 */
 	void resetTreeForQueries() {
-		_queryTree = _tree.makeCopy();
+		_queryTree = new Tree(_tree);
 	}
 	/**
 	 * find a vertex with a clique containing the given set of variables
