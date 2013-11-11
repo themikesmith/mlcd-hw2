@@ -349,7 +349,7 @@ public class Factor {
 			
 			for(int var_idx=0; var_idx < _variables.size(); var_idx ++){
 				
-				//output += String.format("%01d       ", values.get(var_idx));
+				output += String.format("%01d       ", values.get(var_idx));
 				//output += valueNames.get(var_idx) + "\t";
 					//	String.format("%s\t",
 					//	.get(var_idx),);
