@@ -140,7 +140,9 @@ public class QueryProcessor {
 			String[] stuff = line.split(" ");
 			String[] lhs = stuff[0].split(",");
 			String[] rhs = stuff[1].split(",");
-			System.out.println("\n\n\n******result!!!******\n"+query(lhs, rhs, useSumProduct));
+			if(Bump.DEBUG) {
+				System.out.println("\n\n\n******result!!!******\n"+line+"\n"+query(lhs, rhs, useSumProduct));
+			}
 		}
 		br.close();
 	}
