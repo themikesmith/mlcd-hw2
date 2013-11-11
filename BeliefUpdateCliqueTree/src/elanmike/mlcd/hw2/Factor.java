@@ -212,7 +212,7 @@ public class Factor {
 	
 	public Factor(Factor factToCopy){
 		this._variables = factToCopy._variables;
-		this._stride = factToCopy._variables;
+		this._stride = factToCopy._stride;
 		
 		this.data = new ArrayList<Double>(factToCopy.data.size());
 		for(int i = 0; i<factToCopy.data.size(); i++) data.add(factToCopy.data.get(i));
@@ -263,13 +263,16 @@ public class Factor {
 
 	private int index(int[] variableValues) throws FactorIndexException{
 		int searchIndex = 0;
+		
 		if(variableValues.length != _variables.size()) 
 			throw new FactorIndexException("FactorIndexError: indexLength("+variableValues.length+") does not match number of variables for this factor("+_variables.size()+")");
-		for(int index=0; index < _variables.size(); index ++)
+		
+		for(int index=0; index < _variables.size(); index ++){
 			if(variableValues[index] >= _variableCard.get(_variables.get(index))|| variableValues[index]< 0)
 				throw new FactorIndexException("FactorIndexError: variableValue("+variableValues[index]+") was not in the valid range of ( 0 - "+(_variableCard.get(_variables.get(index))-1)+")");
 			else
 				searchIndex += variableValues[index]*_stride.get(index);
+		}
 		
 		return searchIndex;
 	}
@@ -345,7 +348,7 @@ public class Factor {
 		data.set(searchIndex,Math.log(prob));
 	}
 	
-	public double getProbByValues(int[] variableValues) throws FactorIndexException {
+	public double getProbByValues(int[] variableValues) throws FactorIndexException {	
 		return data.get(index(variableValues));
 	}
 	
@@ -433,7 +436,8 @@ public class Factor {
 		
 		ArrayList<Integer> sepset = this.intersection(f._variables);
 		
-
+		//System.out.println("Dividing: "+ this._variables + " by "+ f._variables + ", intersection of: " + sepset  +"("+sepset.size()+")");
+		//System.out.println("LHS datasize: "+ this.data.size() + " RHS datasize: " + f.data.size() );
 		for(int datum_idx = 0; datum_idx < this.data.size(); datum_idx++ ){
 			int[] values = valuesFromIndex(datum_idx);
 			//ArrayList<Integer> sharedVarValues = new ArrayList<Integer>();
@@ -445,7 +449,6 @@ public class Factor {
 				int that_ind = f._variables.indexOf(s);//index of variable in sepset in this factor
 				f_indicies_of_values[that_ind] = values[this_ind];
 			}
-			
 			if(this.data.get(datum_idx) == 0.0 && f.getProbByValues(f_indicies_of_values) == Math.log(0.0) ){
 				result.data.set(datum_idx, Math.log(0.0));
 			}else{
