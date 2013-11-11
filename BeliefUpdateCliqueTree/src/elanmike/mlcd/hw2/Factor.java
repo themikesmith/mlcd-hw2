@@ -706,8 +706,9 @@ public class Factor {
 		Factor.addVariable("C", C_vals);
 		System.out.println(Factor.variableInfo());
 		
-		String[] fac1_vars = {"A","B"}; 
-		//fac1.putProbByValues(.5,0,0);
+		String[] fac1_vars = {"A","B"};
+		Factor fac1 = new Factor(fac1_vars);
+		fac1.putProbByValues(.5,0,0);
 		/*values = {0,0};
 		fac1.putProbByValues(values, .5);
 		fac1.putProbByValues(values, .5);
