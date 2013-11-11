@@ -302,16 +302,6 @@ public class Bump {
 			}
 			return output.toString();
 		}
-		/**
-		 * Initialize beliefs at each vertex of the tree
-		 */
-		void initCliques() {
-			//TODO implement init cliques
-			for(Vertex v : _vertices.values()) {
-				// print clique data
-				if(DEBUG) System.out.println(v.getLongInfo());
-			}
-		}
 	}
 	private static final boolean DEBUG = true;
 	/**
@@ -349,7 +339,7 @@ public class Bump {
 	 * @return true if successful, false otherwise
 	 */
 	public boolean runBump() {
-		_tree.initCliques();
+		// note we initialize the clique tree by construction!
 		try {
 			upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
 		} catch (FactorException e) {
