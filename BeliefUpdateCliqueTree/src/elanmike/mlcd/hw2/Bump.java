@@ -587,8 +587,7 @@ public class Bump {
 			System.err.println("uh oh! query vars size must equal query values size");
 			return null;
 		}
-		// marginalize out variables not in the query's LHS
-		Factor f = target.marginalize(target.difference(vars));
+		if(DEBUG) System.out.println("at clique:"+target);
 		// check the LHS for evidence...
 		ArrayList<Integer> eVars = new ArrayList<Integer>(), 
 				eValues = new ArrayList<Integer>();
@@ -599,12 +598,22 @@ public class Bump {
 				eValues.add(value);
 			}
 		}
-		// and then reduce using the evidence given
-		//System.out.println("Reducing:  "+ Factor.variableIndicesToNames(eVars)+"  "+Factor.valueIndiciesToNames(eVars, eValues));
-		System.out.println("eVars"+ Factor.variableIndicesToNames(eVars));
-		f = target.reduce(eVars, eValues);
-		// return the factor, normalized
+
+
+		Factor f = new Factor(target);
+		System.out.println("found clique:\n"+f);
+		// marginalize out variables not in the query's LHS
+		ArrayList<Integer> diff = f.difference(vars);
+		System.out.println("marginalize out: "+Factor.variableIndicesToNames(diff));
+		f = f.marginalize(diff);
+		System.out.println("after marginalizing:\n"+f);
+
 		f.normalize();
+		System.out.println("after normalizing:\n"+f);
+		// and then reduce using the evidence given
+		System.out.println("Reducing:  "+ Factor.variableIndicesToNames(eVars)+"  "+Factor.valueIndiciesToNames(eVars, eValues));
+		f = f.reduce(eVars, eValues);
+		System.out.println("after reduce:\n"+f);
 		return f;
 	}
 	/**
