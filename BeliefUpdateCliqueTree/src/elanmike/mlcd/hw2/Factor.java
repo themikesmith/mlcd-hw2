@@ -708,30 +708,25 @@ public class Factor {
 		
 		String[] fac1_vars = {"A","B"};
 		Factor fac1 = new Factor(fac1_vars);
-		fac1.putProbByValues(.5,0,0);
-		/*values = {0,0};
-		fac1.putProbByValues(values, .5);
-		fac1.putProbByValues(values, .5);
-		fac1.putProbByValues(values, .5);
-		fac1.putProbByValues(values, .5);
-		fac1.putProbByValues(values, .5);
+		fac1.putProbByValues(0.5, 0,0);
+		fac1.putProbByValues(0.8, 0,1);
+		fac1.putProbByValues(0.1, 1,0);
+		fac1.putProbByValues(0.0, 1,1);
+		fac1.putProbByValues(0.3, 2,0);
+		fac1.putProbByValues(0.9, 2,1);
+
 	
-		//fac1.putProbByIndex(0, .5);
-		fac1.putProbByIndex(1, .1);
-		fac1.putProbByIndex(2, .3);
-		fac1.putProbByIndex(3, .8);
-		fac1.putProbByIndex(4, 0);
-		fac1.putProbByIndex(5, .9);
 		System.out.println(fac1);
 		
 		String[] fac2_vars = {"B","C"}; 
 		Factor fac2 = new Factor(fac2_vars);
-		fac2.putProbByIndex(0, .5);
-		fac2.putProbByIndex(1, .1);
-		fac2.putProbByIndex(2, .7);
-		fac2.putProbByIndex(3, .2);
+		fac2.putProbByValues(0.5, 0,0);
+		fac2.putProbByValues(0.7, 0,1);
+		fac2.putProbByValues(0.1, 1,0);
+		fac2.putProbByValues(0.2, 1,1);
+
 		System.out.println(fac2);
-		*/
+
 		
 		System.out.println(fac1.product(fac2));
 		
