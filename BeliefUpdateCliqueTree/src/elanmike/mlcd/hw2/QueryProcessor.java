@@ -26,8 +26,8 @@ public class QueryProcessor {
 		_bump.resetTreeForQueries();
 	}
 	public String query(String[] lhs, String[] contexts, boolean useSumProduct) {
+		if(Bump.DEBUG) System.out.println("query"+(useSumProduct?"sp":"mp")+":"+lhs.toString()+" | "+ contexts.toString());
 		if(!_ready || useSumProduct != _bump.useSumProduct()) {
-			System.err.println("oops! not ready.");
 			// set appropriate method, and run bump to calibrate
 			_bump.setUseSumProduct(useSumProduct);
 			_bump.runBump();

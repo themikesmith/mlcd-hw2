@@ -54,7 +54,9 @@ public class Bump {
 			}
 			return false;
 		}
-		
+		public String toString() {
+			return _variables.toString();
+		}
 		public String getLongInfo() {
 			StringBuilder sb = new StringBuilder(toString());
 			// add factor result
@@ -117,6 +119,7 @@ public class Bump {
 		 * @throws FactorIndexException 
 		 */
 		void sendMessage(Edge edgeToJ) throws FactorException {
+			if(DEBUG) System.out.println(this.toString()+" sending message to:"+edgeToJ.getOtherVertex(this));
 			// calculate message - marginalize out all variables not in sepset ij
 			Factor sigmaItoJ = this.marginalize(this.difference(edgeToJ._variables));
 			// send: make J receive
@@ -131,6 +134,7 @@ public class Bump {
 		 * @param sigmaItoJ
 		 */
 		private void onReceiveMessage(Edge edgeItoJ, Factor sigmaItoJ) throws FactorException {
+			if(DEBUG) System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
 			// belief j = belief j * (sigma ij / mu ij)
 			this.setFactorData(this.product(sigmaItoJ.divide(edgeItoJ)));
 			// check if I was informed when sending
@@ -319,7 +323,7 @@ public class Bump {
 			return output.toString();
 		}
 	}
-	private static final boolean DEBUG = true;
+	public static final boolean DEBUG = true;
 	/**
 	 * true if we're on the upward pass, 
 	 * if we're going in increasing order id. 
@@ -371,27 +375,7 @@ public class Bump {
 		resetTreeForQueries();
 		return true;
 	}
-	/**
-	 * Calibrate the tree with the upward pass of belief-update message passing.
-	 * Use the reverse of our ordering that we created in the downward pass.
-	 * @throws FactorException 
-	 */
-	void upwardPassBeliefUpdate(List<Vertex> orderedVertices) throws FactorException {
-		_bumpOnUpwardPass = true;
-		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
-		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
-			Vertex v = orderedVertices.get(i);
-			// for each edge that is outgoing given our ordering
-			for(Edge e : v.getUpwardOutgoingNeighborEdges()) {
-				// send our message along that edge
-				v.sendMessage(e);
-				if(DEBUG) {
-					System.out.println("\n******\nmsg:"+i);
-					System.out.println(_tree.getLongInfo());
-				}
-			}
-		}
-	}
+	
 	/**
 	 * Conducts one downward pass of belief update message passing
 	 * with a designated root.
@@ -438,6 +422,7 @@ public class Bump {
 				}
 			}
 			Vertex curr = toProcess.remove();
+			if(DEBUG) System.out.printf("curr vertex:%s\n",curr);
 			// mark
 			curr.setOrderID();
 			ordering.add(curr); // and add to our ordered list
@@ -452,7 +437,7 @@ public class Bump {
 					// send belief update message to the child
 					curr.sendMessage(e);
 					if(DEBUG) {
-						System.out.println("\n******\nmsg:");
+						System.out.println("\n****** tree is now ******\n");
 						System.out.println(_tree.getLongInfo());
 					}
 					// and add the child to our list to process
@@ -461,6 +446,27 @@ public class Bump {
 			}
 		}
 		return ordering;
+	}
+	/**
+	 * Calibrate the tree with the upward pass of belief-update message passing.
+	 * Use the reverse of our ordering that we created in the downward pass.
+	 * @throws FactorException 
+	 */
+	void upwardPassBeliefUpdate(List<Vertex> orderedVertices) throws FactorException {
+		_bumpOnUpwardPass = true;
+		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
+		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
+			Vertex v = orderedVertices.get(i);
+			// for each edge that is outgoing given our ordering
+			for(Edge e : v.getUpwardOutgoingNeighborEdges()) {
+				// send our message along that edge
+				v.sendMessage(e);
+				if(DEBUG) {
+					System.out.println("\n******\nmsg:"+i);
+					System.out.println(_tree.getLongInfo());
+				}
+			}
+		}
 	}
 	/**
 	 * Resets the query tree in preparation for queries.
