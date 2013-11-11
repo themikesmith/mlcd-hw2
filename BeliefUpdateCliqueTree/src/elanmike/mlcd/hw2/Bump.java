@@ -321,7 +321,7 @@ public class Bump {
 		_useSumProduct = true;
 	}
 	/**
-	 * Sets the value of use sum product.
+	 * Sets the value of use sum product - this determines our semiring.
 	 * Note that after changing this, one needs to call runBump again
 	 * to recalibrate the tree.
 	 * @param useSumProduct true if use sum product, false if use max product
