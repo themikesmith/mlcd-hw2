@@ -313,6 +313,13 @@ public class Bump {
 		_bumpOnUpwardPass = false;
 		_useSumProduct = true;
 	}
+	
+	public void init(String networkFilename,String cliqueTreeFilename, String cpdFilename) throws IOException, ArrayIndexOutOfBoundsException, IllegalArgumentException, FactorException{
+		readNetworkFile(networkFilename);
+		readCliqueTreeFile(cliqueTreeFilename);
+		readCPDFile(cpdFilename);
+	}
+	
 	/**
 	 * @return use sum product
 	 */
@@ -676,6 +683,8 @@ public class Bump {
 			}
 		}
 	}
+	
+
 	public static void main(String[] args) {
 		Bump b = new Bump();
 		
