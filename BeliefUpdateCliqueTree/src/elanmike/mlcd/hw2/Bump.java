@@ -587,6 +587,7 @@ public class Bump {
 		// and then marginalize out variables not in query
 		Factor f = target.marginalize(target.difference(vars));
 		// TODO normalize here maybe?
+		f.normalize();
 		return f;
 	}
 	/**
