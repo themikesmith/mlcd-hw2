@@ -376,6 +376,10 @@ public class Bump {
 			e.printStackTrace();
 			return false;
 		}
+		if(DEBUG) {
+			System.out.println("\n******\ntree is now:");
+			System.out.println(_tree.getLongInfo());
+		}
 		resetTreeForQueries();
 		return true;
 	}
@@ -440,10 +444,6 @@ public class Bump {
 					// downstream if we haven't marked it yet
 					// send belief update message to the child
 					curr.sendMessage(e);
-					if(DEBUG) {
-						System.out.println("\n****** tree is now ******\n");
-						System.out.println(_tree.getLongInfo());
-					}
 					// and add the child to our list to process
 					toProcess.add(k);
 				}
@@ -465,10 +465,6 @@ public class Bump {
 			for(Edge e : v.getUpwardOutgoingNeighborEdges()) {
 				// send our message along that edge
 				v.sendMessage(e);
-				if(DEBUG) {
-					System.out.println("\n******\nmsg:"+i);
-					System.out.println(_tree.getLongInfo());
-				}
 			}
 		}
 	}
