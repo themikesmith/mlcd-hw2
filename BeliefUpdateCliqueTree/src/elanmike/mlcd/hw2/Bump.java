@@ -576,6 +576,7 @@ public class Bump {
 			System.err.println("uh oh! query vars size must equal query values size");
 			return null;
 		}
+		System.out.printf("num vars:"+vars.size());
 		// marginalize out variables not in the query's LHS
 		Factor f = target.marginalize(target.difference(vars));
 		// check the LHS for evidence...
@@ -584,9 +585,12 @@ public class Bump {
 		for(int i = 0; i < vars.size(); i++) {
 			int var = vars.get(i), value = values.get(i);
 			if(value != QueryProcessor.NO_EVIDENCE) {
+				System.out.printf("var:%s value:%s\n", Factor.variableIndicesToNames(var), Factor.getVariableName(var, value));
+				System.out.println("yay");
 				eVars.add(var);
 				eValues.add(value);
 			}
+			else System.out.printf("var:%s value:%s\n", Factor.variableIndicesToNames(var), QueryProcessor.NO_EVIDENCE);
 		}
 		// and then reduce using the evidence given
 		f = target.reduce(eVars, eValues);

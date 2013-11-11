@@ -31,8 +31,7 @@ public class BayesQuery {
 		// create and init clique tree
 		b = new Bump();
 		try {
-			b.init(args[0],args[2],args[1]);	
-			
+			b.init(args[0],args[2],args[1]);
 		} catch (NumberFormatException e1) {
 			e1.printStackTrace();
 			return;
