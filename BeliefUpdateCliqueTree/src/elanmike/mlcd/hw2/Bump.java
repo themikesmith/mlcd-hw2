@@ -510,8 +510,11 @@ public class Bump {
 			System.err.println("can't find vertex - whoops!");
 		}
 		// multiply in a new indicator factor
-		// TODO write factor indicator function
-		Factor indicator = null;
+		ArrayList<Integer> vars = new ArrayList<Integer>(), 
+				values = new ArrayList<Integer>();
+		vars.add(varInt);
+		values.add(varValue);
+		Factor indicator = Factor.indicatorFunction(vars, values);
 		newRoot.product(indicator);
 		// conduct one pass of B-U with C as the root
 		downwardPassBeliefUpdate(_queryTree, newRoot);
