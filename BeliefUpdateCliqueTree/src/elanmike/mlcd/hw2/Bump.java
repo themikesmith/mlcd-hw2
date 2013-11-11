@@ -16,8 +16,6 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 
-import elanmike.mlcd.hw2.Bump.Edge;
-import elanmike.mlcd.hw2.Bump.Vertex;
 import elanmike.mlcd.hw2.Factor.FactorException;
 
 /**
