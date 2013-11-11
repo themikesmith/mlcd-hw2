@@ -201,10 +201,10 @@ public class Bump {
 			this._two = two;
 		}
 		
-		Edge(Vertex one, Vertex two,Edge edgeToCopy) {
+		Edge(Edge edgeToCopy, Vertex newOne, Vertex newTwo) {
 			super(edgeToCopy);
-			this._one = one;
-			this._two = two;
+			this._one = newOne;
+			this._two = newTwo;
 		}
 
 		/**
@@ -265,7 +265,12 @@ public class Bump {
 			Iterator<Entry<String, Edge>> ite = other._edges.entrySet().iterator();
 			while(ite.hasNext()) {
 				Entry<String, Edge> entry = ite.next();
-				this.addEdge(new Edge(entry.getValue()));
+				// pass old edge, and new versions of old vertices
+				// get keys of old vertices
+				String keyOne = entry.getValue()._one.makeKey(), 
+						keyTwo = entry.getValue()._two.makeKey();
+				this.addEdge(new Edge(entry.getValue(), 
+					_vertices.get(keyOne), _vertices.get(keyTwo)));
 			}
 		}
 		void addVertex(Vertex v) {
