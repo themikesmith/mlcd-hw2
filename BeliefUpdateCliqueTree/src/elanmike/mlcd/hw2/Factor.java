@@ -288,6 +288,8 @@ public class Factor {
 	}
 	
 	private ArrayList<Integer> valuesFromIndex(int datum_index) throws FactorIndexException {
+		
+		
 		if(datum_index >= data.size()|| datum_index< 0)
 			throw new FactorIndexException("FactorIndexError: index("+datum_index+") was not in the valid range of ( 0 - "+(data.size()-1)+")");
 		
@@ -361,6 +363,21 @@ public class Factor {
 		}
 		
 		return output;
+	}
+	
+	public void putProbByValues(double prob,int... values )
+			throws FactorIndexException {
+		
+		int searchIndex = 0;
+		if(values.length != _variables.size()) 
+			throw new FactorIndexException("FactorIndexError: indexLength("+values.length+") does not match number of variables for this factor("+_variables.size()+")");
+		for(int index=0; index < _variables.size(); index ++)
+			if(values[index] >= _variableCard.get(_variables.get(index))|| values[index]< 0)
+				throw new FactorIndexException("FactorIndexError: variableValue("+values[index]+") was not in the valid range of ( 0 - "+(_variableCard.get(_variables.get(index))-1)+")");
+			else
+				searchIndex += values[index]*_stride.get(index);
+		
+		data.set(searchIndex,Math.log(prob));
 	}
 	
 	public void putProbByValues(ArrayList<Integer> arrayList,double prob) 
@@ -690,8 +707,15 @@ public class Factor {
 		System.out.println(Factor.variableInfo());
 		
 		String[] fac1_vars = {"A","B"}; 
-		Factor fac1 = new Factor(fac1_vars);
-		fac1.putProbByIndex(0, .5);
+		//fac1.putProbByValues(.5,0,0);
+		/*values = {0,0};
+		fac1.putProbByValues(values, .5);
+		fac1.putProbByValues(values, .5);
+		fac1.putProbByValues(values, .5);
+		fac1.putProbByValues(values, .5);
+		fac1.putProbByValues(values, .5);
+	
+		//fac1.putProbByIndex(0, .5);
 		fac1.putProbByIndex(1, .1);
 		fac1.putProbByIndex(2, .3);
 		fac1.putProbByIndex(3, .8);
@@ -706,7 +730,7 @@ public class Factor {
 		fac2.putProbByIndex(2, .7);
 		fac2.putProbByIndex(3, .2);
 		System.out.println(fac2);
-		
+		*/
 		
 		System.out.println(fac1.product(fac2));
 		
