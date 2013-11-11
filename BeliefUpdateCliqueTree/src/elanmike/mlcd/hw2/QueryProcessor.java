@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import elanmike.mlcd.hw2.Factor.FactorException;
+import elanmike.mlcd.hw2.Factor.FactorIndexException;
 
 public class QueryProcessor {
 	public static final int NO_EVIDENCE = -1;
@@ -34,13 +35,12 @@ public class QueryProcessor {
 			_bump.runBump();
 			_ready = true;
 		}
-		if(useSumProduct) return querySumProduct(lhs, contexts);
-		else return queryMaxProduct(lhs, contexts);
+		return query(lhs, contexts);
 	}
 	/**
 	 * queries the structure for p(lhs|contexts)
 	 */
-	String querySumProduct(String[] lhs, String[] contexts) {
+	String query(String[] lhs, String[] contexts) {
 		// check if evidence is incremental or retractive
 		boolean retractive = false;
 		// then take action
@@ -94,84 +94,28 @@ public class QueryProcessor {
 			}
 		}
 		// now process lhs
+		vars = new ArrayList<Integer>(); 
+		values = new ArrayList<Integer>();
 		for(String s : lhs) {
 			String[] varValue = s.split("=");
-			String var = varValue[0], value = varValue[1];
-			int varInt = Factor.getVariableIndex(var),
+			String var = varValue[0];
+			int varInt = Factor.getVariableIndex(var), valueInt = NO_EVIDENCE;
+			if(varValue.length > 1) {
+				String value = varValue[1];
 				valueInt = Factor.getVariableValueIndex(varInt, value);
-			if(valueInt != NO_EVIDENCE) {
-				// TODO conduct query sum product
 			}
+			vars.add(varInt);
+			values.add(valueInt);
 		}
-		return null;
-	}
-	/**
-	 * queries the structure for p(lhs|contexts)
-	 */
-	String queryMaxProduct(String[] lhs, String[] contexts) {
-		// TODO implement query max product = maximum likelihood
-		// check if evidence is incremental or retractive
-		boolean retractive = false;
-		// then take action
-		// check number of variables
-		if(contexts.length < _queryContexts.size()) {
-			// retractive -- less evidence than before. reset and treat as incremental
-			retractive = true;
+		Factor result;
+		try {
+			result = _bump.getQueryResult(vars, values);
+			if(result != null) return result.toString();
+			else return "out of clique inference";
+		} catch (FactorIndexException e) {
+			e.printStackTrace();
+			return e.getMessage();
 		}
-		if(!retractive) {
-			for(String s : contexts) {
-				String[] varValue = s.split("=");
-				String var = varValue[0], value = varValue[1];
-				int varInt = Factor.getVariableIndex(var),
-					valueInt = Factor.getVariableValueIndex(varInt, value);
-				if(_queryContexts.containsKey(varInt) && _queryContexts.get(varInt) != valueInt) {
-					// query context variable has other value. reset.
-					retractive = true;
-					break;
-				}
-			}
-		}
-		if(retractive) resetTreeForQueries();
-		ArrayList<Integer> vars = new ArrayList<Integer>(), 
-				values = new ArrayList<Integer>();
-		for(String s : contexts) {
-			String[] varValue = s.split("=");
-			String var = varValue[0], value = varValue[1];
-			int varInt = Factor.getVariableIndex(var),
-				valueInt = Factor.getVariableValueIndex(varInt, value);
-			boolean incrementalEvidence = false;
-			if(!_queryContexts.containsKey(varInt)) {
-				// additional evidence - we've never seen it before
-				incrementalEvidence = true;
-				vars.add(varInt);
-				values.add(valueInt);
-			}
-			if(incrementalEvidence) {
-				try {
-					_bump.incorporateQueryEvidence(vars, values);
-				} catch (FactorException e) {
-					e.printStackTrace();
-					return e.getMessage();
-				}
-			}
-			else if(_queryContexts.get(varInt) == valueInt) {
-				// already have this context variable = value pair, do nothing
-			}
-			else { // query context variable has other value. reset.
-				// we've already reset so this should never occur
-			}
-		}
-		// now process lhs
-		for(String s : lhs) {
-			String[] varValue = s.split("=");
-			String var = varValue[0], value = varValue[1];
-			int varInt = Factor.getVariableIndex(var),
-				valueInt = Factor.getVariableValueIndex(varInt, value);
-			if(valueInt != NO_EVIDENCE) {
-				// TODO conduct query max product
-			}
-		}
-		return null;
 	}
 	/**
 	 * Process queries in a query file according to a semiring
@@ -189,5 +133,9 @@ public class QueryProcessor {
 			System.out.println(query(lhs, rhs, useSumProduct));
 		}
 		br.close();
+	}
+
+	public static void main(String[] args) {
+		
 	}
 }

@@ -17,6 +17,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import elanmike.mlcd.hw2.Factor.FactorException;
+import elanmike.mlcd.hw2.Factor.FactorIndexException;
 
 /**
  * Belief Update Message Passing class
@@ -497,11 +498,34 @@ public class Bump {
 		return null;
 	}
 	/**
+	 * find a vertex with a clique containing the given set of variables
+	 * in the given tree
+	 * @param t the tree in question
+	 * @param vars the variable integers
+	 * @return a suitable vertex, or null otherwise.  should always return a vertex.
+	 */
+	Vertex findVertexInTree(Tree t, ArrayList<Integer> vars) {
+		for(Vertex v : t._vertices.values()) {
+			boolean containsAll = true;
+			for(int i : vars) {
+				if(!v._variables.contains(i)) {
+					containsAll = false;
+					//continue; // skip.
+				}
+			}
+			if(containsAll) return v;
+		}
+		return null;
+	}
+	/**
+	 * 
+	/**
 	 * Given that our tree is calibrated, incorporate the evidence
 	 * into our QUERY COPY
 	 * 
-	 * @param pairs list of Pair<Integer, Integer>... pairs pairs of variable=value
-	 * @throws FactorException 
+	 * @param vars
+	 * @param values
+	 * @throws FactorException
 	 */
 	public void incorporateQueryEvidence(ArrayList<Integer> vars, ArrayList<Integer> values) 
 			throws FactorException {
@@ -521,6 +545,39 @@ public class Bump {
 		}
 		// and run bump on our query tree with our evidence
 		upwardPassBeliefUpdate(downwardPassBeliefUpdate(_queryTree));
+	}
+	/**
+	 * Get a query result given a LHS of a query.
+	 * At each index of the input lists, we have variable = value pairs.
+	 * Note that to keep the format consistent, 
+	 * we pass NO_EVIDENCE if no evidence specified.
+	 * @param vars
+	 * @param values
+	 * @return the factor result, or null if query is out of clique inference
+	 * @throws FactorIndexException 
+	 */
+	public Factor getQueryResult(ArrayList<Integer> vars, ArrayList<Integer> values) 
+			throws FactorIndexException {
+		Vertex target = findVertexInTree(_queryTree, vars);
+		if(target == null) {
+			System.err.println("uh oh! we can't do out-of-clique inference!");
+			return null;
+		}
+		if(vars.size() != values.size()) {
+			System.err.println("uh oh! query vars size must equal query values size");
+			return null;
+		}
+		// at our target, we multiply indicator functions
+		for(int i = 0; i < vars.size(); i++) {
+			int var = vars.get(i), value = values.get(i);
+			if(value != QueryProcessor.NO_EVIDENCE) {
+				// if we have evidence specified in this pair, we apply an indicator function
+				target.product(Factor.indicatorFunction(var, value));
+			}
+		}
+		// and then marginalize out variables not in query
+		target.marginalize(target.difference(vars));
+		return target;
 	}
 	/**
 	 * Reads in the tree from the clique file.
