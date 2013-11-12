@@ -763,6 +763,7 @@ public class Factor {
 		A_vals.add("2");
 		A_vals.add("3");
 		
+
 		ArrayList<String> B_vals = new ArrayList<String>();
 		B_vals.add("1");
 		B_vals.add("2");
@@ -865,6 +866,7 @@ public class Factor {
 			System.out.println(fac1.reduce(heldVars, heldValues));
 			}
 		}
+
 		
 	}
 	
