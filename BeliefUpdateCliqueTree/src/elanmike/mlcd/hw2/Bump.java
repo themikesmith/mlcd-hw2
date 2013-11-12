@@ -807,4 +807,12 @@ public class Bump {
 //			}
 //		}
 	}
+	public static void main(String[] args) {
+		String[] newArgs = {
+				"/home/mcs/Dropbox/mlcd/assignment2/hw2-files/network-10.8.txt",
+				"/home/mcs/Dropbox/mlcd/assignment2/hw2-files/cpd-10.8.txt",
+				"/home/mcs/Dropbox/mlcd/assignment2/hw2-files/cliquetree-10.8.txt",
+		};
+		
+	}
 }
