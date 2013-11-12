@@ -250,8 +250,6 @@ We are given all actions and observations, as incremental evidence.  We could do
 \noindent - Let the cost of an operation on a factor be proportional to the size of the factor.  We could calibrate our tree based on our distribution's initial beliefs, with cost $2c = 2vk$.  Note that $k$ is the size of the largest clique, which means the size of the largest factor is $O(k)$.  We could then introduce our evidence set $E$, which has $O(T)$ actions, and $O(T n)$ observations, where $T$ is the number of time steps, and $n$ is the maximum number of observations at any time step.  We would therefore need to multiply in $O(2 T n)$ indicator functions, which has cost $O(2 T n x)$, where $x$ is the time needed to find an applicable clique at which to multiply any given indicator function.  We then would need to recalibrate the tree, which adds cost $2 v k$ again.  This is a total cost of $O(4 v k)$, which in our worst case scenario is $O(4 \cdot 2T \cdot 5) = O(40T)$.\\
 \noindent - Assuming we only want to answer this one query, we can forego calibrating the clique tree first, and only calibrate it once after we multiply in the indicator factors with the evidence.  This brings us down to $O(20T)$.\\
 
-//TODO
-
 \end{problem}{}
 
 \begin{problem}{Bayesian Score for Bayesian Networks}
