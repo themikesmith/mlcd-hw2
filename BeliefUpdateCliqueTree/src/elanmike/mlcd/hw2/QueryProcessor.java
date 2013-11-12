@@ -146,14 +146,15 @@ public class QueryProcessor {
 			if(Bump.DEBUG) {
 				System.out.println("\n******result!!!******\n");
 			}
-			for(int i = 0; i < result.data.size(); i++) {
-//				System.out.println(Math.exp(result.data.get(i)));
-				if(Math.exp(result.data.get(i)) < 0 || Math.exp(result.data.get(i)) > 1) {
-					System.err.println("uh oh!! invalid probability in our result!");
+			if(result != null) {
+				for(int i = 0; i < result.data.size(); i++) {
+//					System.out.println(Math.exp(result.data.get(i)));
+					if(Math.exp(result.data.get(i)) < 0 || Math.exp(result.data.get(i)) > 1) {
+						System.err.println("uh oh!! invalid probability in our result!");
+					}
 				}
+				return result.toString();
 			}
-			
-			if(result != null) return result.toString();
 			else return "out of clique inference";
 		} catch (FactorIndexException e) {
 			e.printStackTrace();
