@@ -250,6 +250,12 @@ public class Factor {
 			strideTot*=_variableCard.get(index);
 		}*/
 		for(int i = _variables.size()-1 ; i >=0 ; i--){
+//			System.out.printf("i:%d var:%d aka %s card:%d adding stride:%d strideTot:%d\n",
+//					i, _variables.get(i), Factor.variableIndicesToNames(_variables.get(i)),
+//					_variableCard.get(_variables.get(i)),
+//					strideTot,
+//					strideTot*_variableCard.get(_variables.get(i)) 
+//					);
 			_stride.add(0, strideTot);
 			strideTot*=_variableCard.get(_variables.get(i));
 		}
@@ -321,16 +327,21 @@ public class Factor {
 		
 		ArrayList<Integer> values = new ArrayList<Integer>();
 		
-		/*
-		System.out.println("valuesFromIndex");
-		System.out.println("index:" + datum_index);
-		System.out.println("_variables"+_variables );
-		System.out.println("_stride"+_stride );
-		System.out.println("_variableCard"+_variableCard );
-		System.out.println();
-		*/
+		
+//		System.out.println("valuesFromIndex");
+//		System.out.println("index:" + datum_index);
+//		System.out.println("_variables"+_variables );
+//		System.out.println("_stride"+_stride );
+//		System.out.println("_variableCard"+_variableCard );
+//		System.out.println();
+		
+//		for(int varIdx = _variables.size() -1; varIdx >= 0; varIdx--){
 		for(int varIdx = 0; varIdx< _variables.size(); varIdx++){
-			values.add((datum_index/_stride.get(varIdx))%_variableCard.get(varIdx));
+//			System.out.println("var:%d aka %s\n", varIdx);
+//			System.out.printf("(index / stride[i]) mod card[i]\n");
+//			System.out.printf("(%d / %d) mod %d\n", datum_index, _stride.get(varIdx), _variableCard
+//					.get(_variables.get(varIdx)));
+			values.add((datum_index/_stride.get(varIdx))%_variableCard.get(_variables.get(varIdx)));
 		}
 		
 		return values;
@@ -381,6 +392,7 @@ public class Factor {
 			ArrayList<Integer> values = null;
 			try {
 				values = valuesFromIndex(datum_index);
+//				System.out.printf("data:%d values:%s\n",datum_index, values);
 			} catch (FactorIndexException e) {e.printStackTrace();}
 			
 			/*
@@ -431,10 +443,10 @@ public class Factor {
 			// check if we are given a valid value for that variable.
 			if(arrayList.get(index) >= _variableCard.get(variable)
 					|| arrayList.get(index)< 0) {
-				System.out.printf("for index:%d variable:%d aka %s\nthought card:%d\nsupplied value:%d\n", 
-					index, variable, Factor.variableIndicesToNames(variable), 
-					_variableCard.get(variable),
-					arrayList.get(index));
+//				System.out.printf("for index:%d variable:%d aka %s\nthought card:%d\nsupplied value:%d\n", 
+//					index, variable, Factor.variableIndicesToNames(variable), 
+//					_variableCard.get(variable),
+//					arrayList.get(index));
 				throw new FactorIndexException("FactorIndexError: variableValue("+arrayList.get(index)+") was not in the valid range of ( 0 - "+(_variableCard.get(_variables.get(index))-1)+")");
 			}
 			else
@@ -564,10 +576,12 @@ public class Factor {
 	//example p297
 	public Factor marginalize(ArrayList<Integer> elimVar) throws FactorIndexException{
 		ArrayList<Integer> finalVars = difference(elimVar);
-		
+//		System.out.println("my vars:"+_variables+" aka "+Factor.variableIndicesToNames(_variables));
+//		System.out.println("final vars:"+finalVars+" aka "+Factor.variableIndicesToNames(finalVars));
 		Factor result = new Factor(finalVars, 0);
-//		System.out.println("inital factor of 0's:");
-//		System.out.println(result);
+//		System.out.println("\ninital factor of 0's:");
+//		System.out.println(result.toString());
+//		System.out.println("\nbegin marginalizing");
 		
 		for(int datum_idx = 0; datum_idx < this.data.size(); datum_idx++ ){
 			ArrayList<Integer> values = valuesFromIndex(datum_idx);
@@ -588,9 +602,7 @@ public class Factor {
 			result.data.set(result.index(f_indicies_of_values), 
 					Math.log(
 							Math.exp(result.data.get(result.index(f_indicies_of_values)))
-							+Math.exp(this.data.get(datum_idx))));
-			
-			
+							+Math.exp(this.data.get(datum_idx))));			
 		}
 		return result;
 	}
@@ -689,6 +701,7 @@ public class Factor {
 	public static void main(String args[]) throws Exception{
 		
 		if(true){
+			System.out.println("\n\nMarginalizes\nexample p297\n");
 		//Margin Test
 		ArrayList<String> A_vals = new ArrayList<String>();
 		A_vals.add("1");
@@ -724,15 +737,14 @@ public class Factor {
 		
 		ArrayList<Integer> elim_vars = new ArrayList<Integer>();
 		elim_vars.add(1);
+		System.out.println("marginalize!");
 		Factor marginialzied = fac1.marginalize(elim_vars);
-		System.out.println(marginialzied);
-		System.out.println("== normalized ==");
-		marginialzied.normalize();
 		System.out.println(marginialzied);
 
 		}
 		
-		if(false){
+		if(true){
+			System.out.println("\n\nDivision\n365\n");
 		//Division Test
 		ArrayList<String> A_vals = new ArrayList<String>();
 		A_vals.add("1");
@@ -781,8 +793,9 @@ public class Factor {
 		}
 		
 		
-		if(false){
+		if(true){
 		//Product Test
+			System.out.println("\n\nProduct\np107\n");
 		ArrayList<String> A_vals = new ArrayList<String>();
 		A_vals.add("1");
 		A_vals.add("2");
@@ -826,73 +839,74 @@ public class Factor {
 		System.out.println(fac1.product(fac2));
 		}
 		
-//		if(false){
-//		//Reduction test p 107 and 111
-//		ArrayList<String> A_vals = new ArrayList<String>();
-//		A_vals.add("1");
-//		A_vals.add("2");
-//		A_vals.add("3");
-//		
-//		ArrayList<String> B_vals = new ArrayList<String>();
-//		B_vals.add("1");
-//		B_vals.add("2");
-//		
-//		ArrayList<String> C_vals = new ArrayList<String>();
-//		C_vals.add("1");
-//		C_vals.add("2");
-//		
-//		ArrayList<String> D_vals = new ArrayList<String>();
-//		D_vals.add("1");
-//		D_vals.add("2");
-//		
-//		Factor.addVariable("A", A_vals);
-//		Factor.addVariable("B", B_vals);
-//		Factor.addVariable("C", C_vals);
-//		Factor.addVariable("D", D_vals);
-//		System.out.println(Factor.variableInfo());
-//		
-//		String[] fac1_vars = {"A","B","C"}; 
-//		Factor fac1 = new Factor(fac1_vars);
-//		fac1.putProbByValues(.25, 0,0,0);// 1 1 1
-//		fac1.putProbByValues(.05, 1,0,0);// 2 1 1
-//		fac1.putProbByValues(.15, 2,0,0);// 3 1 1
-//		
-//		fac1.putProbByValues(.08, 0,1,0);// 1 2 1 
-//		fac1.putProbByValues(0, 1,1,0);  // 2 2 1
-//		fac1.putProbByValues(.09, 2,1,0);// 3 2 1
-//		
-//		fac1.putProbByValues(.35, 0,0,1);// 1 1 2
-//		fac1.putProbByValues(.07, 1,0,1);// 2 1 2
-//		fac1.putProbByValues(.21, 2,0,1);// 3 1 2
-//		
-//		fac1.putProbByValues(.16, 0,1,1); //1 2 2
-//		fac1.putProbByValues(0, 1,1,1);  //2 2 2
-//		fac1.putProbByValues(.18, 2,1,1);//3 2 2
-//		System.out.println(fac1);
-//		{
-//		System.out.println("reduce f1 by C=1");
-//		ArrayList<String> heldVarStrs = new ArrayList<String>();
-//		heldVarStrs.add("C");
-//		ArrayList<String> heldVarValStrs = new ArrayList<String>();
-//		heldVarValStrs.add("1");
-//		ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
-//		ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
-//		System.out.println(fac1.reduce(heldVars, heldValues));
-//		}
-//		
-//			if(false){
-//				System.out.println("reduce f1 by D=1");
-//				ArrayList<String> heldVarStrs = new ArrayList<String>();
-//				heldVarStrs.add("D");
-//				ArrayList<String> heldVarValStrs = new ArrayList<String>();
-//				heldVarValStrs.add("1");
-//				ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
-//				ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
-//				System.out.println(fac1.reduce(heldVars, heldValues));
-//			}
-//		}
+		if(true){
+		//Reduction test p 107 and 111
+			System.out.println("\n\nreduction\np 107 and 111\n");
+		ArrayList<String> A_vals = new ArrayList<String>();
+		A_vals.add("1");
+		A_vals.add("2");
+		A_vals.add("3");
+		
+		ArrayList<String> B_vals = new ArrayList<String>();
+		B_vals.add("1");
+		B_vals.add("2");
+		
+		ArrayList<String> C_vals = new ArrayList<String>();
+		C_vals.add("1");
+		C_vals.add("2");
+		
+		ArrayList<String> D_vals = new ArrayList<String>();
+		D_vals.add("1");
+		D_vals.add("2");
+		
+		Factor.addVariable("A", A_vals);
+		Factor.addVariable("B", B_vals);
+		Factor.addVariable("C", C_vals);
+		Factor.addVariable("D", D_vals);
+		System.out.println(Factor.variableInfo());
+		
+		String[] fac1_vars = {"A","B","C"}; 
+		Factor fac1 = new Factor(fac1_vars);
+		fac1.putProbByValues(.25, 0,0,0);// 1 1 1
+		fac1.putProbByValues(.05, 1,0,0);// 2 1 1
+		fac1.putProbByValues(.15, 2,0,0);// 3 1 1
+		
+		fac1.putProbByValues(.08, 0,1,0);// 1 2 1 
+		fac1.putProbByValues(0, 1,1,0);  // 2 2 1
+		fac1.putProbByValues(.09, 2,1,0);// 3 2 1
+		
+		fac1.putProbByValues(.35, 0,0,1);// 1 1 2
+		fac1.putProbByValues(.07, 1,0,1);// 2 1 2
+		fac1.putProbByValues(.21, 2,0,1);// 3 1 2
+		
+		fac1.putProbByValues(.16, 0,1,1); //1 2 2
+		fac1.putProbByValues(0, 1,1,1);  //2 2 2
+		fac1.putProbByValues(.18, 2,1,1);//3 2 2
+		System.out.println(fac1);
+		{
+		System.out.println("reduce f1 by C=1");
+		ArrayList<String> heldVarStrs = new ArrayList<String>();
+		heldVarStrs.add("C");
+		ArrayList<String> heldVarValStrs = new ArrayList<String>();
+		heldVarValStrs.add("1");
+		ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
+		ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
+		System.out.println(fac1.reduce(heldVars, heldValues));
+		}
+		
+			if(true){
+				System.out.println("reduce f1 by D=1");
+				ArrayList<String> heldVarStrs = new ArrayList<String>();
+				heldVarStrs.add("D");
+				ArrayList<String> heldVarValStrs = new ArrayList<String>();
+				heldVarValStrs.add("1");
+				ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
+				ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
+				System.out.println(fac1.reduce(heldVars, heldValues));
+			}
+		}
 		if(true) {
-			System.out.println("normalize test");
+			System.out.println("\n\nnormalize test\n");
 			ArrayList<String> X_vals = new ArrayList<String>();
 			X_vals.add("1");
 			X_vals.add("2");

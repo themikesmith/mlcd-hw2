@@ -122,16 +122,18 @@ public class Bump {
 		 * @throws FactorIndexException 
 		 */
 		void sendMessage(Edge edgeToJ) throws FactorException {
-			System.out.println(this.toString()+" sending message to:"+edgeToJ.getOtherVertex(this));
+			if(DEBUG) System.out.println(this.toString()+" sending message to:"+edgeToJ.getOtherVertex(this)+"\n via edge:"+edgeToJ);
 			// calculate message - marginalize out all variables not in sepset ij
-			System.out.println("elim:"+this.difference(edgeToJ._variables)+" aka "+Factor.variableIndicesToNames(this.difference(edgeToJ._variables)));
+			if(DEBUG) System.out.println("elim:"+this.difference(edgeToJ._variables)+" aka "+Factor.variableIndicesToNames(this.difference(edgeToJ._variables)));
+			if(DEBUG) System.out.println("belief before marginalize:");
+			if(DEBUG) System.out.println(super.getLongInfo());
 			Factor sigmaItoJ = this.marginalize(this.difference(edgeToJ._variables));
-//			System.out.println("sigma I,J:\n"+sigmaItoJ);
+			if(DEBUG) System.out.println("sigma I,J:\n"+sigmaItoJ);
 			// send: make J receive
 			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ, sigmaItoJ);
 			// update edge potential
 			edgeToJ.setFactorData(sigmaItoJ);
-//			if(DEBUG) System.out.println("mu I,J:\n"+(Factor)edgeToJ);
+			if(DEBUG) System.out.println("mu I,J:\n"+edgeToJ.getLongInfo());
 		}
 		/**
 		 * When we receive a message...
@@ -140,10 +142,13 @@ public class Bump {
 		 * @param sigmaItoJ
 		 */
 		private void onReceiveMessage(Edge edgeItoJ, Factor sigmaItoJ) throws FactorException {
-			System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
+			if(DEBUG) System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
+			if(DEBUG) System.out.println("old belief:");
+			if(DEBUG) System.out.println(super.getLongInfo());
 			// belief j = belief j * (sigma ij / mu ij)
+			if(DEBUG) System.out.println("mu ItoJ:"+edgeItoJ.getLongInfo());
 			this.setFactorData(this.product(sigmaItoJ.divide(edgeItoJ)));
-//			if(DEBUG) System.out.println("belief J:\n"+(Factor)this);
+			if(DEBUG) System.out.println("belief J:\n"+(Factor)this);
 			// check if I was informed when sending
 			Vertex i = edgeItoJ.getOtherVertex(this);
 			_recvdMsgStatus.put(edgeItoJ, i._isInformed);
@@ -731,8 +736,8 @@ public class Bump {
 		BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
 		String line;
 		
-//		System.out.println("all factor variable info:");
-//		System.out.println(Factor.variableInfo());
+		if(DEBUG) System.out.println("all factor variable info:");
+		if(DEBUG) System.out.println(Factor.variableInfo());
 		
 		HashMap<String,Factor> initialFactors = new HashMap<String,Factor>();
 		
