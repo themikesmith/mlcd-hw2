@@ -813,6 +813,13 @@ public class Bump {
 				"/home/mcs/Dropbox/mlcd/assignment2/hw2-files/cpd-10.8.txt",
 				"/home/mcs/Dropbox/mlcd/assignment2/hw2-files/cliquetree-10.8.txt",
 		};
-		
+		Bump b = new Bump();
+		// calibrate on our tree
+		try {
+			b.init(newArgs[0],newArgs[2],newArgs[1]);
+		} catch (ArrayIndexOutOfBoundsException | IllegalArgumentException
+				| IOException | FactorException e) {
+			e.printStackTrace();
+		}
 	}
 }
