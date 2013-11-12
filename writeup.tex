@@ -66,9 +66,173 @@
 
 \begin{problem}{Parameter Sharing}
 
+
+4.1.4 - Deliverables for estimate-params
+
+Our estimate-params program is written in Java.  We have a driver 
+program, a singleton Network class, a MotionModel class, an 
+ObservationModel class, and a Constants class.
+
+The network class has three methods, each of which are called in 
+succession by the driver: read, train, and write.
+
+In the read function we use assumptions specified about our models and 
+the input format to determine sufficient statistics for each network; 
+they are the number of rows I, the number of columns J, the number of 
+landmarks L, and the number of time steps T.  We collect these in the 
+method while reading the network file.
+
+In the train function, we initialize our models with the applicable 
+sufficient statistics.  We note that to compute the MAP estimate using
+add-1 smoothing, we need to only maintain counts of times we observed 
+each parameter p, and maintain counts of all possible instances where 
+we could have observed said parameter p.  To implement add-1 smoothing, 
+We initialize our observed counts of each p to 1, and our counts of 
+chances of observation to 2.
+For the motion model, we maintain two 4x1 arrays, one for successful 
+moves in each of the 4 directions, and one for attempted moves in each 
+of the 4 directions.
+For the observation model, we maintain a four-dimensional array.  We 
+have an IxJ array, and in each cell we store a two dimensional array 
+which is information about observing walls and landmarks at that cell 
+of the map.  This 2-d array is (4(1+L))x2, as for each cell we could 
+observe a wall in each of the 4 directions, and we could observe any of
+ the L landmarks in each of the 4 directions.  The remaining dimension 
+x2 is to store the number of times we made observation $O_i$ at the cell 
+(i,j), and the number of times we visited the cell (i,j) respectively.
+
+In the writeCPD function, we loop over all time steps in the network.
+For each time step, we output the same probabilities since we are 
+sharing parameters.  For each time step, we output the results of the 
+motion model, and those of the observation model.
+For the motion model, we loop once over every previous row value.  For 
+each of these values, we loop over every possible action, and print the
+probability of the action's success given the previous row value, and
+print the probability of the action's failure (if applicable).  
+Analogously, we loop over every previous column value, and for each of 
+these values, we loop over every possible action.  We print the 
+probability of the action's success given the previous column value, and
+print the probability of the action's failture (if applicable).
+For the observation model, we loop once over every possible value of 
+(i,j), and for each observation $O_i$, print the probability of making 
+that observation ('yes'), and the probability of not making it ('no').
+
+4.1.5  Analytical questions about shared parameterization
+
+1. An important advantage of sharing parameters is the lesssening of the
+effects of overfitting.  Explain why.  Why is this issue important when
+doing parameter estimation in this assignment?
+
+Sharing parameters lessens the effects of overfitting because we smooth
+across all time steps, computing probabilities using data from all time
+ steps.  By doing this, we increase our sample size.  If we did not 
+share parameters, we would be computing probabilities of events at a 
+given time, and we would need many more training trajectories both to 
+accurately estimate probabilities, and to avoid many scenarios for which
+we have no data.  Smoothing takes care of this, but the specific brand 
+of smoothing that we use, add-1, does not adjust for the sample size, so
+we end up smoothing an incredible amount relative to our unseen event.
+
+This issue is important when doing our estimation in this assignment 
+because we want our probabilities in the CPD to be meaningful, and to 
+carry weight.  We also want to be able to predict the chance of an event
+given a context that we never encounter (eg, transitioning from a 
+position at a given time step after a move from a previous position in 
+the previous time step), so it is important that we smooth, and assume 
+that this probability is equal to the probability of being in a 
+position after a move from a previous position.
+
+2. Describe at least one property of the robot localization setting (with regard
+to either the motion model or observation model) that you cannot model with the shared
+parameterization in this assignment, but that you could model if we used an explicit
+parameterization (i.e. we learn the entire CPT for particular positions or time steps). It
+does not have to be a property of the environment that we described in this handout; you
+can construct something relevant that you might like to model in this setting.
+
+If the robot's legs wear out after a certain number of moves, the 
+chances of a move failing greatly increase after time is greater than
+this threshold.  Sharing parameters across all time steps doesn't allow
+for us to capture this.
+
+3. Describe a way to combine the advantages of both approaches. That is, come
+up with a model design that can potentially learn unique values for all CPT entries, but
+also has shared parameters which reduce overfitting. Sketch the idea in a few sentences,
+and explain the advantages over the other models.
+
+??? //TODO
+
+
+
 \end{problem}{}
 
 \begin{problem}{Inference}
+4.2.1
+
+1. / 3. 
+
+Describe the process you followed to make the clique tree. Note one or two
+points in the process where you could have obtained a (slightly) different clique tree by
+making different choices.
+
+We noted that because of the problem domain and structure of the models,
+we only needed the sufficient statistics from a network to be able to 
+construct a clique tree for that network.  Given these statistics, we 
+know how to convert the network to an undirected chordal graph and thus
+get the set of maximal cliques.  They are as follows. 
+for every value of time $T=t_i$:
+	for each direction:
+		row t, col t, observe wall d t
+	for each direction:
+		for each landmark:
+			row t, col t, observe landmark L d t
+	for every value of time $T=t_i$, save $T=t_n$:
+		row t, col t, action t
+		row t+1, col t+1, action t
+		row t, row t+1, action t
+		col t, col t+1, action t
+		row t, col t, col t+1
+		row t, row t+1, col t+1
+	if $T=t_n$:
+		$Action_t$
+
+Given that we have these maximal cliques, create a cluster graph by 
+going through all possible pairs i,j of cliques (except where i=j), 
+adding an edge (i to j) to the graph if the number of variables in 
+common between i and j is greater than 0.  The weight of each edge is
+the number of variables in common along that edge.
+
+We sort these edges in decreasing order by weight so that we can apply
+a modified version of Kruskal's algorithm for finding a maximum spanning
+tree.  We modify it because we note that our clique tree may not be 
+fully connected, and that's okay.
+
+Once we have our tree, we print it according to the output format.
+
+There was one choice we made to make when creating a tree, such that if
+we had taken a different path the tree would have differed.  For the 
+variables at each time step, we had to choose between creating one of 
+two new edges when generating the list of maximal cliques.  We close to
+connect $Row_t$ to $Col_{t+1}$ where we instead could have chosen to make 
+an edge between $Col_t$ and $Row{t+1}$.  This would affect our cliques, and
+would therefore affect the vertices and edges of our clique tree.
+
+2. [2 points] Demonstrate that the running intersection property holds 
+in the resulting clique tree. A formal proof is not required, simply 
+explain how this property holds.
+
+//TODO??
+
+Because our cliques repeat the same structure across time steps, 
+we can restrict our 'proof' to examining a small subset of contiguous
+time steps in the clique tree, and by induction we can see that for the
+whole tree it is true.  The final action $Action_t$ is a clique of size 1,
+such that there are no edges, so the running intersection property holds.
+For every subset with a $Row_t$ variable, one can see that it appears in 
+6 cliques.  By construction, these 6 cliques are connected in such a way
+such that there is only one path between any pair in the set, since the
+graph is a tree.  Therefore the running intersection property holds.
+
+
 
 \end{problem}{}
 
