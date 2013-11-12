@@ -80,6 +80,8 @@ public class Factor {
 		_variableNames.add(varName);
 		_variableValues.add(varValues);
 		_variableCard.add(varValues.size());
+//		System.out.printf("var:%s values:%s card:%s\n", varName, varValues, 
+//				varValues.size());
 	}
 	
 	public static int getVariableIndex(String var){
@@ -166,7 +168,7 @@ public class Factor {
 		if(_variableNames != null && _variableValues != null && _variableCard != null ){
 			output+= "_variableNames size: " + _variableNames.size() +"\n";
 			for(int varIdx = 0; varIdx<_variableNames.size(); varIdx++){
-				output+= _variableNames.get(varIdx) + " size(" + _variableCard.get(varIdx) +")[";
+				output+= varIdx + " aka " +_variableNames.get(varIdx) + " size(" + _variableCard.get(varIdx) +")[";
 				for(int valIdx = 0; valIdx < _variableValues.get(varIdx).size(); valIdx++){
 					output+=" "+_variableValues.get(varIdx).get(valIdx);
 				}
@@ -176,7 +178,6 @@ public class Factor {
 		
 		return output;
 	}
-	
 	
 	protected ArrayList<Integer> lhs,rhs;
 	
@@ -424,14 +425,21 @@ public class Factor {
 		int searchIndex = 0;
 		if(arrayList.size() != _variables.size()) 
 			throw new FactorIndexException("FactorIndexError: indexLength("+arrayList.size()+") does not match number of variables for this factor("+_variables.size()+")");
-		for(int index=0; index < _variables.size(); index ++)
-			if(arrayList.get(index) >= _variableCard.get(index) || arrayList.get(index)< 0) {
-				System.err.printf("for index:%d variable:%s\nthought card:%d\nsupplied index:%d\n", 
-					index, Factor.variableIndicesToNames(index), _variableCard.get(index), arrayList.get(index));
+		// for every one of our variables...
+		for(int index=0; index < _variables.size(); index ++) {
+			int variable = _variables.get(index);
+			// check if we are given a valid value for that variable.
+			if(arrayList.get(index) >= _variableCard.get(variable)
+					|| arrayList.get(index)< 0) {
+				System.out.printf("for index:%d variable:%d aka %s\nthought card:%d\nsupplied value:%d\n", 
+					index, variable, Factor.variableIndicesToNames(variable), 
+					_variableCard.get(variable),
+					arrayList.get(index));
 				throw new FactorIndexException("FactorIndexError: variableValue("+arrayList.get(index)+") was not in the valid range of ( 0 - "+(_variableCard.get(_variables.get(index))-1)+")");
 			}
 			else
 				searchIndex += arrayList.get(index)*_stride.get(index);
+		}
 		
 		data.set(searchIndex,Math.log(prob));
 	}

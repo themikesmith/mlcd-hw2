@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeMap;
 
 import elanmike.mlcd.hw2.Factor.FactorException;
 import elanmike.mlcd.hw2.Factor.FactorIndexException;
@@ -121,10 +122,11 @@ public class Bump {
 		 * @throws FactorIndexException 
 		 */
 		void sendMessage(Edge edgeToJ) throws FactorException {
-//			if(DEBUG) System.out.println(this.toString()+" sending message to:"+edgeToJ.getOtherVertex(this));
+			System.out.println(this.toString()+" sending message to:"+edgeToJ.getOtherVertex(this));
 			// calculate message - marginalize out all variables not in sepset ij
+			System.out.println("elim:"+this.difference(edgeToJ._variables)+" aka "+Factor.variableIndicesToNames(this.difference(edgeToJ._variables)));
 			Factor sigmaItoJ = this.marginalize(this.difference(edgeToJ._variables));
-//			if(DEBUG) System.out.println("sigma I,J:\n"+sigmaItoJ);
+//			System.out.println("sigma I,J:\n"+sigmaItoJ);
 			// send: make J receive
 			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ, sigmaItoJ);
 			// update edge potential
@@ -138,7 +140,7 @@ public class Bump {
 		 * @param sigmaItoJ
 		 */
 		private void onReceiveMessage(Edge edgeItoJ, Factor sigmaItoJ) throws FactorException {
-//			if(DEBUG) System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
+			System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertex(this));
 			// belief j = belief j * (sigma ij / mu ij)
 			this.setFactorData(this.product(sigmaItoJ.divide(edgeItoJ)));
 //			if(DEBUG) System.out.println("belief J:\n"+(Factor)this);
@@ -700,11 +702,11 @@ public class Bump {
 				String[] tokenized = line.split(" ");
 				String variableName = tokenized[0];
 				tokenized = tokenized[1].split(",");//values
-				System.out.printf("var:%s values:",variableName);
-				for(int q = 0; q < tokenized.length; q++) {
-					System.out.printf("%s ", tokenized[q]);
-				}
-				System.out.println();
+//				System.out.printf("var:%s values:",variableName);
+//				for(int q = 0; q < tokenized.length; q++) {
+//					System.out.printf("%s ", tokenized[q]);
+//				}
+//				System.out.println();
 				Factor.addVariable(variableName, new ArrayList<String>(Arrays.asList(tokenized)));
 			}else{
 				br.close();
@@ -729,6 +731,9 @@ public class Bump {
 		BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
 		String line;
 		
+//		System.out.println("all factor variable info:");
+//		System.out.println(Factor.variableInfo());
+		
 		HashMap<String,Factor> initialFactors = new HashMap<String,Factor>();
 		
 		while ((line = br.readLine()) != null) {
@@ -748,13 +753,21 @@ public class Bump {
 			//if(DEBUG) System.out.println(variables);
 			//System.out.println(variables+" "+var_value+" "+ prob);
 			
-			
 			//System.out.println(Factor.variableNamesToIndicies(variables).toString());
 			
 			ArrayList<Integer> key = Factor.variableNamesToIndicies(variables);
 			ArrayList<Integer> val_indicies = Factor.valueNamesToIndicies(variables, var_value);
+			// hacky preserving sort
+			Map<Integer,Integer> preserveSort = new TreeMap<Integer,Integer>();
+			for(int i = 0; i < key.size(); i++) {
+				preserveSort.put(key.get(i), val_indicies.get(i));
+			}			
 			Collections.sort(key);
-			
+			// and restore sort of values
+			val_indicies.clear();
+			for(int k : key) {
+				val_indicies.add(preserveSort.get(k));
+			}
 //			System.out.println(variables+" "+var_value+" "+ prob + "\nkey: "+key.toString()+ "  vals: "+val_indicies.toString());
 			//System.out.println(initialFactors.keySet().toString());
 			
