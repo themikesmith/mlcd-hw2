@@ -238,6 +238,48 @@ graph is a tree.  Therefore the running intersection property holds.
 
 \begin{problem}{Bayesian Score for Bayesian Networks}
 
+\begin{eqnarray*}
+P( \mathcal{D} \mid \mathcal{G}) & = & 
+\prod_i \prod _{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+\frac{\Gamma(\alpha^{\mathcal{G}}_{X_{i}\mid \mathbf{u}_{i}})}{\Gamma(\alpha^{\mathcal{G}}_{X_{i}\mid \mathbf{u}_{i}} + M[ \mathbf{u}_{i}])} 
+\prod_{x_{i}^{j} \in Val(X_{i})} 
+\left[ \frac{\Gamma(\alpha^{\mathcal{G}}_{x_{i}^{j}\mid \mathbf{u}_{i}} + M[ x_{i}^{j},\mathbf{u}_{i}])}{\Gamma(\alpha^{\mathcal{G}}_{x_{i}^{j}\mid \mathbf{u}_{i}} )} \right]\\
+& = & 
+\prod_i \prod _{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+A
+\prod_{x_{i}^{j} \in Val(X_{i})} 
+B\\
+\end{eqnarray*}
+
+\begin{eqnarray*}
+p_{i} & = & \alpha^{\mathcal{G}}_{X_{i}\mid \mathbf{u}_{i}}\\
+q_{i,j} & = & \alpha^{\mathcal{G}}_{x_{i}^{j}\mid \mathbf{u}_{i}} \\
+\\
+A & = & \frac{\Gamma(\alpha^{\mathcal{G}}_{X_{i}\mid \mathbf{u}_{i}})}{\Gamma(\alpha^{\mathcal{G}}_{X_{i}\mid \mathbf{u}_{i}} + M[ \mathbf{u}_{i}])} \\
+& = & \frac{\Gamma(p_{i})}{\Gamma(p_{i} + M[ \mathbf{u}_{i}])} \\
+& = & \frac{p_{i}^{(p_{i}-\frac{1}{2})} e^{-p_{i}}}{(p_{i} + M[ \mathbf{u}_{i}])^{(p_{i} + M[ \mathbf{u}_{i}] - \frac{1}{2})}e^{-(p_{i} + M[ \mathbf{u}_{i}]})} \\
+& = & \frac{p_{i}^{(p_{i}-\frac{1}{2})} }{(p_{i} + M[ \mathbf{u}_{i}])^{(p_{i} + M[ \mathbf{u}_{i}] - \frac{1}{2})}} e^{-p_{i}+(p_{i} + M[ \mathbf{u}_{i}])} \\
+& = & \frac{p_{i}^{(p_{i}-\frac{1}{2})} }{(p_{i} + M[ \mathbf{u}_{i}])^{(p_{i} + M[ \mathbf{u}_{i}] - \frac{1}{2})}} e^{ M[ \mathbf{u}_{i}]} \\
+& = & p_{i}^{(p_{i}-\frac{1}{2})} 
+	(p_{i} + M[ \mathbf{u}_{i}])^{-(p_{i} + M[ \mathbf{u}_{i}] - \frac{1}{2})} 
+	e^{ M[ \mathbf{u}_{i}]} \\
+\\
+B & = & \frac{\Gamma(\alpha^{\mathcal{G}}_{x_{i}^{j}\mid \mathbf{u}_{i}} + M[ x_{i}^{j},\mathbf{u}_{i}])}{\Gamma(\alpha^{\mathcal{G}}_{x_{i}^{j}\mid \mathbf{u}_{i}} )}\\
+& = & \frac{\Gamma(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])}{\Gamma(q_{i,j} )}\\
+& = & \frac{(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])^{(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}] -\frac{1}{2})}e^{-(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])}}{q_{i,j} ^{(q_{i,j} -\frac{1}{2})} e^{-q_{i,j} }}\\
+& = & \frac{(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])^{(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}] -\frac{1}{2})}}{q_{i,j} ^{(q_{i,j} -\frac{1}{2})} } 
+	e^{-M[ x_{i}^{j},\mathbf{u}_{i}]}\\
+& = & (q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])^{(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}] -\frac{1}{2})}
+	q_{i,j} ^{-(q_{i,j} -\frac{1}{2})} 
+	e^{-M[ x_{i}^{j},\mathbf{u}_{i}]}\\
+\end{eqnarray*}
+
+\begin{eqnarray*}
+\ell(\hat{\mathbf{\theta}},\mathcal{D}) & = & 
+	\sum^{n}_{i=1} \left[ \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})}  \sum_{x_{i}}  \right]
+	M[x_{i},\mathbf{u_{i}}] \log \hat{\mathbf{\theta}}_{x_{i} \mid \mathbf{u_{i}}}
+\end{eqnarray*}
+
 \end{problem}{}
 
 \end{document}
