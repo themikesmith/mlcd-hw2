@@ -329,7 +329,7 @@ public class Bump {
 			return output.toString();
 		}
 	}
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	/**
 	 * true if we're on the upward pass, 
 	 * if we're going in increasing order id. 
@@ -601,19 +601,18 @@ public class Bump {
 
 
 		Factor f = new Factor(target);
-		System.out.println("found clique:\n"+f);
+		if(DEBUG) System.out.println("found clique:\n"+f);
 		// marginalize out variables not in the query's LHS
 		ArrayList<Integer> diff = f.difference(vars);
-		System.out.println("marginalize out: "+Factor.variableIndicesToNames(diff));
+		if(DEBUG) System.out.println("marginalize out: "+Factor.variableIndicesToNames(diff));
 		f = f.marginalize(diff);
-		System.out.println("after marginalizing:\n"+f);
-
+		if(DEBUG) System.out.println("after marginalizing:\n"+f);
 		f.normalize();
-		System.out.println("after normalizing:\n"+f);
+		if(DEBUG) System.out.println("after normalizing:\n"+f); 
 		// and then reduce using the evidence given
-		System.out.println("Reducing:  "+ Factor.variableIndicesToNames(eVars)+"  "+Factor.valueIndiciesToNames(eVars, eValues));
+		if(DEBUG) System.out.println("Reducing:  "+ Factor.variableIndicesToNames(eVars)+"  "+Factor.valueIndiciesToNames(eVars, eValues));
 		f = f.reduce(eVars, eValues);
-		System.out.println("after reduce:\n"+f);
+		if(DEBUG) System.out.println("after reduce:\n"+f);
 		return f;
 	}
 	/**
@@ -625,7 +624,7 @@ public class Bump {
 	 */
 	public void readCliqueTreeFile(String cliqueTreeFilename) 
 			throws IOException, NumberFormatException {
-		System.out.println("reading clique tree from:"+cliqueTreeFilename);
+		if(DEBUG) System.out.println("reading clique tree from:"+cliqueTreeFilename);
 		BufferedReader br = new BufferedReader(new FileReader(cliqueTreeFilename));
 		String line;		
 		// on the first line is the number of following lines that describe vertices
@@ -681,7 +680,7 @@ public class Bump {
 	 */
 	public void readNetworkFile(String networkFilename)
 		throws IOException, NumberFormatException {
-		System.out.println("reading network file from:"+networkFilename);
+		if(DEBUG) System.out.println("reading network file from:"+networkFilename);
 		BufferedReader br = new BufferedReader(new FileReader(networkFilename));
 		String line;
 		// on the first line is the number of following lines that describe vertices
@@ -722,7 +721,7 @@ public class Bump {
 	public void readCPDFile(String cpdFilename) 
 			throws IOException, ArrayIndexOutOfBoundsException,
 			IllegalArgumentException, FactorException {
-		System.out.println("reading cpd from:"+cpdFilename);
+		if(DEBUG) System.out.println("reading cpd from:"+cpdFilename);
 		BufferedReader br = new BufferedReader(new FileReader(cpdFilename));
 		String line;
 		

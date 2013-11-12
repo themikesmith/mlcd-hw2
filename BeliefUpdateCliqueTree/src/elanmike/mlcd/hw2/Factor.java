@@ -147,6 +147,10 @@ public class Factor {
 		}
 		return valueNames;
 	}
+	public static String valueIndexToName(int variable, int var_value){
+		ArrayList<String> valueNames = new ArrayList<String>();
+		return _variableValues.get(variable).get(var_value);
+	}
 	
 	public static String variableInfo(){
 		String output = "";
@@ -355,19 +359,22 @@ public class Factor {
 	}
 	
 	public String toString(){
-		String output = "Phi( ";
-		for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
-			output += _variableNames.get(_variables.get(var_idx)) + " ";
-		output += ")\n";
-		
-		for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
-			output += _stride.get(var_idx) + "\t";
-		output += "Stride\n";
-		
-		for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
-			output += _variableNames.get(_variables.get(var_idx)) + "\t";
-		output += "Value\n";
-		
+		String output = "";
+		if(_variables.size() != 0) {
+			// print out a description of the factor
+			output += "Phi( ";
+			for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
+				output += _variableNames.get(_variables.get(var_idx)) + " ";
+			output += ")\n";
+			
+//			for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
+//				output += _stride.get(var_idx) + "\t";
+//			output += "Stride\n";
+			
+			for(int var_idx=0; var_idx < _variables.size(); var_idx ++)
+				output += _variableNames.get(_variables.get(var_idx)) + "\t";
+			output += "Value\n";
+		}
 		for(int datum_index = 0; datum_index < data.size(); datum_index++){
 			
 			ArrayList<Integer> values = null;
@@ -382,8 +389,8 @@ public class Factor {
 			System.out.println(valueNames);
 			*/
 			for(int var_idx=0; var_idx < _variables.size(); var_idx ++){
-				
-				output += String.format("%01d\t", values.get(var_idx));
+//				output += String.format("%01d\t", values.get(var_idx));
+				output += String.format("%s\t", Factor.valueIndexToName(var_idx, values.get(var_idx)));
 				//output += valueNames.get(var_idx) + "\t";
 					//	String.format("%s\t",
 					//	.get(var_idx),);
@@ -393,8 +400,7 @@ public class Factor {
 			}
 			output += Math.exp(data.get(datum_index))+"\n";
 		}
-		
-		return output;
+		return output.substring(0, output.length()-1);
 	}
 	
 	public void putProbByValues(double prob,int... values )
@@ -549,8 +555,8 @@ public class Factor {
 		ArrayList<Integer> finalVars = difference(elimVar);
 		
 		Factor result = new Factor(finalVars, 0);
-		System.out.println("inital factor of 0's:");
-		System.out.println(result);
+//		System.out.println("inital factor of 0's:");
+//		System.out.println(result);
 		
 		for(int datum_idx = 0; datum_idx < this.data.size(); datum_idx++ ){
 			ArrayList<Integer> values = valuesFromIndex(datum_idx);
@@ -566,8 +572,8 @@ public class Factor {
 				f_indicies_of_values[that_ind] = values.get(this_ind);
 				
 			}
-			System.out.printf("this:%e result:%f\n", Math.exp(this.data.get(datum_idx)), 
-					Math.exp(result.data.get(result.index(f_indicies_of_values))));
+//			System.out.printf("this:%e result:%f\n", Math.exp(this.data.get(datum_idx)), 
+//					Math.exp(result.data.get(result.index(f_indicies_of_values))));
 			result.data.set(result.index(f_indicies_of_values), 
 					Math.log(
 							Math.exp(result.data.get(result.index(f_indicies_of_values)))
