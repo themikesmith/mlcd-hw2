@@ -245,7 +245,7 @@ public class Factor {
 			strideTot*=_variableCard.get(index);
 		}*/
 		for(int i = _variables.size()-1 ; i >=0 ; i--){
-			_stride.add(strideTot);
+			_stride.add(0, strideTot);
 			strideTot*=_variableCard.get(_variables.get(i));
 		}
 		
@@ -548,7 +548,7 @@ public class Factor {
 	public Factor marginalize(ArrayList<Integer> elimVar) throws FactorIndexException{
 		ArrayList<Integer> finalVars = difference(elimVar);
 		
-		Factor result = new Factor(finalVars);
+		Factor result = new Factor(finalVars,0);
 		for(int datum_idx = 0; datum_idx < this.data.size(); datum_idx++ ){
 			ArrayList<Integer> values = valuesFromIndex(datum_idx);
 			
@@ -563,7 +563,10 @@ public class Factor {
 				f_indicies_of_values[that_ind] = values.get(this_ind);
 				
 			}
-			result.data.set(result.index(f_indicies_of_values), Math.log(Math.exp(result.data.get(result.index(f_indicies_of_values)))+Math.exp(this.data.get(datum_idx))));
+			result.data.set(result.index(f_indicies_of_values), 
+					Math.log(
+							Math.exp(result.data.get(result.index(f_indicies_of_values)))
+							+Math.exp(this.data.get(datum_idx))));
 			
 			
 		}
