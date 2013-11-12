@@ -245,7 +245,7 @@ public class Factor {
 			strideTot*=_variableCard.get(index);
 		}*/
 		for(int i = _variables.size()-1 ; i >=0 ; i--){
-			_stride.add(strideTot);
+			_stride.add(0, strideTot);
 			strideTot*=_variableCard.get(_variables.get(i));
 		}
 		
@@ -568,7 +568,10 @@ public class Factor {
 			}
 			System.out.printf("this:%e result:%f\n", Math.exp(this.data.get(datum_idx)), 
 					Math.exp(result.data.get(result.index(f_indicies_of_values))));
-			result.data.set(result.index(f_indicies_of_values), Math.log(Math.exp(result.data.get(result.index(f_indicies_of_values)))+Math.exp(this.data.get(datum_idx))));
+			result.data.set(result.index(f_indicies_of_values), 
+					Math.log(
+							Math.exp(result.data.get(result.index(f_indicies_of_values)))
+							+Math.exp(this.data.get(datum_idx))));
 			
 			
 		}
@@ -705,7 +708,6 @@ public class Factor {
 		ArrayList<Integer> elim_vars = new ArrayList<Integer>();
 		elim_vars.add(1);
 		Factor marginialzied = fac1.marginalize(elim_vars);
-		System.out.println("== marginalized ==");
 		System.out.println(marginialzied);
 		System.out.println("== normalized ==");
 		marginialzied.normalize();
