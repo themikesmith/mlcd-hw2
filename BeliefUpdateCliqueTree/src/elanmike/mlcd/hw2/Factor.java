@@ -121,7 +121,7 @@ public class Factor {
 		return names;
 	}
 	
-	public static int getVariableValueIndex(int varIdx, String val){
+	public static int getVariableValueIndex(int varIdx, String val) throws ArrayIndexOutOfBoundsException {
 		if(_variableValues == null)
 			return -1;
 		return _variableValues.get(varIdx).indexOf(val);

@@ -812,11 +812,17 @@ public class Bump {
 				"/home/mcs/Dropbox/mlcd/assignment2/hw2-files/cpd-10.8.txt",
 				"/home/mcs/Dropbox/mlcd/assignment2/hw2-files/cliquetree-10.8.txt",
 		};
+		newArgs = args;
 		Bump b = new Bump();
 		// calibrate on our tree
-		
 			try {
+				for(int i = 0; i < newArgs.length; i++) {
+					System.out.printf("argument i:%d %s\n", i, newArgs[i]);
+				}
 				b.init(newArgs[0],newArgs[2],newArgs[1]);
+				System.out.println("yay!");
+				b.runBump();
+				System.out.println("yay calibrated!");
 			} catch (ArrayIndexOutOfBoundsException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

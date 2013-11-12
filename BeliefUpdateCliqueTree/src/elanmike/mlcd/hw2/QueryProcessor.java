@@ -41,6 +41,14 @@ public class QueryProcessor {
 	 * queries the structure for p(lhs|contexts)
 	 */
 	String query(String[] lhs, String[] contexts) {
+//		System.out.println("lhs:");
+//		for(String s : lhs) {
+//			System.out.println(s);
+//		}
+//		System.out.println("rhs:");
+//		for(String s : contexts) {
+//			System.out.println(s);
+//		}
 		// check if evidence is incremental or retractive
 		boolean retractive = false;
 		// then take action
@@ -51,16 +59,22 @@ public class QueryProcessor {
 		}
 		// if it's the same number in rhs, check each variable
 		if(!retractive) {
-			for(String s : contexts) {
-				String[] varValue = s.split("=");
-				String var = varValue[0], value = varValue[1];
-				int varInt = Factor.getVariableIndex(var),
-					valueInt = Factor.getVariableValueIndex(varInt, value);
-				if(_queryContexts.containsKey(varInt) && _queryContexts.get(varInt) != valueInt) {
-					// query context variable has other value. reset.
-					retractive = true;
-					break;
+			try {
+				for(String s : contexts) {
+					String[] varValue = s.split("=");
+					String var = varValue[0], value = varValue[1];
+					int varInt = Factor.getVariableIndex(var),
+						valueInt = Factor.getVariableValueIndex(varInt, value);
+					if(_queryContexts.containsKey(varInt) && _queryContexts.get(varInt) != valueInt) {
+						// query context variable has other value. reset.
+						retractive = true;
+						break;
+					}
 				}
+			}
+			catch(ArrayIndexOutOfBoundsException ex) {
+				// context variable undefined in scope
+				return "undefined";
 			}
 		} // and reset if we have retractive evidence
 		if(retractive) resetTreeForQueries(); // clears our evidence
@@ -69,26 +83,32 @@ public class QueryProcessor {
 		ArrayList<Integer> vars = new ArrayList<Integer>(), 
 				values = new ArrayList<Integer>();
 		int numberNewEvidence = 0;
-		for(int i = 0; i < contexts.length; i++) {
-			String[] varValue = contexts[i].split("=");
-			String var = varValue[0], value = varValue[1];
-			int varInt = Factor.getVariableIndex(var),
-				valueInt = Factor.getVariableValueIndex(varInt, value);
-			if(!_queryContexts.containsKey(varInt)) {
-				// additional evidence - we've never seen it before
-				if(Bump.DEBUG) {
-					System.out.printf("\ni:%d add'l evidence:%s=%s\n", i, var, value);
+		try {
+			for(int i = 0; i < contexts.length; i++) {
+				String[] varValue = contexts[i].split("=");
+				String var = varValue[0], value = varValue[1];
+				int varInt = Factor.getVariableIndex(var),
+					valueInt = Factor.getVariableValueIndex(varInt, value);
+				if(!_queryContexts.containsKey(varInt)) {
+					// additional evidence - we've never seen it before
+					if(Bump.DEBUG) {
+						System.out.printf("\ni:%d add'l evidence:%s=%s\n", i, var, value);
+					}
+					vars.add(varInt);
+					values.add(valueInt);
+					_queryContexts.put(varInt,valueInt);
+					numberNewEvidence++;
 				}
-				vars.add(varInt);
-				values.add(valueInt);
-				_queryContexts.put(varInt,valueInt);
-				numberNewEvidence++;
-			}
-			else { // do nothing with repeat evidence
-				if(Bump.DEBUG) {
-					System.out.printf("\ni:%d repeat evidence:%s=%s\n", i, var, value);
+				else { // do nothing with repeat evidence
+					if(Bump.DEBUG) {
+						System.out.printf("\ni:%d repeat evidence:%s=%s\n", i, var, value);
+					}
 				}
 			}
+		}
+		catch(ArrayIndexOutOfBoundsException ex) {
+			// context variable undefined in scope
+			return "undefined";
 		}
 		if(numberNewEvidence > 0) {
 			try {
@@ -101,16 +121,24 @@ public class QueryProcessor {
 		// now process lhs
 		vars = new ArrayList<Integer>();
 		values = new ArrayList<Integer>();
-		for(String s : lhs) {
-			String[] varValue = s.split("=");
-			String var = varValue[0], value = "";
-			int varInt = Factor.getVariableIndex(var), valueInt = NO_EVIDENCE;
-			if(varValue.length > 1) {
-				value = varValue[1];
-				valueInt = Factor.getVariableValueIndex(varInt, value);
+		try {
+			for(String s : lhs) {
+				String[] varValue = s.split("=");
+				String var = varValue[0], value = "";
+				int varInt = Factor.getVariableIndex(var), valueInt = NO_EVIDENCE;
+				if(varInt == -1) {
+					throw new ArrayIndexOutOfBoundsException("variable not recognized, or factors not initialized");
+				}
+				if(varValue.length > 1) {
+					value = varValue[1];
+					valueInt = Factor.getVariableValueIndex(varInt, value);
+				}
+				vars.add(varInt);
+				values.add(valueInt);
 			}
-			vars.add(varInt);
-			values.add(valueInt);
+		}
+		catch(ArrayIndexOutOfBoundsException ex) {
+			return "undefined"; // we are being asked about a factor that doesn't exist.
 		}
 		Factor result;
 		try {
@@ -142,7 +170,10 @@ public class QueryProcessor {
 		BufferedReader br = new BufferedReader(new FileReader(queryFile));
 		String line;
 		while ((line = br.readLine()) != null) {
-			if(Bump.DEBUG) System.out.println("### query:\n\n"+line+"\n");
+			if(line.length() == 0) {
+				continue;
+			}
+//			System.out.println("### query:\n\n'"+line+"'\n");
 			String[] stuff = line.split(" ");
 			String[] lhs = stuff[0].split(",");
 			String[] rhs = new String[0];
