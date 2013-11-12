@@ -166,13 +166,13 @@ and explain the advantages over the other models.\\
 \end{problem}{}
 
 \begin{problem}{Inference}
-4.2.1
+4.2.1\\
 
-1.
+1 and 3.\\
 
 Describe the process you followed to make the clique tree. Note one or two
 points in the process where you could have obtained a (slightly) different clique tree by
-making different choices.
+making different choices.\\
 
 We noted that because of the problem domain and structure of the models,
 we only needed the sufficient statistics from a network to be able to 
@@ -199,12 +199,11 @@ for every value of time $T=t_i$, save $T=t_n$:\\
 \indent	row t, col t+1, row t+1, col t+1, action t\\
 if $t=t_n$: \\
 \indent	$Action_t$ \\
-\textit{Our clique trees built using the former method with minimal triangulation are in 'cliquetree-*.txt' files.  This naming convention contrasts with that used for our trees built using the latter method with larger cliques, which is 'cliquetree-*_big.txt'.}\\
-
+\textit{Our clique trees built using the former method with minimal triangulation are in 'cliquetree-*.txt' files.  This naming convention contrasts with that used for our trees built using the latter method with larger cliques, which is 'cliquetree-*\_big.txt'.}\\
 Given that we have these maximal cliques, create a cluster graph by 
-going through all possible pairs i,j of cliques (except where i=j), 
-adding an edge (i to j) to the graph if the number of variables in 
-common between i and j is greater than 0.  The weight of each edge is
+going through all possible pairs $i,j$ of cliques (except where $i=j$), 
+adding an edge ($i$ to $j$) to the graph if the number of variables in 
+common between $i$ and $j$ is greater than 0.  The weight of each edge is
 the number of variables in common along that edge.\\
 
 We sort these edges in decreasing order by weight so that we can apply
@@ -226,22 +225,21 @@ would therefore affect the vertices and edges of our clique tree.\\
 in the resulting clique tree. A formal proof is not required, simply 
 explain how this property holds.\\
 
-\textit{Using our minimal triangulation trees:}\\
-We note that this is simply a chain.  At each time $t$, we have a clique $G_t$ (row t, col t, action t, col t+1) connected to a clique $B_t$ (row t, action t, row r+1, col t+1), and a clique $G_t$ connected to cliques $R_{t}^{i}$ (row t, col t, observation i t).  $B_t$ connects to $G_{t+1}$ in the next time step.  The running intersection property holds in this small subset of cliques.  Since this form holds at every time step, the running intersection property holds throughout the chain.
-\textit{Using our trees with larger cliques:}\\
-We note that this is simply a chain, with each large clique at time $t$ (row t, col t, action t, row t+1, col t+1) having edges leading to the observations at time $t$ (row t, col t, observation $i$ at time t), and the next large clique at time $t+1$ (row t+1, col t+1, action t+1, row t+2, col t+2).  The running intersection property holds in this small subset of cliques.  Since this form holds at every time step, the running intersection property holds throughout the chain.\\
+\noindent The form of our clique tree is as follows:\\
+\noindent \textit{Using our minimal triangulation trees:}\\
+We note that this is simply a chain.  At each time $t$, we have a clique $G_t$ (row t, col t, action t, col t+1) connected to a clique $B_t$ (row t, action t, row r+1, col t+1), and a clique $G_t$ connected to cliques $R_{t}^{i}$ (row t, col t, observation i t).  $B_t$ connects to $G_{t+1}$ in the next time step.\\
+\noindent \textit{Using our trees with larger cliques:}\\
+We note that this is simply a chain, with each large clique at time $t$ (row t, col t, action t, row t+1, col t+1) having edges leading to the observations at time $t$ (row t, col t, observation $i$ at time t), and the next large clique at time $t+1$ (row t+1, col t+1, action t+1, row t+2, col t+2).\\
 
-Because our cliques repeat the same structure across time steps, 
+\noindent Because our cliques repeat the same structure across time steps, 
 we can restrict our 'proof' to examining a small subset of contiguous
 time steps in the clique tree, and by induction we can see that for the
 whole tree it is true.  The final action $Action_t$ is a clique of size 1,
-such that there are no edges, so the running intersection property holds.
-For every subset with a $Row_t$ variable, one can see that it appears in 
-6 cliques.  By construction, these 6 cliques are connected in such a way
-such that there is only one path between any pair in the set, since the
-graph is a tree.  Therefore the running intersection property holds.
+such that there are no edges, so the running intersection property holds. \\
 
+4.\\
 
+//TODO
 
 \end{problem}{}
 
