@@ -425,8 +425,11 @@ public class Factor {
 		if(arrayList.size() != _variables.size()) 
 			throw new FactorIndexException("FactorIndexError: indexLength("+arrayList.size()+") does not match number of variables for this factor("+_variables.size()+")");
 		for(int index=0; index < _variables.size(); index ++)
-			if(arrayList.get(index) >= _variableCard.get(_variables.get(index))|| arrayList.get(index)< 0)
+			if(arrayList.get(index) >= _variableCard.get(_variables.get(index)) || arrayList.get(index)< 0) {
+				System.err.printf("for index:%d variable:%s\nthought card:%d\nsupplied index:%d\n", 
+					index, Factor.variableIndicesToNames(index), _variableCard.get(_variables.get(index)), arrayList.get(index));
 				throw new FactorIndexException("FactorIndexError: variableValue("+arrayList.get(index)+") was not in the valid range of ( 0 - "+(_variableCard.get(_variables.get(index))-1)+")");
+			}
 			else
 				searchIndex += arrayList.get(index)*_stride.get(index);
 		

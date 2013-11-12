@@ -700,7 +700,11 @@ public class Bump {
 				String[] tokenized = line.split(" ");
 				String variableName = tokenized[0];
 				tokenized = tokenized[1].split(",");//values
-				
+				System.out.printf("var:%s values:",variableName);
+				for(int q = 0; q < tokenized.length; q++) {
+					System.out.printf("%s ", tokenized[q]);
+				}
+				System.out.println();
 				Factor.addVariable(variableName, new ArrayList<String>(Arrays.asList(tokenized)));
 			}else{
 				br.close();
@@ -728,6 +732,7 @@ public class Bump {
 		HashMap<String,Factor> initialFactors = new HashMap<String,Factor>();
 		
 		while ((line = br.readLine()) != null) {
+			System.out.println("\nline:"+line);
 			String[] tokenized = line.split(" |,");
 			ArrayList<String> variables = new ArrayList<String>();
 			ArrayList<String> var_value = new ArrayList<String>();
@@ -750,7 +755,7 @@ public class Bump {
 			ArrayList<Integer> val_indicies = Factor.valueNamesToIndicies(variables, var_value);
 			Collections.sort(key);
 			
-			//System.out.println(variables+" "+var_value+" "+ prob + "  key: "+key.toString()+ "  vals: "+val_indicies.toString());
+			System.out.println(variables+" "+var_value+" "+ prob + "  key: "+key.toString()+ "  vals: "+val_indicies.toString());
 			//System.out.println(initialFactors.keySet().toString());
 			
 			if(initialFactors.containsKey(key.toString())){ //already has this factor
