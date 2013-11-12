@@ -282,9 +282,12 @@ public class Factor {
 		}
 	}
 
-	private int index(ArrayList<Integer> variables, ArrayList<Integer> values) throws FactorIndexException{
+	private int index(ArrayList<Integer> variables, ArrayList<Integer> values) throws FactorIndexException {
 		int[] temp = new int[variables.size()];
 		for(int i = 0; i< variables.size();i++){
+			if(_variables.indexOf(variables.get(i)) == -1) {
+				throw new FactorIndexException("index error: factor does not contain desired variable");
+			}
 			temp[_variables.indexOf(variables.get(i))] = values.get(i);
 		}
 		return index(temp);
@@ -583,16 +586,25 @@ public class Factor {
 		for(int i = 0; i<result.data.size(); i++){
 			try {
 				ArrayList<Integer> variablesOfLarger = (ArrayList<Integer>) result._variables.clone();
+
 				variablesOfLarger.addAll(heldVars);
 				ArrayList<Integer> varValues = result.valuesFromIndex(i);
 				varValues.addAll(heldValues);
-				int indexOfLarger = this.index(variablesOfLarger,varValues);
-				result.data.set(i, this.data.get(indexOfLarger)) ;
-				
-				
-			} catch (FactorIndexException e) {e.printStackTrace();}
+				try {
+					int indexOfLarger = this.index(variablesOfLarger,varValues);
+					result.data.set(i, this.data.get(indexOfLarger));
+				}
+				catch(FactorIndexException ex) {
+					// if we don't find the index of our desired variable
+					// (if the original doesn't have it), simply print the original
+					result.data.set(i, this.data.get(i));
+				}
+			} catch (FactorIndexException e) {
+				// this is from the 'valuesFromIndex' call,
+				// though it will never fail because of the for loop constraint
+				e.printStackTrace();
+			}
 		}
-		
 		return result;
 	}
 	
@@ -797,9 +809,14 @@ public class Factor {
 		C_vals.add("1");
 		C_vals.add("2");
 		
+		ArrayList<String> D_vals = new ArrayList<String>();
+		D_vals.add("1");
+		D_vals.add("2");
+		
 		Factor.addVariable("A", A_vals);
 		Factor.addVariable("B", B_vals);
 		Factor.addVariable("C", C_vals);
+		Factor.addVariable("D", D_vals);
 		System.out.println(Factor.variableInfo());
 		
 		String[] fac1_vars = {"A","B","C"}; 
@@ -820,15 +837,27 @@ public class Factor {
 		fac1.putProbByValues(0, 1,1,1);  //2 2 2
 		fac1.putProbByValues(.18, 2,1,1);//3 2 2
 		System.out.println(fac1);
-		
+		{
+		System.out.println("reduce f1 by C=1");
 		ArrayList<String> heldVarStrs = new ArrayList<String>();
 		heldVarStrs.add("C");
 		ArrayList<String> heldVarValStrs = new ArrayList<String>();
 		heldVarValStrs.add("1");
 		ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
 		ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
-		System.out.println("reduce f1 by C=1");
 		System.out.println(fac1.reduce(heldVars, heldValues));
+		}
+		
+		{
+			System.out.println("reduce f1 by D=1");
+			ArrayList<String> heldVarStrs = new ArrayList<String>();
+			heldVarStrs.add("D");
+			ArrayList<String> heldVarValStrs = new ArrayList<String>();
+			heldVarValStrs.add("1");
+			ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
+			ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
+			System.out.println(fac1.reduce(heldVars, heldValues));
+			}
 		}
 		
 	}
