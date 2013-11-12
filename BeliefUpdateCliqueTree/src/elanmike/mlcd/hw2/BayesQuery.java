@@ -58,8 +58,10 @@ public class BayesQuery {
 	 * Prints an example of proper usage of the program
 	 */
 	private static void usage() {
-		System.err.println("usage: pass 5 arguments. arg[0] = network_file ;" +
+		System.err.println("usage: pass 4 arguments. arg[0] = network_file ;" +
 				" arg[1] = cpd_file ; arg[2] = clique_tree_file ;" +
-				"arg[3] = query_file ; arg[4] = 's|m' (for sum- or max-product ; ");
+				"arg[3] = query_file ;" +
+				"\n" +
+				"One may specify an optional argument arg[4] = 's|m' (for sum- or max-product ; ");
 	}
 }
