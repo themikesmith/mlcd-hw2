@@ -863,19 +863,56 @@ public class Factor {
 		System.out.println(fac1.reduce(heldVars, heldValues));
 		}
 		
-		if(false){
-			System.out.println("reduce f1 by D=1");
-			ArrayList<String> heldVarStrs = new ArrayList<String>();
-			heldVarStrs.add("D");
-			ArrayList<String> heldVarValStrs = new ArrayList<String>();
-			heldVarValStrs.add("1");
-			ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
-			ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
-			System.out.println(fac1.reduce(heldVars, heldValues));
+			if(false){
+				System.out.println("reduce f1 by D=1");
+				ArrayList<String> heldVarStrs = new ArrayList<String>();
+				heldVarStrs.add("D");
+				ArrayList<String> heldVarValStrs = new ArrayList<String>();
+				heldVarValStrs.add("1");
+				ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
+				ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
+				System.out.println(fac1.reduce(heldVars, heldValues));
 			}
 		}
-
-		
+		if(true) {
+			ArrayList<String> A_vals = new ArrayList<String>();
+			A_vals.add("1");
+			A_vals.add("2");
+//			A_vals.add("3");
+			
+			ArrayList<String> B_vals = new ArrayList<String>();
+			B_vals.add("1");
+			B_vals.add("2");
+			
+			ArrayList<String> C_vals = new ArrayList<String>();
+			C_vals.add("1");
+			C_vals.add("2");
+			
+			Factor.addVariable("A", A_vals);
+			Factor.addVariable("B", B_vals);
+			Factor.addVariable("C", C_vals);
+			System.out.println(Factor.variableInfo());
+			
+			String[] fac1_vars = {"A","B","C"}; 
+			Factor fac1 = new Factor(fac1_vars);
+			fac1.putProbByValues(1, 0,0,0);
+			fac1.putProbByValues(2, 0,0,1);
+			fac1.putProbByValues(3, 0,1,0);
+			fac1.putProbByValues(4, 0,1,1);
+			fac1.putProbByValues(5, 1,0,0);
+			fac1.putProbByValues(6, 1,0,1);
+			fac1.putProbByValues(7, 1,1,0);
+			fac1.putProbByValues(8, 1,1,1);
+//			fac1.putProbByValues(9, 2,0,0);
+//			fac1.putProbByValues(10, 2,0,1);
+//			fac1.putProbByValues(11, 2,1,0);
+//			fac1.putProbByValues(12, 2,1,1);
+			System.out.println("before normalize:");
+			System.out.println(fac1);
+			System.out.println("normalize:");
+			fac1.normalize();
+			System.out.println(fac1);
+		}
 	}
 	
 }
