@@ -663,7 +663,7 @@ public class Factor {
 	
 	public static void main(String args[]) throws Exception{
 		
-		/*
+		if(true){
 		//Margin Test
 		ArrayList<String> A_vals = new ArrayList<String>();
 		A_vals.add("1");
@@ -681,186 +681,192 @@ public class Factor {
 		
 		String[] fac1_vars = {"A","B","C"}; 
 		Factor fac1 = new Factor(fac1_vars);
-		fac1.addJointProbByIndex(0, .25);// 1 1 1
-		fac1.addJointProbByIndex(1, .05);// 2 1 1
-		fac1.addJointProbByIndex(2, .15);// 3 1 1
 		
-		fac1.addJointProbByIndex(3, .08);// 1 2 1 
-		fac1.addJointProbByIndex(4, 0);  // 2 2 1
-		fac1.addJointProbByIndex(5, .09);// 3 2 1
-		
-		fac1.addJointProbByIndex(6, .35);// 1 1 2
-		fac1.addJointProbByIndex(7, .07);// 2 1 2
-		fac1.addJointProbByIndex(8, .21);// 3 1 2
-		
-		fac1.addJointProbByIndex(9, .16); //1 2 2
-		fac1.addJointProbByIndex(10, 0);  //2 2 2
-		fac1.addJointProbByIndex(11, .18);//3 2 2
+		fac1.putProbByValues(0.25, 0, 0, 0);
+		fac1.putProbByValues(0.35, 0, 0, 1);
+		fac1.putProbByValues(0.08, 0, 1, 0);
+		fac1.putProbByValues(0.16, 0, 1, 1);
+		fac1.putProbByValues(0.05, 1, 0, 0);
+		fac1.putProbByValues(0.07, 1, 0, 1);
+		fac1.putProbByValues(0.00, 1, 1, 0);
+		fac1.putProbByValues(0.00, 1, 1, 1);
+		fac1.putProbByValues(0.15, 2, 0, 0);
+		fac1.putProbByValues(0.21, 2, 0, 1);
+		fac1.putProbByValues(0.09, 2, 1, 0);
+		fac1.putProbByValues(0.18, 2, 1, 1);
+
 		System.out.println(fac1);
 		
 		ArrayList<Integer> elim_vars = new ArrayList<Integer>();
 		elim_vars.add(1);
-		System.out.println(fac1.marginalize(elim_vars));
-		*/
+		Factor marginialzied = fac1.marginalize(elim_vars);
+		System.out.println(marginialzied);
+		System.out.println("== normalized ==");
+		marginialzied.normalize();
+		System.out.println(marginialzied);
+
+		}
 		
-//		{
-//		//Division Test
-//		ArrayList<String> A_vals = new ArrayList<String>();
-//		A_vals.add("1");
-//		A_vals.add("2");
-//		A_vals.add("3");
-//		
-//		ArrayList<String> B_vals = new ArrayList<String>();
-//		B_vals.add("1");
-//		B_vals.add("2");
-//		
-//		ArrayList<String> C_vals = new ArrayList<String>();
-//		C_vals.add("1");
-//		C_vals.add("2");
-//		
-//		Factor.addVariable("A", A_vals);
-//		Factor.addVariable("B", B_vals);
-//		Factor.addVariable("C", C_vals);
-//		System.out.println(Factor.variableInfo());
-//		
-//		String[] fac1_vars = {"A","B"}; 
-//		Factor fac1 = new Factor(fac1_vars);
-//		fac1.putProbByValues(.5, 0, 0);
-//		fac1.putProbByValues(.2, 0, 1);
-//		fac1.putProbByValues(0, 1, 0);
-//		fac1.putProbByValues(1, 1, 1);
-//		fac1.putProbByValues(.3, 2, 0);
-//		fac1.putProbByValues(.45, 2, 1);
-//		System.out.println(fac1);
-//		
-//		String[] fac2_vars = {"A"}; 
-//		Factor fac2 = new Factor(fac2_vars);
-//		fac2.putProbByValues(.8, 0);
-//		fac2.putProbByValues(.0, 1);
-//		fac2.putProbByValues(.6, 2);
-//		System.out.println(fac2);
-//		
-//		String[] fac3_vars = {"A"}; 
-//		Factor fac3 = new Factor(fac3_vars);
-//		fac3.putProbByValues(.8, 0);
-//		fac3.putProbByValues(.0, 1);
-//		fac3.putProbByValues(.6, 2);
-//		System.out.println(fac3);
-//		
-//		System.out.println("f1 / f2 = ");
-//		System.out.println(fac1.divide(fac2));
-//		}
+		if(false){
+		//Division Test
+		ArrayList<String> A_vals = new ArrayList<String>();
+		A_vals.add("1");
+		A_vals.add("2");
+		A_vals.add("3");
+		
+		ArrayList<String> B_vals = new ArrayList<String>();
+		B_vals.add("1");
+		B_vals.add("2");
+		
+		ArrayList<String> C_vals = new ArrayList<String>();
+		C_vals.add("1");
+		C_vals.add("2");
+		
+		Factor.addVariable("A", A_vals);
+		Factor.addVariable("B", B_vals);
+		Factor.addVariable("C", C_vals);
+		System.out.println(Factor.variableInfo());
+		
+		String[] fac1_vars = {"A","B"}; 
+		Factor fac1 = new Factor(fac1_vars);
+		fac1.putProbByValues(.5, 0, 0);
+		fac1.putProbByValues(.2, 0, 1);
+		fac1.putProbByValues(0, 1, 0);
+		fac1.putProbByValues(1, 1, 1);
+		fac1.putProbByValues(.3, 2, 0);
+		fac1.putProbByValues(.45, 2, 1);
+		System.out.println(fac1);
+		
+		String[] fac2_vars = {"A"}; 
+		Factor fac2 = new Factor(fac2_vars);
+		fac2.putProbByValues(.8, 0);
+		fac2.putProbByValues(.0, 1);
+		fac2.putProbByValues(.6, 2);
+		System.out.println(fac2);
+		
+		String[] fac3_vars = {"A"}; 
+		Factor fac3 = new Factor(fac3_vars);
+		fac3.putProbByValues(.8, 0);
+		fac3.putProbByValues(.0, 1);
+		fac3.putProbByValues(.6, 2);
+		System.out.println(fac3);
+		
+		System.out.println("f1 / f2 = ");
+		System.out.println(fac1.divide(fac2));
+		}
 		
 		
-//		{
-//		//Product Test
-//		ArrayList<String> A_vals = new ArrayList<String>();
-//		A_vals.add("1");
-//		A_vals.add("2");
-//		A_vals.add("3");
-//		
-//		ArrayList<String> B_vals = new ArrayList<String>();
-//		B_vals.add("1");
-//		B_vals.add("2");
-//		
-//		ArrayList<String> C_vals = new ArrayList<String>();
-//		C_vals.add("1");
-//		C_vals.add("2");
-//		
-//		Factor.addVariable("A", A_vals);
-//		Factor.addVariable("B", B_vals);
-//		Factor.addVariable("C", C_vals);
-//		System.out.println(Factor.variableInfo());
-//		
-//		String[] fac1_vars = {"A","B"};
-//		Factor fac1 = new Factor(fac1_vars);
-//		fac1.putProbByValues(.5,0,0);
-//		fac1.putProbByValues(.8,0,1);
-//		fac1.putProbByValues(.1,1,0);
-//		fac1.putProbByValues(.0,1,1);
-//		fac1.putProbByValues(.3,2,0);
-//		fac1.putProbByValues(.9,2,1);
-//	
-//		System.out.println(fac1);
-//		
-//		String[] fac2_vars = {"B","C"}; 
-//		Factor fac2 = new Factor(fac2_vars);
-//		fac2.putProbByValues(.5, 0,0);
-//		fac2.putProbByValues(.7, 0,1);
-//		fac2.putProbByValues(.1, 1,0);
-//		fac2.putProbByValues(.2, 1,1);
-//
-//		System.out.println(fac2);
-//		System.out.println(fac2.data.toString());
-//		System.out.println("A x B = ");
-//		System.out.println(fac1.product(fac2));
-//		}
+		if(false){
+		//Product Test
+		ArrayList<String> A_vals = new ArrayList<String>();
+		A_vals.add("1");
+		A_vals.add("2");
+		A_vals.add("3");
 		
-//		{
-//		//Reduction test p 107 and 111
-//		ArrayList<String> A_vals = new ArrayList<String>();
-//		A_vals.add("1");
-//		A_vals.add("2");
-//		A_vals.add("3");
-//		
-//		ArrayList<String> B_vals = new ArrayList<String>();
-//		B_vals.add("1");
-//		B_vals.add("2");
-//		
-//		ArrayList<String> C_vals = new ArrayList<String>();
-//		C_vals.add("1");
-//		C_vals.add("2");
-//		
-//		ArrayList<String> D_vals = new ArrayList<String>();
-//		D_vals.add("1");
-//		D_vals.add("2");
-//		
-//		Factor.addVariable("A", A_vals);
-//		Factor.addVariable("B", B_vals);
-//		Factor.addVariable("C", C_vals);
-//		Factor.addVariable("D", D_vals);
-//		System.out.println(Factor.variableInfo());
-//		
-//		String[] fac1_vars = {"A","B","C"}; 
-//		Factor fac1 = new Factor(fac1_vars);
-//		fac1.putProbByValues(.25, 0,0,0);// 1 1 1
-//		fac1.putProbByValues(.05, 1,0,0);// 2 1 1
-//		fac1.putProbByValues(.15, 2,0,0);// 3 1 1
-//		
-//		fac1.putProbByValues(.08, 0,1,0);// 1 2 1 
-//		fac1.putProbByValues(0, 1,1,0);  // 2 2 1
-//		fac1.putProbByValues(.09, 2,1,0);// 3 2 1
-//		
-//		fac1.putProbByValues(.35, 0,0,1);// 1 1 2
-//		fac1.putProbByValues(.07, 1,0,1);// 2 1 2
-//		fac1.putProbByValues(.21, 2,0,1);// 3 1 2
-//		
-//		fac1.putProbByValues(.16, 0,1,1); //1 2 2
-//		fac1.putProbByValues(0, 1,1,1);  //2 2 2
-//		fac1.putProbByValues(.18, 2,1,1);//3 2 2
-//		System.out.println(fac1);
-//		{
-//		System.out.println("reduce f1 by C=1");
-//		ArrayList<String> heldVarStrs = new ArrayList<String>();
-//		heldVarStrs.add("C");
-//		ArrayList<String> heldVarValStrs = new ArrayList<String>();
-//		heldVarValStrs.add("1");
-//		ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
-//		ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
-//		System.out.println(fac1.reduce(heldVars, heldValues));
-//		}
-//		
-//		{
-//			System.out.println("reduce f1 by D=1");
-//			ArrayList<String> heldVarStrs = new ArrayList<String>();
-//			heldVarStrs.add("D");
-//			ArrayList<String> heldVarValStrs = new ArrayList<String>();
-//			heldVarValStrs.add("1");
-//			ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
-//			ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
-//			System.out.println(fac1.reduce(heldVars, heldValues));
-//			}
-//		}
+
+		ArrayList<String> B_vals = new ArrayList<String>();
+		B_vals.add("1");
+		B_vals.add("2");
+		
+		ArrayList<String> C_vals = new ArrayList<String>();
+		C_vals.add("1");
+		C_vals.add("2");
+		
+		Factor.addVariable("A", A_vals);
+		Factor.addVariable("B", B_vals);
+		Factor.addVariable("C", C_vals);
+		System.out.println(Factor.variableInfo());
+		
+		String[] fac1_vars = {"A","B"};
+		Factor fac1 = new Factor(fac1_vars);
+		fac1.putProbByValues(.5,0,0);
+		fac1.putProbByValues(.8,0,1);
+		fac1.putProbByValues(.1,1,0);
+		fac1.putProbByValues(.0,1,1);
+		fac1.putProbByValues(.3,2,0);
+		fac1.putProbByValues(.9,2,1);
+	
+		System.out.println(fac1);
+		
+		String[] fac2_vars = {"B","C"}; 
+		Factor fac2 = new Factor(fac2_vars);
+		fac2.putProbByValues(.5, 0,0);
+		fac2.putProbByValues(.7, 0,1);
+		fac2.putProbByValues(.1, 1,0);
+		fac2.putProbByValues(.2, 1,1);
+
+		System.out.println(fac2);
+		System.out.println(fac2.data.toString());
+		System.out.println("A x B = ");
+		System.out.println(fac1.product(fac2));
+		}
+		
+		if(false){
+		//Reduction test p 107 and 111
+		ArrayList<String> A_vals = new ArrayList<String>();
+		A_vals.add("1");
+		A_vals.add("2");
+		A_vals.add("3");
+		
+		ArrayList<String> B_vals = new ArrayList<String>();
+		B_vals.add("1");
+		B_vals.add("2");
+		
+		ArrayList<String> C_vals = new ArrayList<String>();
+		C_vals.add("1");
+		C_vals.add("2");
+		
+		ArrayList<String> D_vals = new ArrayList<String>();
+		D_vals.add("1");
+		D_vals.add("2");
+		
+		Factor.addVariable("A", A_vals);
+		Factor.addVariable("B", B_vals);
+		Factor.addVariable("C", C_vals);
+		Factor.addVariable("D", D_vals);
+		System.out.println(Factor.variableInfo());
+		
+		String[] fac1_vars = {"A","B","C"}; 
+		Factor fac1 = new Factor(fac1_vars);
+		fac1.putProbByValues(.25, 0,0,0);// 1 1 1
+		fac1.putProbByValues(.05, 1,0,0);// 2 1 1
+		fac1.putProbByValues(.15, 2,0,0);// 3 1 1
+		
+		fac1.putProbByValues(.08, 0,1,0);// 1 2 1 
+		fac1.putProbByValues(0, 1,1,0);  // 2 2 1
+		fac1.putProbByValues(.09, 2,1,0);// 3 2 1
+		
+		fac1.putProbByValues(.35, 0,0,1);// 1 1 2
+		fac1.putProbByValues(.07, 1,0,1);// 2 1 2
+		fac1.putProbByValues(.21, 2,0,1);// 3 1 2
+		
+		fac1.putProbByValues(.16, 0,1,1); //1 2 2
+		fac1.putProbByValues(0, 1,1,1);  //2 2 2
+		fac1.putProbByValues(.18, 2,1,1);//3 2 2
+		System.out.println(fac1);
+		{
+		System.out.println("reduce f1 by C=1");
+		ArrayList<String> heldVarStrs = new ArrayList<String>();
+		heldVarStrs.add("C");
+		ArrayList<String> heldVarValStrs = new ArrayList<String>();
+		heldVarValStrs.add("1");
+		ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
+		ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
+		System.out.println(fac1.reduce(heldVars, heldValues));
+		}
+		
+		if(false){
+			System.out.println("reduce f1 by D=1");
+			ArrayList<String> heldVarStrs = new ArrayList<String>();
+			heldVarStrs.add("D");
+			ArrayList<String> heldVarValStrs = new ArrayList<String>();
+			heldVarValStrs.add("1");
+			ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
+			ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
+			System.out.println(fac1.reduce(heldVars, heldValues));
+			}
+		}
+
 		
 	}
 	
