@@ -796,71 +796,71 @@ public class Factor {
 //		System.out.println(fac1.product(fac2));
 //		}
 		
-		{
-		//Reduction test p 107 and 111
-		ArrayList<String> A_vals = new ArrayList<String>();
-		A_vals.add("1");
-		A_vals.add("2");
-		A_vals.add("3");
-		
-		ArrayList<String> B_vals = new ArrayList<String>();
-		B_vals.add("1");
-		B_vals.add("2");
-		
-		ArrayList<String> C_vals = new ArrayList<String>();
-		C_vals.add("1");
-		C_vals.add("2");
-		
-		ArrayList<String> D_vals = new ArrayList<String>();
-		D_vals.add("1");
-		D_vals.add("2");
-		
-		Factor.addVariable("A", A_vals);
-		Factor.addVariable("B", B_vals);
-		Factor.addVariable("C", C_vals);
-		Factor.addVariable("D", D_vals);
-		System.out.println(Factor.variableInfo());
-		
-		String[] fac1_vars = {"A","B","C"}; 
-		Factor fac1 = new Factor(fac1_vars);
-		fac1.putProbByValues(.25, 0,0,0);// 1 1 1
-		fac1.putProbByValues(.05, 1,0,0);// 2 1 1
-		fac1.putProbByValues(.15, 2,0,0);// 3 1 1
-		
-		fac1.putProbByValues(.08, 0,1,0);// 1 2 1 
-		fac1.putProbByValues(0, 1,1,0);  // 2 2 1
-		fac1.putProbByValues(.09, 2,1,0);// 3 2 1
-		
-		fac1.putProbByValues(.35, 0,0,1);// 1 1 2
-		fac1.putProbByValues(.07, 1,0,1);// 2 1 2
-		fac1.putProbByValues(.21, 2,0,1);// 3 1 2
-		
-		fac1.putProbByValues(.16, 0,1,1); //1 2 2
-		fac1.putProbByValues(0, 1,1,1);  //2 2 2
-		fac1.putProbByValues(.18, 2,1,1);//3 2 2
-		System.out.println(fac1);
-		{
-		System.out.println("reduce f1 by C=1");
-		ArrayList<String> heldVarStrs = new ArrayList<String>();
-		heldVarStrs.add("C");
-		ArrayList<String> heldVarValStrs = new ArrayList<String>();
-		heldVarValStrs.add("1");
-		ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
-		ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
-		System.out.println(fac1.reduce(heldVars, heldValues));
-		}
-		
-		{
-			System.out.println("reduce f1 by D=1");
-			ArrayList<String> heldVarStrs = new ArrayList<String>();
-			heldVarStrs.add("D");
-			ArrayList<String> heldVarValStrs = new ArrayList<String>();
-			heldVarValStrs.add("1");
-			ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
-			ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
-			System.out.println(fac1.reduce(heldVars, heldValues));
-			}
-		}
+//		{
+//		//Reduction test p 107 and 111
+//		ArrayList<String> A_vals = new ArrayList<String>();
+//		A_vals.add("1");
+//		A_vals.add("2");
+//		A_vals.add("3");
+//		
+//		ArrayList<String> B_vals = new ArrayList<String>();
+//		B_vals.add("1");
+//		B_vals.add("2");
+//		
+//		ArrayList<String> C_vals = new ArrayList<String>();
+//		C_vals.add("1");
+//		C_vals.add("2");
+//		
+//		ArrayList<String> D_vals = new ArrayList<String>();
+//		D_vals.add("1");
+//		D_vals.add("2");
+//		
+//		Factor.addVariable("A", A_vals);
+//		Factor.addVariable("B", B_vals);
+//		Factor.addVariable("C", C_vals);
+//		Factor.addVariable("D", D_vals);
+//		System.out.println(Factor.variableInfo());
+//		
+//		String[] fac1_vars = {"A","B","C"}; 
+//		Factor fac1 = new Factor(fac1_vars);
+//		fac1.putProbByValues(.25, 0,0,0);// 1 1 1
+//		fac1.putProbByValues(.05, 1,0,0);// 2 1 1
+//		fac1.putProbByValues(.15, 2,0,0);// 3 1 1
+//		
+//		fac1.putProbByValues(.08, 0,1,0);// 1 2 1 
+//		fac1.putProbByValues(0, 1,1,0);  // 2 2 1
+//		fac1.putProbByValues(.09, 2,1,0);// 3 2 1
+//		
+//		fac1.putProbByValues(.35, 0,0,1);// 1 1 2
+//		fac1.putProbByValues(.07, 1,0,1);// 2 1 2
+//		fac1.putProbByValues(.21, 2,0,1);// 3 1 2
+//		
+//		fac1.putProbByValues(.16, 0,1,1); //1 2 2
+//		fac1.putProbByValues(0, 1,1,1);  //2 2 2
+//		fac1.putProbByValues(.18, 2,1,1);//3 2 2
+//		System.out.println(fac1);
+//		{
+//		System.out.println("reduce f1 by C=1");
+//		ArrayList<String> heldVarStrs = new ArrayList<String>();
+//		heldVarStrs.add("C");
+//		ArrayList<String> heldVarValStrs = new ArrayList<String>();
+//		heldVarValStrs.add("1");
+//		ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
+//		ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
+//		System.out.println(fac1.reduce(heldVars, heldValues));
+//		}
+//		
+//		{
+//			System.out.println("reduce f1 by D=1");
+//			ArrayList<String> heldVarStrs = new ArrayList<String>();
+//			heldVarStrs.add("D");
+//			ArrayList<String> heldVarValStrs = new ArrayList<String>();
+//			heldVarValStrs.add("1");
+//			ArrayList<Integer> heldVars = Factor.variableNamesToIndicies(heldVarStrs);
+//			ArrayList<Integer> heldValues = Factor.valueNamesToIndicies(heldVarStrs, heldVarValStrs);
+//			System.out.println(fac1.reduce(heldVars, heldValues));
+//			}
+//		}
 		
 	}
 	
