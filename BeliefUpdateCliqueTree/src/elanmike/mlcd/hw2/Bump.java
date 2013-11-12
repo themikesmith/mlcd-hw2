@@ -815,11 +815,22 @@ public class Bump {
 		};
 		Bump b = new Bump();
 		// calibrate on our tree
-		try {
-			b.init(newArgs[0],newArgs[2],newArgs[1]);
-		} catch (ArrayIndexOutOfBoundsException | IllegalArgumentException
-				| IOException | FactorException e) {
-			e.printStackTrace();
-		}
+		
+			try {
+				b.init(newArgs[0],newArgs[2],newArgs[1]);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (FactorException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
 	}
 }
