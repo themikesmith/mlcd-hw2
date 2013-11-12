@@ -17,7 +17,7 @@ import java.util.regex.Matcher;
 import elanmike.mlcd.hw2.Constants.DIR;
 
 public class CreateNetworkCliqueTree {
-	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks, _numCliques;
+	private static int _biggestRow, _biggestCol, _biggestTimeStep, _numLandmarks;
 	private static Clique _lastAction;
 	private static boolean _debug = false;
 	/**
@@ -27,9 +27,9 @@ public class CreateNetworkCliqueTree {
 	 *
 	 */
 	private static class Clique {
-		private Set<String> _variables;
+		private List<String> _variables;
 		Clique() {
-			_variables = new HashSet<String>();
+			_variables = new ArrayList<String>();
 		}
 		void addVariable(String var) {
 			_variables.add(var);
@@ -122,11 +122,20 @@ public class CreateNetworkCliqueTree {
 		 * @param e
 		 */
 		void addEdge(Edge e) {
-			if(!_edges.contains(e)) {
-				_vertices.add(e._one);
-				_vertices.add(e._two);
-				_edges.add(e);
+			_edges.add(e);
+			_vertices.add(e._one);
+			_vertices.add(e._two);
+		}
+		public String toString() {
+			StringBuilder sb = new StringBuilder("Vertices:\n");
+			for(Clique c : _vertices) {
+				sb.append(c).append("\n");
 			}
+			sb.append("Edges:\n");
+			for(Edge e : _edges) {
+				sb.append(e).append("\n");
+			}
+			return sb.toString();
 		}
 	}
 	/**
@@ -140,31 +149,38 @@ public class CreateNetworkCliqueTree {
 			usage();
 			return;
 		}
-//		// kidding! debug with 10.8 example
-//		Set<Clique> maximalCliques = debugMaximalCliques();
-		// read network file
-		try {
-			read(args[0]);
-		} catch (IOException e) {
-			System.err.println("error reading network file:"+args[0]);
-			e.printStackTrace();
-			return;
+		List<Clique> maximalCliques;
+		if(_debug) {
+			System.out.println("debug with 10.8 example");
+			// debug with 10.8 example
+			maximalCliques = debugMaximalCliques();	
 		}
-		System.out.println("read network from:"+args[0]);
-		// given sufficient statistics, assemble list of maximal cliques
-		Set<Clique> maximalCliques = assembleMaximalCliques();
+		else {
+			// read network file
+			try {
+				read(args[0]);
+			} catch (IOException e) {
+				System.err.println("error reading network file:"+args[0]);
+				e.printStackTrace();
+				return;
+			}
+			System.out.println("read network from:"+args[0]);
+			// given sufficient statistics, assemble list of maximal cliques
+			maximalCliques = assembleMaximalCliques();
+		}
+//		if(_debug) System.out.println(maximalCliques);
 		// now that we have our list of maximal cliques, assemble cluster graph
 		List<Edge> clusterGraphEdges = assembleClusterGraphEdges(maximalCliques);
+//		if(_debug) System.out.println(clusterGraphEdges);
 		// sort the edges in descending order by weight
 		Collections.sort(clusterGraphEdges, new EdgeComparator());
 		// create the tree!
-		_numCliques = maximalCliques.size();
-		Tree cliqueTree = createMaximalSpanningTree(clusterGraphEdges, _numCliques);
-		if(cliqueTree._vertices.size() != _numCliques) {
-			System.err.printf("error when making tree! V:%d N:%d\n", cliqueTree._vertices.size(), _numCliques);
+		Tree cliqueTree = createMaximalSpanningTree(clusterGraphEdges, maximalCliques.size());
+		if(_debug) System.out.println(cliqueTree);
+		if(cliqueTree._vertices.size() != maximalCliques.size()) {
+			System.err.printf("error when making tree! V:%d N:%d\n", cliqueTree._vertices.size(), maximalCliques.size());
 			return;
 		}
-		clusterGraphEdges.clear(); // no longer need this, clear memory;
 		// and print to file.
 		try {
 			printTreeToFile(cliqueTree, args[1]);
@@ -270,10 +286,11 @@ public class CreateNetworkCliqueTree {
 	 * Now that we have our sufficient statistics from the network,
 	 * assemble the list of maximal cliques.
 	 */
-	private static Set<Clique> assembleMaximalCliques() {
-		Set<Clique> maximalCliques = new HashSet<Clique>();
+	private static List<Clique> assembleMaximalCliques() {
+		List<Clique> maximalCliques = new ArrayList<Clique>();
 		// forms of cliques:
 		for(int t = 0; t <= _biggestTimeStep; t++) {
+			// row n, col n, observation o n
 			for(DIR d : DIR.values()) {
 				// row t, col t, observe wall d t
 				Clique c = new Clique();
@@ -290,50 +307,66 @@ public class CreateNetworkCliqueTree {
 					maximalCliques.add(c);
 				}
 			}
+			// motion model:
 			// if time step not last one
 			if(t != _biggestTimeStep) {
-				// row t, col t, action t
+				// at each time step we have 
+				// blue:row n, row n+1, col n+1, action n
 				Clique c = new Clique();
 				c.addVariable("PositionRow_"+t);
-				c.addVariable("PositionCol_"+t);
-				c.addVariable("Action_"+t);
-				maximalCliques.add(c);
-				// row t+1, col t+1, action t
-				c = new Clique();
 				c.addVariable("PositionRow_"+(t+1));
 				c.addVariable("PositionCol_"+(t+1));
 				c.addVariable("Action_"+t);
 				maximalCliques.add(c);
-				// row t, row t+1, action t
-				c = new Clique();
-				c.addVariable("PositionRow_"+t);
-				c.addVariable("PositionRow_"+(t+1));
-				c.addVariable("Action_"+t);
-				maximalCliques.add(c);
-				// col t, col t+1, action t
-				c = new Clique();
-				c.addVariable("PositionCol_"+t);
-				c.addVariable("PositionCol_"+(t+1));
-				c.addVariable("Action_"+t);
-				maximalCliques.add(c);
-				// row t, col t, col t+1
+				// green:row n, col n, action n, col n+1
 				c = new Clique();
 				c.addVariable("PositionRow_"+t);
 				c.addVariable("PositionCol_"+t);
-				c.addVariable("PositionCol_"+(t+1));
-				maximalCliques.add(c);
-				// row t, action t, col t+1
-				c = new Clique();
-				c.addVariable("PositionRow_"+t);
 				c.addVariable("Action_"+t);
 				c.addVariable("PositionCol_"+(t+1));
 				maximalCliques.add(c);
-				// row t, row t+1, col t+1
-				c = new Clique();
-				c.addVariable("PositionRow_"+t);
-				c.addVariable("PositionRow_"+(t+1));
-				c.addVariable("PositionCol_"+(t+1));
-				maximalCliques.add(c);
+//				// row t, col t, action t
+//				Clique c = new Clique();
+//				c.addVariable("PositionRow_"+t);
+//				c.addVariable("PositionCol_"+t);
+//				c.addVariable("Action_"+t);
+//				maximalCliques.add(c);
+//				// row t+1, col t+1, action t
+//				c = new Clique();
+//				c.addVariable("PositionRow_"+(t+1));
+//				c.addVariable("PositionCol_"+(t+1));
+//				c.addVariable("Action_"+t);
+//				maximalCliques.add(c);
+//				// row t, row t+1, action t
+//				c = new Clique();
+//				c.addVariable("PositionRow_"+t);
+//				c.addVariable("PositionRow_"+(t+1));
+//				c.addVariable("Action_"+t);
+//				maximalCliques.add(c);
+//				// col t, col t+1, action t
+//				c = new Clique();
+//				c.addVariable("PositionCol_"+t);
+//				c.addVariable("PositionCol_"+(t+1));
+//				c.addVariable("Action_"+t);
+//				maximalCliques.add(c);
+//				// row t, col t, col t+1
+//				c = new Clique();
+//				c.addVariable("PositionRow_"+t);
+//				c.addVariable("PositionCol_"+t);
+//				c.addVariable("PositionCol_"+(t+1));
+//				maximalCliques.add(c);
+//				// row t, action t, col t+1
+//				c = new Clique();
+//				c.addVariable("PositionRow_"+t);
+//				c.addVariable("Action_"+t);
+//				c.addVariable("PositionCol_"+(t+1));
+//				maximalCliques.add(c);
+//				// row t, row t+1, col t+1
+//				c = new Clique();
+//				c.addVariable("PositionRow_"+t);
+//				c.addVariable("PositionRow_"+(t+1));
+//				c.addVariable("PositionCol_"+(t+1));
+//				maximalCliques.add(c);
 			}
 			else { // last time step
 				// action t
@@ -342,20 +375,22 @@ public class CreateNetworkCliqueTree {
 				maximalCliques.add(_lastAction);
 			}
 		}
-		_numCliques = maximalCliques.size();
 		return maximalCliques;
 	}
 	/**
 	 * Now that we have our list of maximal cliques,
 	 * assemble our cluster graph's list of edges.
 	 */
-	private static List<Edge> assembleClusterGraphEdges(Set<Clique> maximalCliques) {
+	private static List<Edge> assembleClusterGraphEdges(List<Clique> maximalCliques) {
 		List<Edge> clusterGraphEdges = new ArrayList<Edge>();
 		// for each possible pair of cliques...
 		Iterator<Clique> iIter = maximalCliques.iterator();
+		int i = 0;
 		while(iIter.hasNext()) {
 			Clique one = iIter.next();
+			i++;
 			Iterator<Clique> jIter = maximalCliques.iterator();
+			for(int j = 0; j < i; j++) jIter.next();
 			while(jIter.hasNext()) {
 				Clique two = jIter.next();
 				if(!one.equals(two)) { // exclude edges between identical cliques 
@@ -366,6 +401,9 @@ public class CreateNetworkCliqueTree {
 							clusterGraphEdges.add(e);
 						}
 					}
+				}
+				else {
+					System.err.println("uh oh!"); 
 				}
 			}
 		}
@@ -380,11 +418,13 @@ public class CreateNetworkCliqueTree {
 	 */
 	private static Tree createMaximalSpanningTree(List<Edge> _clusterGraphEdges, int numCliques) {
 		Tree cliqueTree = new Tree();
-		// add clique: action of last time step, since it won't get added when adding edges
-		cliqueTree._vertices.add(_lastAction);
+		// add every clique to the tree
+		// in our special case the only clique that won't get added when adding
+		// edges is the last action
+		if(!_debug) cliqueTree._vertices.add(_lastAction);
 		// add first edge
 		cliqueTree.addEdge(_clusterGraphEdges.get(0));
-		// try to add n-1 edges without cycles
+		// try to add n-2 edges without cycles - we know that one vertex isn't connected
 		int i = 1;
 		// (assuming we will get edges in order of decreasing weight)
 		while(cliqueTree._edges.size() < numCliques - 1) {
@@ -398,8 +438,8 @@ public class CreateNetworkCliqueTree {
 						|| !cliqueTree._vertices.contains(e._two)) {
 					cliqueTree.addEdge(e); // ... we add!
 				} // otherwise the edge would be a duplicate or create a cycle
+				i++;
 			}
-			i++;
 		}
 		return cliqueTree;
 	}
@@ -432,8 +472,8 @@ public class CreateNetworkCliqueTree {
 		}
 		out.close();
 	}
-	private static Set<Clique> debugMaximalCliques() {
-		Set<Clique> cliques = new HashSet<Clique>();
+	private static List<Clique> debugMaximalCliques() {
+		List<Clique> cliques = new ArrayList<Clique>();
 		Clique c = new Clique();
 		c.addVariable("C");
 		c.addVariable("D");
