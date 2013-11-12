@@ -732,7 +732,7 @@ public class Bump {
 		HashMap<String,Factor> initialFactors = new HashMap<String,Factor>();
 		
 		while ((line = br.readLine()) != null) {
-			System.out.println("\nline:"+line);
+//			System.out.println("\nline:"+line);
 			String[] tokenized = line.split(" |,");
 			ArrayList<String> variables = new ArrayList<String>();
 			ArrayList<String> var_value = new ArrayList<String>();
@@ -755,7 +755,7 @@ public class Bump {
 			ArrayList<Integer> val_indicies = Factor.valueNamesToIndicies(variables, var_value);
 			Collections.sort(key);
 			
-			System.out.println(variables+" "+var_value+" "+ prob + "  key: "+key.toString()+ "  vals: "+val_indicies.toString());
+//			System.out.println(variables+" "+var_value+" "+ prob + "\nkey: "+key.toString()+ "  vals: "+val_indicies.toString());
 			//System.out.println(initialFactors.keySet().toString());
 			
 			if(initialFactors.containsKey(key.toString())){ //already has this factor
@@ -825,9 +825,9 @@ public class Bump {
 					System.out.printf("argument i:%d %s\n", i, newArgs[i]);
 				}
 				b.init(newArgs[0],newArgs[2],newArgs[1]);
-				System.out.println("yay!");
-				b.runBump();
-				System.out.println("yay calibrated!");
+				System.out.println("yay initialized!");
+				if(b.runBump());
+					System.out.println("yay calibrated!");
 			} catch (ArrayIndexOutOfBoundsException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -841,6 +841,5 @@ public class Bump {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
 	}
 }
