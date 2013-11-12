@@ -239,6 +239,17 @@ such that there are no edges, so the running intersection property holds. \\
 
 4.\\
 
+\noindent For a grid of size N by M and a sequence of T actions and observations (assume they are fully observed), what would be the computational complexity of computing the distribution over the final position at time T if we simply marginalized over a joint CPT?
+What is the computational complexity of computing the distribution over the final position at time T using message passing in your clique tree?\\
+The computational complexity of computing the distribution over the final position at time T if we simply marginalize over a joint CPT is as follows:\\
+If we have $n$ variables, and the maximum cardinality out of all the variables is $c$, then the cost of marginalizing over the joint CPT is $c^n$.\\
+The computational complexity of the clique tree message passing is as follows, from p358 of Koller:
+Letting $c$ be the execution cost of message passing in a clique tree to one root (upward pass), the cost of obtaining the calibrated tree is $2c$.  One pass of the message passing algorithm involves every vertex sending a message to its 'downstream' neighbors, so it involves $v$ vertices.  When sending to vertex $j$, each vertex $i$ marginalizes out all its variables not in the sepset between its variables and $j$'s variables.  The number of variables marginalized is on the order of the size of the largest clique, which we'll call $k$.\\
+We are given all actions and observations, as incremental evidence.  We could do it one of two ways.\\
+\textit{We note that at most we have 3 vertices for each time step, if we use our minimal triangulation, and the largest clique size is 3.  This would make $v = 3T$, and $k = 3$.  We also could have at most 2 vertices for each time step, and the largest clique size is 5, which would make $v = 2T$ and $k = 5$.  We consider the latter case to be the worst case scenario, as we will see.}\\
+\noindent - Let the cost of an operation on a factor be proportional to the size of the factor.  We could calibrate our tree based on our distribution's initial beliefs, with cost $2c = 2vk$.  Note that $k$ is the size of the largest clique, which means the size of the largest factor is $O(k)$.  We could then introduce our evidence set $E$, which has $O(T)$ actions, and $O(T n)$ observations, where $T$ is the number of time steps, and $n$ is the maximum number of observations at any time step.  We would therefore need to multiply in $O(2 T n)$ indicator functions, which has cost $O(2 T n x)$, where $x$ is the time needed to find an applicable clique at which to multiply any given indicator function.  We then would need to recalibrate the tree, which adds cost $2 v k$ again.  This is a total cost of $O(4 v k)$, which in our worst case scenario is $O(4 \cdot 2T \cdot 5) = O(40T)$.\\
+\noindent - Assuming we only want to answer this one query, we can forego calibrating the clique tree first, and only calibrate it once after we multiply in the indicator factors with the evidence.  This brings us down to $O(20T)$.\\
+
 //TODO
 
 \end{problem}{}
