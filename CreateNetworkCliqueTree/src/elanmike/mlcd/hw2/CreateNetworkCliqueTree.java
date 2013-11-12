@@ -310,61 +310,29 @@ public class CreateNetworkCliqueTree {
 			// motion model:
 			// if time step not last one
 			if(t != _biggestTimeStep) {
-				// at each time step we have 
-				// blue:row n, row n+1, col n+1, action n
+				// use cliques size 5 - too big, but at recommendation of suchi
 				Clique c = new Clique();
 				c.addVariable("PositionRow_"+t);
+				c.addVariable("PositionCol_"+t);
 				c.addVariable("PositionRow_"+(t+1));
 				c.addVariable("PositionCol_"+(t+1));
 				c.addVariable("Action_"+t);
 				maximalCliques.add(c);
-				// green:row n, col n, action n, col n+1
-				c = new Clique();
-				c.addVariable("PositionRow_"+t);
-				c.addVariable("PositionCol_"+t);
-				c.addVariable("Action_"+t);
-				c.addVariable("PositionCol_"+(t+1));
-				maximalCliques.add(c);
-//				// row t, col t, action t
+				
+//				// cliques size 4
+//				// at each time step we have 
+//				// blue:row n, row n+1, col n+1, action n
 //				Clique c = new Clique();
 //				c.addVariable("PositionRow_"+t);
-//				c.addVariable("PositionCol_"+t);
-//				c.addVariable("Action_"+t);
-//				maximalCliques.add(c);
-//				// row t+1, col t+1, action t
-//				c = new Clique();
 //				c.addVariable("PositionRow_"+(t+1));
 //				c.addVariable("PositionCol_"+(t+1));
 //				c.addVariable("Action_"+t);
 //				maximalCliques.add(c);
-//				// row t, row t+1, action t
-//				c = new Clique();
-//				c.addVariable("PositionRow_"+t);
-//				c.addVariable("PositionRow_"+(t+1));
-//				c.addVariable("Action_"+t);
-//				maximalCliques.add(c);
-//				// col t, col t+1, action t
-//				c = new Clique();
-//				c.addVariable("PositionCol_"+t);
-//				c.addVariable("PositionCol_"+(t+1));
-//				c.addVariable("Action_"+t);
-//				maximalCliques.add(c);
-//				// row t, col t, col t+1
+//				// green:row n, col n, action n, col n+1
 //				c = new Clique();
 //				c.addVariable("PositionRow_"+t);
 //				c.addVariable("PositionCol_"+t);
-//				c.addVariable("PositionCol_"+(t+1));
-//				maximalCliques.add(c);
-//				// row t, action t, col t+1
-//				c = new Clique();
-//				c.addVariable("PositionRow_"+t);
 //				c.addVariable("Action_"+t);
-//				c.addVariable("PositionCol_"+(t+1));
-//				maximalCliques.add(c);
-//				// row t, row t+1, col t+1
-//				c = new Clique();
-//				c.addVariable("PositionRow_"+t);
-//				c.addVariable("PositionRow_"+(t+1));
 //				c.addVariable("PositionCol_"+(t+1));
 //				maximalCliques.add(c);
 			}
