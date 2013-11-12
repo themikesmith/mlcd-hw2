@@ -208,7 +208,7 @@ public class Factor {
 	
 	protected Factor(ArrayList<Integer> vars){
 		this._variables = vars;
-		
+		Collections.sort(_variables);
 		this._stride = new ArrayList<Integer>(_variables.size());
 		int strideTot = 1;
 		/*
@@ -236,7 +236,7 @@ public class Factor {
 	
 	public Factor(ArrayList<Integer> vars, double d) {
 		this._variables = vars;
-		
+		Collections.sort(_variables);
 		this._stride = new ArrayList<Integer>(_variables.size());
 		int strideTot = 1;
 		/*
@@ -486,17 +486,19 @@ public class Factor {
 			psi.data.set(i, this.data.get(j)+f.data.get(k)); //adding log probabilies
 			//System.out.printf("Multiplying value at (%d) by (%d) to get value at (%d)\n",j,k,i);
 			
-			for(int l =0; l < unionScope.size(); l++){
-				
+			//for(int l =0; l < unionScope.size(); l++){
+			 for(int l =unionScope.size()-1; l >=0 ; l--){
 				assigment[l]++;
-				
+				//System.out.printf("l = %d\n",l);
 				if(assigment[l]==_variableCard.get(unionScope.get(l))){
+					//System.out.printf("assignment[%d] == card(%d)\n",unionScope.get(l),unionScope.get(l));
 					assigment[l]=0;
 					if(this._variables.contains(unionScope.get(l)))
 						j = j-(_variableCard.get(unionScope.get(l))-1)*this._stride.get(this.getInternalIndex(unionScope.get(l)));
 					if(f._variables.contains(unionScope.get(l)))
 						k = k-(_variableCard.get(unionScope.get(l))-1)*f._stride.get(f.getInternalIndex(unionScope.get(l)));
 				}else{
+					//System.out.printf("Else\n");
 					if(this._variables.contains(unionScope.get(l)))
 						j = j + this._stride.get(this.getInternalIndex(unionScope.get(l)));
 					if(f._variables.contains(unionScope.get(l)))
@@ -542,6 +544,7 @@ public class Factor {
 		return result;
 	}
 	
+	//example p297
 	public Factor marginalize(ArrayList<Integer> elimVar) throws FactorIndexException{
 		ArrayList<Integer> finalVars = difference(elimVar);
 		
@@ -586,7 +589,6 @@ public class Factor {
 		for(int i = 0; i<result.data.size(); i++){
 			try {
 				ArrayList<Integer> variablesOfLarger = (ArrayList<Integer>) result._variables.clone();
-
 				variablesOfLarger.addAll(heldVars);
 				ArrayList<Integer> varValues = result.valuesFromIndex(i);
 				varValues.addAll(heldValues);
