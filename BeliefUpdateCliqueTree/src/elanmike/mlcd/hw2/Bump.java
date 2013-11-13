@@ -422,6 +422,7 @@ public class Bump {
 	}
 	
 	public boolean isCalibrated() {
+		boolean passed = true;
 		for(String e:_tree._edges.keySet()){
 			Edge curEdge = _tree._edges.get(e);
 			
@@ -430,17 +431,17 @@ public class Bump {
 				Factor two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
 				if(one.data.size() != two.data.size()){
 					System.err.println("'calibrated' factors not equal size");
-					return false;
+					passed =  false;
+					break;
 				}
 				for(int i = 0; i<one.data.size(); i++){
-					if(one.data.get(i) != two.data.get(i)){
+					if(one.data.get(i).equals(two.data.get(i))){
 						System.err.println("data at index "+ i + " is not equal");
 						System.err.println("Factor from clique one");
 						System.err.println(one);
 						System.err.println(two);
-						
-						
-						return false;
+						passed =  false;
+						break;
 					}
 				}
 			} catch (FactorIndexException e1) {
@@ -449,7 +450,7 @@ public class Bump {
 			}
 		}
 		
-		return true;
+		return passed;
 	}
 	
 	/**
