@@ -32,6 +32,7 @@ public class QueryProcessor {
 			// set appropriate method, and run bump to calibrate
 			_bump.setUseSumProduct(useSumProduct);
 			_bump.runBump();
+			System.out.println("Calibrated? " + _bump.isCalibrated());
 			_calibrated = true;
 			resetTreeForQueries();
 		}
@@ -161,6 +162,7 @@ public class QueryProcessor {
 			return e.getMessage();
 		}
 	}
+	
 	/**
 	 * Process queries in a query file according to a semiring
 	 * @param queryFile
