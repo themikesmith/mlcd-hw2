@@ -464,6 +464,80 @@ public class Bump {
 	 * @return a list of the order of this pass, so we can reverse it in the upward pass
 	 * @throws FactorException 
 	 */
+	List<Vertex> assignBumpOrdering(Tree t) throws FactorException {
+		return assignBumpOrdering(t, t._vertices.values().iterator().next());
+	}
+	/**
+	 * Conducts one downward pass of belief update message passing
+	 * with a designated root.
+	 * Conducts depth-first or breadth-first search of the query tree, 
+	 * sends messages in that order.
+	 * 
+	 * @param t the tree in question.
+	 * @param root
+	 * @return a list of the order of this pass, so the upward pass can reverse it
+	 * @throws FactorException 
+	 */
+	List<Vertex> assignBumpOrdering(Tree t, Vertex root) throws FactorException {
+		_bumpOnUpwardPass = false;
+		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
+		nextOrderID = UNMARKED; // begin again at 0
+		List<Vertex> ordering = new ArrayList<Vertex>();
+		if(t._vertices.size() == 0) return ordering;
+		// mark all vertices unmarked
+		for(Vertex v : t._vertices.values()) {
+			v.setUnmarked();
+		}
+		Queue<Vertex> toProcess = new LinkedList<Vertex>();
+		toProcess.add(root);
+		// giving a number is equivalent to adding to ordering, giving index
+		// while all vertices don't have a number
+		while(ordering.size() != t._vertices.size()) {
+			if(toProcess.size() == 0) {
+				// find an unmarked node... expensive
+				for(Vertex v : t._vertices.values()) {
+					if(v._orderID == UNMARKED) {
+						toProcess.add(v); // add to queue when find unmarked
+					}
+				}
+			}
+			Vertex curr = toProcess.remove();
+			if(DEBUG) System.out.printf("curr vertex:%s\n",curr);
+			// mark
+			curr.setOrderID();
+			ordering.add(curr); // and add to our ordered list
+			if(curr._orderID != ordering.size()) {// verify
+				System.err.println("oops! order id incorrect");
+			}
+			// and then for each downstream child...
+			for(Edge e : curr._recvdMsgStatus.keySet()) {
+				Vertex k = e.getOtherVertex(curr);
+				if(DEBUG) System.out.println("check neighbor:"+k);
+				if(k._orderID == UNMARKED) {
+					if(DEBUG) System.out.println(k+" is unmarked - it's downstream");
+					// downstream if we haven't marked it yet
+//					// send belief update message to the child
+//					curr.sendMessage(e);
+					// and add the child to our list to process
+					toProcess.add(k);
+				}
+			}
+		}
+		return ordering;
+	}
+	
+	/**
+	 * Conducts one downward pass of belief update message passing
+	 * with a designated root.
+	 * Conducts breadth-first search of the query tree, 
+	 * and sends messages in that order.
+	 * 
+	 * Chooses an arbitrary root.
+	 * 
+	 * @param t the tree in question
+	 * @return a list of the order of this pass, so we can reverse it in the upward pass
+	 * @throws FactorException 
+	 */
 	List<Vertex> downwardPassBeliefUpdate(Tree t) throws FactorException {
 		return downwardPassBeliefUpdate(t, t._vertices.values().iterator().next());
 	}
