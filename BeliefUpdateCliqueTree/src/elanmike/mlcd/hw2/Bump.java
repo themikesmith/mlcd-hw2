@@ -462,6 +462,7 @@ public class Bump {
 				// check number of times edge was used:
 				if(curEdge._timesMessagesSentAcrossMe != 2) {
 					System.err.printf("'calibrated' edge used for messages:%d times", curEdge._timesMessagesSentAcrossMe);
+
 					passed = false; 
 					break;
 				}
@@ -542,6 +543,8 @@ public class Bump {
 		}
 		Queue<Vertex> toProcess = new LinkedList<Vertex>();
 		toProcess.add(root);
+		System.out.println("root is "+root.getVariableNames());
+		
 		// giving a number is equivalent to adding to ordering, giving index
 		// while all vertices don't have a number
 		while(ordering.size() != t._vertices.size()) {
@@ -571,6 +574,7 @@ public class Bump {
 //					// send belief update message to the child
 //					curr.sendMessage(e);
 					// and add the child to our list to process
+					System.out.printf("adding %s to be processed\n",root.getVariableNames());
 					toProcess.add(k);
 				}
 			}
