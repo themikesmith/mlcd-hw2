@@ -139,6 +139,8 @@ public class Bump {
 			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ, sigmaItoJ);
 			// update edge potential
 			edgeToJ.setFactorData(sigmaItoJ);
+			// update edge message count
+			edgeToJ._timesMessagesSentAcrossMe++;
 			if(DEBUG) System.out.println("mu I,J:\n"+edgeToJ.getLongInfo());
 		}
 		/**
@@ -241,10 +243,12 @@ public class Bump {
 	private class Edge extends Factor{
 		public static final String EDGE = " -- ";
 		Vertex _one, _two;
+		private int _timesMessagesSentAcrossMe;
 		Edge(Vertex one, Vertex two) {
 			super(one.intersection(two._variables));
 			this._one = one;
 			this._two = two;
+			_timesMessagesSentAcrossMe = 0;
 		}
 		
 		protected Edge(Edge edgeToCopy, Vertex newOne, Vertex newTwo) {
@@ -275,6 +279,7 @@ public class Bump {
 		}
 		public String getLongInfo() {
 			StringBuilder sb = new StringBuilder("edge:\n");
+			sb.append("used:").append(_timesMessagesSentAcrossMe).append(" times for messages.\n");
 			sb.append(Factor.variableIndicesToNames(_one._variables));
 			sb.append(" --").append(Factor.variableIndicesToNames(_variables)).append("-- ");
 			sb.append(Factor.variableIndicesToNames(_two._variables));
