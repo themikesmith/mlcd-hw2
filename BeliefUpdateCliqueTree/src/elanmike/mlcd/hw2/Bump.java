@@ -178,6 +178,12 @@ public class Bump {
 				while(it.hasNext()) {
 					Edge e = it.next();
 					Vertex v = e.getOtherVertex(this);
+					if(this._orderID == UNMARKED) {
+						System.err.println("whoops i am unmarked");
+					}
+					if(v._orderID == UNMARKED) {
+						System.err.println("whoops neighbor unmarked");
+					}
 					if(this._orderID > v._orderID) {
 						outgoingEdges.add(e);
 					}
@@ -202,6 +208,12 @@ public class Bump {
 				while(it.hasNext()) {
 					Edge e = it.next();
 					Vertex v = e.getOtherVertex(this);
+					if(this._orderID == UNMARKED) {
+						System.err.println("whoops i am unmarked");
+					}
+					if(v._orderID == UNMARKED) {
+						System.err.println("whoops neighbor unmarked");
+					}
 					if(this._orderID < v._orderID) {
 						outgoingEdges.add(e);
 					}
