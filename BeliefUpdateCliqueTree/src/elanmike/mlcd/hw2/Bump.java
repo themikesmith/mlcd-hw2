@@ -172,7 +172,7 @@ public class Bump {
 			if(!_bumpOnUpwardPass) {
 				System.err.println("calling upward pass neighbor method on downward pass!");
 			}
-			if(_outgoingEdges.size() == 0) { // only compute if we have to
+//			if(_outgoingEdges.size() == 0) { // only compute if we have to
 				Set<Edge> outgoingEdges = new HashSet<Edge>();
 				Iterator<Edge> it = _recvdMsgStatus.keySet().iterator();
 				while(it.hasNext()) {
@@ -183,8 +183,9 @@ public class Bump {
 					}
 				}
 				_outgoingEdges = outgoingEdges;
-			}
-			return _outgoingEdges;
+//			}
+//			return _outgoingEdges;
+				return outgoingEdges;
 		}
 		/**
 		 * Return a list of all outgoing neighbors for the upward pass,
@@ -195,7 +196,7 @@ public class Bump {
 			if(!_bumpOnUpwardPass) {
 				System.err.println("calling upward pass neighbor method on downward pass!");
 			}
-			if(_outgoingEdges.size() == 0) { // only compute if we have to
+//			if(_outgoingEdges.size() == 0) { // only compute if we have to
 				Set<Edge> outgoingEdges = new HashSet<Edge>();
 				Iterator<Edge> it = _recvdMsgStatus.keySet().iterator();
 				while(it.hasNext()) {
@@ -206,8 +207,9 @@ public class Bump {
 					}
 				}
 				_outgoingEdges = outgoingEdges;
-			}
-			return _outgoingEdges;
+//			}
+//			return outgoingEdges;
+				return outgoingEdges;
 		}
 		/**
 		 * Checks if this vertex is informed.
