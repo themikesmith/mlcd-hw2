@@ -803,6 +803,7 @@ public class Bump {
 	public void incorporateQueryEvidence(ArrayList<Integer> vars, 
 			ArrayList<Integer> values, int numNewEvidence) 
 			throws FactorException {
+		if(DEBUG) System.out.println("incorporate query evidence...");
 		if(vars.size() != values.size()) {
 			System.err.println("uh oh! vars size must equal values size");
 		}
@@ -827,6 +828,14 @@ public class Bump {
 		if(DEBUG) System.out.println(+numNewEvidence+" new var-> run two passes");
 		upwardPassBeliefUpdate(downwardPassBeliefUpdate(_queryTree));
 //		runBump();
+		if(DEBUG) {
+			if(DEBUG) System.out.println("\n\n******\nis tree calibrated?\n\n");
+			if(DEBUG) System.out.println(isCalibrated());
+//			if(DEBUG) System.out.println(_tree.getLongInfo());
+		}
+		else {
+			isCalibrated();
+		}
 	}
 	/**
 	 * Get a query result given a LHS of a query.
