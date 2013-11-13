@@ -658,7 +658,7 @@ public class Bump {
 	 */
 	void downwardPassBeliefUpdate(List<Vertex> orderedVertices) throws FactorException {
 		_bumpOnUpwardPass = true;
-//		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
+		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
 		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
 			Vertex v = orderedVertices.get(i);
 			// for each edge that is outgoing given our ordering
@@ -675,7 +675,7 @@ public class Bump {
 	 */
 	void upwardPassBeliefUpdate(List<Vertex> orderedVertices) throws FactorException {
 		_bumpOnUpwardPass = true;
-//		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
+		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
 		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
 			Vertex v = orderedVertices.get(i);
 			// for each edge that is outgoing given our ordering
