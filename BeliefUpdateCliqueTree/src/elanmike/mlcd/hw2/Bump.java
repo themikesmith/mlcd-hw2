@@ -498,7 +498,6 @@ public class Bump {
 				// check number of times edge was used:
 				if(curEdge._timesMessagesSentAcrossMe != 2) {
 					System.err.printf("'calibrated' edge used for messages:%d times", curEdge._timesMessagesSentAcrossMe);
-
 					passed = false; 
 					break;
 				}
@@ -520,10 +519,10 @@ public class Bump {
 						b = ((Double)Math.exp(two.data.get(i))).floatValue();
 					if(a != b) {
 						System.err.printf("data at index %d is not equal (%f = %f)\n",i,Math.exp(one.data.get(i)),Math.exp(two.data.get(i)));
-						//System.err.println("Factor from clique:"+curEdge._one);
+						System.err.println("Factor from clique:"+curEdge._one);
 						System.err.println("one:");
 						System.err.println(one.toString());
-						//System.err.println("Factor from clique:"+curEdge._two);
+						System.err.println("Factor from clique:"+curEdge._two);
 						System.err.println("two:");
 						System.err.println(two.toString());
 						System.err.println("edge:");
