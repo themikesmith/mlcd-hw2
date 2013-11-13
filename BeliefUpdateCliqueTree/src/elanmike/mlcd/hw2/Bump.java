@@ -446,6 +446,9 @@ public class Bump {
 			if(DEBUG) System.out.println(isCalibrated());
 //			if(DEBUG) System.out.println(_tree.getLongInfo());
 		}
+		else {
+			isCalibrated();
+		}
 		return true;
 	}
 	
