@@ -284,8 +284,21 @@ B\\
 
 \begin{eqnarray*}
 p_{i} & = & \alpha^{\mathcal{G}}_{X_{i}\mid \mathbf{u}_{i}}\\
-q_{i,j} & = & \alpha^{\mathcal{G}}_{x_{i}^{j}\mid \mathbf{u}_{i}} \\
-\\
+q_{i,j} & = & \alpha^{\mathcal{G}}_{x_{i}^{j}\mid \mathbf{u}_{i}}   \\
+p_{i} & = & \sum_{x_{i}^{j} \in Val(X_{i})} q_{i,j}\\
+\end{eqnarray*}
+
+
+\begin{eqnarray*}
+\ell(\hat{\mathbf{\theta}},\mathcal{D}) & = & 
+	\sum^{n}_{i=1} \left[ 
+	\sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})}  
+	\sum_{x_{i}^{j} \in Val(X_{i})}  
+	M[x_{i},\mathbf{u_{i}}] \log \hat{\mathbf{\theta}}_{x_{i} \mid \mathbf{u_{i}}} \right]
+\end{eqnarray*}
+
+
+\begin{eqnarray*}
 A & = & \frac{\Gamma(\alpha^{\mathcal{G}}_{X_{i}\mid \mathbf{u}_{i}})}{\Gamma(\alpha^{\mathcal{G}}_{X_{i}\mid \mathbf{u}_{i}} + M[ \mathbf{u}_{i}])} \\
 & = & \frac{\Gamma(p_{i})}{\Gamma(p_{i} + M[ \mathbf{u}_{i}])} \\
 & = & \frac{p_{i}^{(p_{i}-\frac{1}{2})} e^{-p_{i}}}{(p_{i} + M[ \mathbf{u}_{i}])^{(p_{i} + M[ \mathbf{u}_{i}] - \frac{1}{2})}e^{-(p_{i} + M[ \mathbf{u}_{i}]})} \\
@@ -304,11 +317,126 @@ B & = & \frac{\Gamma(\alpha^{\mathcal{G}}_{x_{i}^{j}\mid \mathbf{u}_{i}} + M[ x_
 	q_{i,j} ^{-(q_{i,j} -\frac{1}{2})} 
 	e^{-M[ x_{i}^{j},\mathbf{u}_{i}]}\\
 \end{eqnarray*}
+\\
+\\
+\\
+\\   
+\\
+\\   
+\\
+\begin{eqnarray*}
+\log P( \mathcal{D} \mid \mathcal{G}) & = & 
+	\sum_{i} \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+	\left[ \log A + 
+	\sum_{x_{i}^{j} \in Val(X_{i})} 
+	\log B \right] \\
+& = & 
+	\sum_{i} \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+	\frac{1}{2} \log (2 \pi) (p_{i}) \log p_{i}  - \frac{1}{2} \log p_{i} - p_{i} \\
+	& - &\frac{1}{2} \log (2 \pi)  (p_{i} + M[ \mathbf{u}_{i}]) \log  (p_{i} + M[ \mathbf{u}_{i}])  + \frac{1}{2} \log (p_{i} + M[ \mathbf{u}_{i}]) +(p_{i} + M[ \mathbf{u}_{i}]) \\
+	& + &\sum_{x_{i}^{j} \in Val(X_{i})} 
+	\frac{1}{2} \log (2 \pi) ((q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])) \log (q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])\\
+	& - &\frac{1}{2} \log (q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}]) - (q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}]) \\
+	& - &\frac{1}{2} \log (2 \pi) q_{i,j} \log q_{i,j}  + \frac{1}{2} \log q_{i,j}+ q_{i,j} \\
+\end{eqnarray*}
+
+The $(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])$ cancels with $(p_{i} + M[ \mathbf{u}_{i}])$, we also can factor out the $\frac{1}{2}$
 
 \begin{eqnarray*}
-\ell(\hat{\mathbf{\theta}},\mathcal{D}) & = & 
-	\sum^{n}_{i=1} \left[ \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})}  \sum_{x_{i}}  \right]
-	M[x_{i},\mathbf{u_{i}}] \log \hat{\mathbf{\theta}}_{x_{i} \mid \mathbf{u_{i}}}
+\log P( \mathcal{D} \mid \mathcal{G}) & = & 
+	\frac{1}{2} \sum_{i} \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+	 \log (2 \pi) (p_{i}) \log p_{i}  -  \log p_{i} \\
+	& - & \log (2 \pi)  (p_{i} + M[ \mathbf{u}_{i}]) \log  (p_{i} + M[ \mathbf{u}_{i}])  + \log (p_{i} + M[ \mathbf{u}_{i}])  \\
+	& + &\sum_{x_{i}^{j} \in Val(X_{i})} 
+	 \log (2 \pi) ((q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])) \log (q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])\\
+	& - & \log (q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}]) \\
+	& - &\log (2 \pi) q_{i,j} \log q_{i,j}  +\log q_{i,j}\\
+& = & 
+	\frac{1}{2} \sum_{i} \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+	 \log (2 \pi) (p_{i}) \log p_{i}  -  \log p_{i} \\
+	& - & \log (2 \pi)  (p_{i} + M[ \mathbf{u}_{i}]) \log  (p_{i} + M[ \mathbf{u}_{i}])  + \log (p_{i} + M[ \mathbf{u}_{i}])  \\
+	& + &\sum_{x_{i}^{j} \in Val(X_{i})} 
+	 \log (2 \pi) ((q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])) \log (q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])\\
+	& - & \log (q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}]) \\
+	& - &\log (2 \pi) q_{i,j} \log q_{i,j}  +\log q_{i,j}\\
+\end{eqnarray*}
+
+As $M \rightarrow \infty$ we have $M[ x_{i}^{j},\mathbf{u}_{i}] \rightarrow \hat{\theta}$:
+
+\begin{eqnarray*}
+& = & 
+	\frac{1}{2} \sum_{i} \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+	 \log (2 \pi) (p_{i}) \log p_{i}  -  \log p_{i} \\
+	& - & \log (2 \pi)  (p_{i} + M[ \mathbf{u}_{i}]) \log  (p_{i} + M[ \mathbf{u}_{i}])  + \log (p_{i} + M[ \mathbf{u}_{i}])  \\
+	& + &\sum_{x_{i}^{j} \in Val(X_{i})} 
+	 \log (2 \pi) ((q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])) \log (q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])\\
+	& - & \log (q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}]) \\
+	& - &\log (2 \pi) q_{i,j} \log q_{i,j}  +\log q_{i,j}\\
+\end{eqnarray*}
+\\
+\\
+\\
+\\
+\\
+\\
+\\
+\\
+\begin{eqnarray*}
+\log P( \mathcal{D} \mid \mathcal{G}) & = & 
+	\sum_{i} \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+	\left[ \log A + 
+	\sum_{x_{i}^{j} \in Val(X_{i})} 
+	\log B \right] \\
+& = & 
+	\sum_{i} \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+	 \log [ p_{i}^{(p_{i}-\frac{1}{2})} ] 
+	+ \log [(p_{i} + M[ \mathbf{u}_{i}])^{-(p_{i} + M[ \mathbf{u}_{i}] - \frac{1}{2})} ]
+	+ M[ \mathbf{u}_{i}]\\
+	&+& \sum_{x_{i}^{j} \in Val(X_{i})} 
+	\log [(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])^{(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}] -\frac{1}{2})}] 
+	+ \log q_{i,j} ^{-(q_{i,j} -\frac{1}{2})}  
+	-M[ x_{i}^{j},\mathbf{u}_{i}]\\
+& = & 
+	\sum_{i} \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+	 (p_{i}-\frac{1}{2}) \log [ p_{i} ] 
+	-(p_{i} + M[ \mathbf{u}_{i}] - \frac{1}{2}) \log [(p_{i} + M[ \mathbf{u}_{i}]) ]
+	+ M[ \mathbf{u}_{i}]\\
+	&+ &\sum_{x_{i}^{j} \in Val(X_{i})} 
+	(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}] -\frac{1}{2}) \log [(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])] 
+	-(q_{i,j} -\frac{1}{2}) \log q_{i,j}   
+	-M[ x_{i}^{j},\mathbf{u}_{i}]\\
+& = & 
+	\sum_{i} \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+	 (p_{i}-\frac{1}{2}) \log [ p_{i} ] 
+	-(p_{i} + M[ \mathbf{u}_{i}] - \frac{1}{2}) \log [(p_{i} + M[ \mathbf{u}_{i}]) ]
+	+ M[ \mathbf{u}_{i}]\\
+	&+ &\sum_{x_{i}^{j} \in Val(X_{i})} 
+	(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}] -\frac{1}{2}) \log [(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])] 
+	-(q_{i,j} -\frac{1}{2}) \log q_{i,j}   
+	-M[ x_{i}^{j},\mathbf{u}_{i}]\\	
+& = & 
+	\sum_{i} \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+	 (p_{i}-\frac{1}{2}) \log [ p_{i} ] 
+	-(p_{i} + M[ \mathbf{u}_{i}] - \frac{1}{2}) \log [(p_{i} + M[ \mathbf{u}_{i}]) ]\\
+%	+ M[ \mathbf{u}_{i}]\\
+	&+ &\sum_{x_{i}^{j} \in Val(X_{i})} 
+	(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}] -\frac{1}{2}) \log [(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])] 
+	-(q_{i,j} -\frac{1}{2}) \log q_{i,j}  \\
+%	-M[ x_{i}^{j},\mathbf{u}_{i}]\\	
+\end{eqnarray*}
+
+If we let $ M \rightarrow \inf$ then the alpha terms fall out and we are left with:
+
+\begin{eqnarray*}
+\log P( \mathcal{D} \mid \mathcal{G}) & = & 
+	\sum_{i} \sum_{\mathbf{u_{i}} \in Val(Pa^{\mathcal{G}}_{X_{i}})} 
+	 (p_{i}-\frac{1}{2}) \log [ p_{i} ] 
+	-(p_{i} + M[ \mathbf{u}_{i}] - \frac{1}{2}) \log [(p_{i} + M[ \mathbf{u}_{i}]) ]\\
+%	+ M[ \mathbf{u}_{i}]\\
+	&+ &\sum_{x_{i}^{j} \in Val(X_{i})} 
+	(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}] -\frac{1}{2}) \log [(q_{i,j}  + M[ x_{i}^{j},\mathbf{u}_{i}])] 
+	-(q_{i,j} -\frac{1}{2}) \log q_{i,j}  \\
+%	-M[ x_{i}^{j},\mathbf{u}_{i}]\\	
 \end{eqnarray*}
 
 \end{problem}{}
