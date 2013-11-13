@@ -45,6 +45,7 @@ public class QueryProcessor {
 	}
 
 	public String query(String[] lhs, String[] contexts, boolean useSumProduct) {
+		//TODO fix
 		if (!_calibrated || (useSumProduct != _bump.useSumProduct())) {
 			// set appropriate method, and run bump to calibrate
 			_bump.setUseSumProduct(useSumProduct);

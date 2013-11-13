@@ -27,7 +27,7 @@ import elanmike.mlcd.hw2.Factor.FactorIndexException;
  * @author mcs
  *
  */
-public class BumpMax {
+public class BumpMax extends Bump {
 	public static final int UNMARKED = 0;
 	public static int nextOrderID = UNMARKED;
 	/**
@@ -54,12 +54,12 @@ public class BumpMax {
 		 * Resets the current belief to the stored initial belief
 		 */
 		public void resetToInitialBelief() {
+			//TODO when do we call this?
 			this.data = new ArrayList<Double>();
 			for(int i = 0; i < _initialBelief.data.size(); i++) {
 				this.data.add(_initialBelief.data.get(i));
 			}
 		}
-		
 		/**
 		 * A clique is equal to another clique if their sets of variables are equal
 		 */
@@ -78,6 +78,7 @@ public class BumpMax {
 			StringBuilder sb = new StringBuilder(toString());
 			// add factor result
 			sb.append("\n").append(super.toString());
+			sb.append("\ninitialbelief:\n").append(_initialBelief.toString());
 			return sb.toString();
 		}
 		public String getLongInitialInfo() {
@@ -91,24 +92,20 @@ public class BumpMax {
 		private int _orderID;
 		private Set<Edge> _outgoingEdges;
 		/**
-		 * Stores each neighboring edge, initializes with the fact that we
-		 * have not yet received an informed message via that edge.
-		 * Tracks our 'informed' status - whether or not we've received
-		 * informed messages on all edges
+		 * Stores each neighboring edge
 		 */
-		private Map<Edge, Boolean> _recvdMsgStatus;
-		private boolean _isInformed;
+		private Set<Edge> _neighborEdges;
 		VertexMax(String[] varsContained){
 			super(varsContained);
 			_outgoingEdges = new HashSet<Edge>();
-			_recvdMsgStatus = new HashMap<Edge, Boolean>();
+			_neighborEdges = new HashSet<Edge>();
 			reset();
 		}
 		
 		protected VertexMax(VertexMax VertexMaxToCopy) {
 			super(VertexMaxToCopy);
 			_outgoingEdges = new HashSet<Edge>();
-			_recvdMsgStatus = new HashMap<Edge, Boolean>();
+			_neighborEdges = new HashSet<Edge>();
 			reset();
 		}
 		
@@ -117,10 +114,6 @@ public class BumpMax {
 		 */
 		void reset() {
 			_orderID = UNMARKED;
-			_isInformed = false;
-			for(Edge e : _recvdMsgStatus.keySet()) {
-				_recvdMsgStatus.put(e, false);
-			}
 			_outgoingEdges.clear();
 		}
 		void setOrderID() {
@@ -135,9 +128,7 @@ public class BumpMax {
 		 * @param e
 		 */
 		void addNeighborEdge(Edge e) {
-			if(!_recvdMsgStatus.containsKey(e)) {
-				_recvdMsgStatus.put(e, false);
-			}
+			_neighborEdges.add(e);
 		}
 		/**
 		 * Sends a message to its neighbor.
@@ -147,19 +138,28 @@ public class BumpMax {
 		 */
 		void sendMessage(Edge edgeToJ) throws FactorException {
 			if(DEBUG) System.out.println(this.toString()+" sending message to:"+edgeToJ.getOtherVertexMax(this)+"\n via edge:"+edgeToJ);
-			// calculate message - marginalize out all variables not in sepset ij
-			if(DEBUG) System.out.println("elim:"+this.difference(edgeToJ._variables)+" aka "+Factor.variableIndicesToNames(this.difference(edgeToJ._variables)));
-			if(DEBUG) System.out.println("initial belief before max marginalize:");
-			if(DEBUG) System.out.println(super.getLongInitialInfo());
-			Factor sigmaItoJ = _initialBelief.maxMarginalize(this.difference(edgeToJ._variables));
-			if(DEBUG) System.out.println("sigma I,J:\n"+sigmaItoJ);
+			// calculate message: initial belief times the deltas from every upstream edge
+			Factor deltaItoJ = _initialBelief;
+			System.out.println("initial belief:\n"+deltaItoJ);
+			// get upstream / incoming edges
+			Set<Edge> es = this.getincomingNeighborEdges(_bumpOnUpwardPass);
+			// for each upstream / incoming edge
+			for(Edge e : es) {
+				deltaItoJ = deltaItoJ.product(e);
+			}
+			// and max marginalize out the variables not in the sepset
+			if(DEBUG) System.out.println("marginalize out variables not in sepset...");
+			//TODO maxmarginalize
+//			deltaItoJ = deltaItoJ.maxMarginalize(this.difference(edgeToJ._variables));
+			deltaItoJ = deltaItoJ.marginalize(this.difference(edgeToJ._variables));
+			if(DEBUG) System.out.println("sending delta I,J:\n"+edgeToJ.getLongInfo());
 			// send: make J receive
-			edgeToJ.getOtherVertexMax(this).onReceiveMessage(edgeToJ, sigmaItoJ);
+			edgeToJ.getOtherVertexMax(this).onReceiveMessage(edgeToJ, deltaItoJ);
 			// update edge potential
-			edgeToJ.setFactorData(sigmaItoJ); //TODO add backpointers, assignment
+			edgeToJ.setFactorData(deltaItoJ); //TODO add backpointers, assignment
 			// update edge message count
 			edgeToJ._timesMessagesSentAcrossMe++;
-			if(DEBUG) System.out.println("mu I,J:\n"+edgeToJ.getLongInfo());
+			if(DEBUG) System.out.println("delta I,J:\n"+edgeToJ.getLongInfo());
 		}
 		/**
 		 * When we receive a message...
@@ -169,20 +169,40 @@ public class BumpMax {
 		 */
 		private void onReceiveMessage(Edge edgeItoJ, Factor sigmaItoJ) throws FactorException {
 			if(DEBUG) System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertexMax(this));
-			if(DEBUG) System.out.println("old belief:");
+			if(DEBUG) System.out.println("old belief beta:");
 			if(DEBUG) System.out.println(super.getLongInfo());
-			// belief j = belief j * (sigma ij / mu ij)
-			if(DEBUG) System.out.println("mu ItoJ:"+edgeItoJ.getLongInfo());
-			this.setFactorData(this.product(sigmaItoJ.divide(edgeItoJ)));
-			if(DEBUG) System.out.println("belief J:\n"+super.getLongInfo());
-			// check if I was informed when sending
-			VertexMax i = edgeItoJ.getOtherVertexMax(this);
-			_recvdMsgStatus.put(edgeItoJ, i._isInformed);
-//			_recvdMsgStatus.put(edgeItoJ, true);
-			if(i._isInformed) { // if VertexMax I was informed....
-				_isInformed = isInformed(); // recheck if we are informed
-			}
-//			if(DEBUG) System.out.println("informed status:\n"+_recvdMsgStatus);
+			// belief j = initial belief j * product of all incoming messages
+			if(DEBUG) System.out.println("delta ItoJ:"+edgeItoJ.getLongInfo());
+			this.setFactorData(this.product(edgeItoJ));
+			if(DEBUG) System.out.println("belief J now:\n"+super.getLongInfo());
+		}
+		/**
+		 * Return a list of all outgoing neighbors for the upward pass,
+		 * as defined by our VertexMax ordering.
+		 * @param onUpwardPass true if uwpard pass, false if downward
+		 * @return the list of all outgoing neighbors for the upward pass
+		 */
+		Set<Edge> getincomingNeighborEdges(boolean onUpwardPass) {
+//			if(_outgoingEdges.size() == 0) { // only compute if we have to
+				Set<Edge> outgoingEdges = new HashSet<Edge>();
+				Iterator<Edge> it = _neighborEdges.iterator();
+				while(it.hasNext()) {
+					Edge e = it.next();
+					VertexMax v = e.getOtherVertexMax(this);
+					if(this._orderID == UNMARKED) {
+						System.err.println("whoops i am unmarked");
+					}
+					if(v._orderID == UNMARKED) {
+						System.err.println("whoops neighbor unmarked");
+					}
+					if(this._orderID < v._orderID) {
+						outgoingEdges.add(e);
+					}
+				}
+				_outgoingEdges = outgoingEdges;
+//			}
+//			return _outgoingEdges;
+				return outgoingEdges;
 		}
 		/**
 		 * Return a list of all outgoing neighbors for the upward pass,
@@ -195,7 +215,7 @@ public class BumpMax {
 			}
 //			if(_outgoingEdges.size() == 0) { // only compute if we have to
 				Set<Edge> outgoingEdges = new HashSet<Edge>();
-				Iterator<Edge> it = _recvdMsgStatus.keySet().iterator();
+				Iterator<Edge> it = _neighborEdges.iterator();
 				while(it.hasNext()) {
 					Edge e = it.next();
 					VertexMax v = e.getOtherVertexMax(this);
@@ -225,7 +245,7 @@ public class BumpMax {
 			}
 //			if(_outgoingEdges.size() == 0) { // only compute if we have to
 				Set<Edge> outgoingEdges = new HashSet<Edge>();
-				Iterator<Edge> it = _recvdMsgStatus.keySet().iterator();
+				Iterator<Edge> it = _neighborEdges.iterator();
 				while(it.hasNext()) {
 					Edge e = it.next();
 					VertexMax v = e.getOtherVertexMax(this);
@@ -244,18 +264,6 @@ public class BumpMax {
 //			return outgoingEdges;
 				return outgoingEdges;
 		}
-		/**
-		 * Checks if this VertexMax is informed.
-		 * @return true if has received informed messages from all neighbors
-		 */
-		boolean isInformed() {
-			// default to true, to account for the case where we have no neighbors
-			for(boolean b : _recvdMsgStatus.values()) {
-				// if any value is false, we return false
-				if(!b) return false; 
-			}
-			return true;
-		}
 		@Override
 		public boolean equals(Object o) {
 			if(o instanceof VertexMax) {
@@ -269,7 +277,7 @@ public class BumpMax {
 			// add clique string
 			sb.append(super.getLongInfo());
 			// add edge info
-			sb.append("\nrecvdMsgStatus:").append(_recvdMsgStatus);
+			sb.append("\nneighborEdges:").append(_neighborEdges);
 			return sb.toString();
 		}
 	}
@@ -404,7 +412,7 @@ public class BumpMax {
 			return output.toString();
 		}
 	}
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 	/**
 	 * true if we're on the upward pass, 
 	 * if we're going in increasing order id. 
@@ -412,7 +420,7 @@ public class BumpMax {
 	 */
 	private boolean _bumpOnUpwardPass;
 	private Tree _tree, _queryTree;
-	private boolean _useSumProduct;
+	private static boolean _useSumProduct;
 	public BumpMax() {
 		_tree = new Tree();
 		_bumpOnUpwardPass = false;
@@ -450,8 +458,8 @@ public class BumpMax {
 		try {
 			List<VertexMax> ordering = assignBumpOrdering(_tree);
 			if(DEBUG) System.out.printf("ordering:\n%s\n", ordering);
-			upwardPassBeliefUpdate(ordering);
-			downwardPassBeliefUpdate(ordering);
+			upwardPassMaxBeliefUpdate(ordering);
+			downwardPassMaxBeliefUpdate(ordering);
 //			upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
 			
 //			ordering = assignBumpOrdering(_tree);
@@ -630,7 +638,7 @@ public class BumpMax {
 				System.err.println("oops! order id incorrect");
 			}
 			// and then for each downstream child...
-			for(Edge e : curr._recvdMsgStatus.keySet()) {
+			for(Edge e : curr._neighborEdges) {
 				VertexMax k = e.getOtherVertexMax(curr);
 				if(DEBUG) System.out.println("check neighbor:"+k);
 				if(k._orderID == UNMARKED) {
@@ -705,7 +713,7 @@ public class BumpMax {
 				System.err.println("oops! order id incorrect");
 			}
 			// and then for each downstream child...
-			for(Edge e : curr._recvdMsgStatus.keySet()) {
+			for(Edge e : curr._neighborEdges) {
 				VertexMax k = e.getOtherVertexMax(curr);
 				if(DEBUG) System.out.println("check neighbor:"+k);
 				if(k._orderID == UNMARKED) {
@@ -725,7 +733,7 @@ public class BumpMax {
 	 * Use the reverse of our ordering that we created in the downward pass.
 	 * @throws FactorException 
 	 */
-	void downwardPassBeliefUpdate(List<VertexMax> orderedVertices) throws FactorException {
+	void downwardPassMaxBeliefUpdate(List<VertexMax> orderedVertices) throws FactorException {
 		_bumpOnUpwardPass = true;
 		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
 		for(int i = 0; i < orderedVertices.size(); i++) {
@@ -743,7 +751,7 @@ public class BumpMax {
 	 * Use the reverse of our ordering that we created in the downward pass.
 	 * @throws FactorException 
 	 */
-	void upwardPassBeliefUpdate(List<VertexMax> orderedVertices) throws FactorException {
+	void upwardPassMaxBeliefUpdate(List<VertexMax> orderedVertices) throws FactorException {
 		_bumpOnUpwardPass = true;
 		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
 		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
@@ -846,7 +854,7 @@ public class BumpMax {
 		}
 		// ...since we need at most two to recalibrate
 		if(DEBUG) System.out.println(+numNewEvidence+" new var-> run two passes");
-		upwardPassBeliefUpdate(downwardPassBeliefUpdate(_queryTree));
+		upwardPassMaxBeliefUpdate(downwardPassBeliefUpdate(_queryTree));
 //		runBump();
 		if(DEBUG) {
 			if(DEBUG) System.out.println("\n\n******\nis tree calibrated?\n\n");
@@ -1120,7 +1128,9 @@ public class BumpMax {
 				"/home/mcs/Dropbox/mlcd/assignment2/hw2-files/cliquetree-10.8.txt",
 		};
 		newArgs = args;
-		Bump b = new Bump();
+		Bump b;
+		if(_useSumProduct) b= new Bump();
+		else b = new BumpMax();
 		// calibrate on our tree
 			try {
 				for(int i = 0; i < newArgs.length; i++) {
