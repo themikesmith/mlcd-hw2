@@ -18,8 +18,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.sun.xml.internal.ws.api.server.SDDocument;
-
 import elanmike.mlcd.hw2.Factor.FactorException;
 import elanmike.mlcd.hw2.Factor.FactorIndexException;
 
