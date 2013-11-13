@@ -392,6 +392,37 @@ public class Bump {
 		return true;
 	}
 	
+	public boolean isCalibrated() {
+		for(String e:_tree._edges.keySet()){
+			Edge curEdge = _tree._edges.get(e);
+			
+			try {
+				Factor one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
+				Factor two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
+				if(one.data.size() != two.data.size()){
+					System.err.println("'calibrated' factors not equal size");
+					return false;
+				}
+				for(int i = 0; i<one.data.size(); i++){
+					if(one.data.get(i) != two.data.get(i)){
+						System.err.println("data at index "+ i + " is not equal");
+						System.err.println("Factor from clique one");
+						System.err.println(one);
+						System.err.println(two);
+						
+						
+						return false;
+					}
+				}
+			} catch (FactorIndexException e1) {
+				e1.printStackTrace();
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	/**
 	 * Conducts one downward pass of belief update message passing
 	 * with a designated root.
