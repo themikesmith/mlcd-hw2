@@ -268,6 +268,7 @@ public class Bump {
 			super(edgeToCopy);
 			this._one = newOne;
 			this._two = newTwo;
+			_timesMessagesSentAcrossMe = 0;
 		}
 
 		/**
@@ -441,16 +442,16 @@ public class Bump {
 			return false;
 		}
 		if(DEBUG) {
-			System.out.println("\n\n******\nis tree calibrated?\n\n");
-			System.out.println(isCalibrated());
-//			System.out.println(_tree.getLongInfo());
+			if(DEBUG) System.out.println("\n\n******\nis tree calibrated?\n\n");
+			if(DEBUG) System.out.println(isCalibrated());
+//			if(DEBUG) System.out.println(_tree.getLongInfo());
 		}
 		return true;
 	}
 	
 	public boolean isCalibrated() {
 		boolean passed = true;
-		System.err.println("checking edges:");
+		if(DEBUG) System.out.println("checking edges:");
 		for(Edge curEdge : _tree._edges.values()) {
 			try {
 				Factor one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
@@ -466,7 +467,7 @@ public class Bump {
 				}
 				// check number of times edge was used:
 				if(curEdge._timesMessagesSentAcrossMe != 2) {
-					System.err.printf("'calibrated' edge used for messages:%d times", curEdge._timesMessagesSentAcrossMe);
+					System.err.printf("'calibrated' edge used for messages:%d times\n", curEdge._timesMessagesSentAcrossMe);
 					passed = false; 
 					break;
 				}
@@ -485,7 +486,7 @@ public class Bump {
 				ex.printStackTrace();
 			}
 		}
-		System.err.println("checking edge values:");
+		if(DEBUG) System.out.println("checking edge values:");
 		for(String e:_tree._edges.keySet()){
 			Edge curEdge = _tree._edges.get(e);
 			
@@ -503,7 +504,7 @@ public class Bump {
 				}
 				// check number of times edge was used:
 				if(curEdge._timesMessagesSentAcrossMe != 2) {
-					System.err.printf("'calibrated' edge used for messages:%d times", curEdge._timesMessagesSentAcrossMe);
+					System.err.printf("'calibrated' edge used for messages:%d times\n", curEdge._timesMessagesSentAcrossMe);
 					passed = false; 
 //					break;
 				}
@@ -811,7 +812,7 @@ public class Bump {
 			}
 			// multiply in a new indicator factor
 			Factor indicator = Factor.indicatorFunction(var, value);
-			v.product(indicator);
+			v.setFactorData(v.product(indicator));
 			if(numNewEvidence == 1) {
 				// run only one pass of bump
 				if(DEBUG) System.out.println(+numNewEvidence+" new var-> run one pass");
@@ -822,6 +823,7 @@ public class Bump {
 		// ...since we need at most two to recalibrate
 		if(DEBUG) System.out.println(+numNewEvidence+" new var-> run two passes");
 		upwardPassBeliefUpdate(downwardPassBeliefUpdate(_queryTree));
+//		runBump();
 	}
 	/**
 	 * Get a query result given a LHS of a query.
