@@ -16,6 +16,9 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
+
+import com.sun.xml.internal.ws.api.server.SDDocument;
 
 import elanmike.mlcd.hw2.Factor.FactorException;
 import elanmike.mlcd.hw2.Factor.FactorIndexException;
@@ -430,8 +433,22 @@ public class Bump {
 			try {
 				Factor one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
 				Factor two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
+				// check sets of variables
+				Set<Integer> sone = new TreeSet<Integer>(one._variables);
+				Set<Integer> stwo = new TreeSet<Integer>(two._variables);
+				Set<Integer> sedge = new TreeSet<Integer>(curEdge._variables);
+				if(!sone.equals(stwo) || !stwo.equals(sedge) || !sone.equals(sedge)) {
+					System.err.println("'calibrated' clique sepsets / edge sets not equal");
+					passed = false;
+					break;
+				}
 				if(one.data.size() != two.data.size()){
-					System.err.println("'calibrated' factors not equal size");
+					System.err.println("'calibrated' clique marginal factors not equal size");
+					passed =  false;
+					break;
+				}
+				if(one.data.size() != curEdge.data.size()){
+					System.err.println("'calibrated' edge / clique factors not equal size");
 					passed =  false;
 					break;
 				}
