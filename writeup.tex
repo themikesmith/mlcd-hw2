@@ -265,6 +265,27 @@ We may not just use the two different clusters where each contains a subset of t
 \noindent 1. Using your bayes-query-sp program, determine the distribution over the final position of the robot given a sequence of actions and a sequence of observations. Loosely, you'll be inferring the distribution: p(final position $\mid$ action sequence, observation sequence). For each of $T \in {10,100,1000}$, construct a set of queries where the lefthand side contains different values of PositionCol T and PositionRow T. You should use the provided evidence (i.e. righthand side) given in the file evidence-q1-grid10x10-tT.txt, which corresponds to the model in network-grid10x10-tT.txt. Notice that some of the evidence is missing! Apparently, our robot had a bug in which it failed to report its action and observations every fifth timestep. Not to worry, you can just marginalize over these missing data points. Describe in what region of the map the final position of the robot is likely to be.\\
 Time = 10: the robot is equally likely to end up in any position?\\
 
+2.\\
+
+3.\\
+
+Feed the query into the algorithm.  We need to make sure that the cliques that we create contain the variables (row t, col t, row t+1, col t+1).  Calibrate the tree, then whe algorithm will introduce indicator factors for each evidence given.  It will then recalibrate the tree, and then we can find the clique in question on the LHS and marginalize out the action variable.\\
+
+4.\\
+To compute the log likelihood of the evidence, of a full trajectory, one must feed that evidence into the algorithm, which will then multiply in indicator factors for every single variable.  We then calibrate our tree.  To get the joint, ?? \\
+
+5.\\
+A design for an experiment about the time saved with our incremental update code is that it saves us passes of the algorithm.  We check if we need to calibrate.  If we do, we only need to do one pass.  Without this incremental update code, we would be adding in things and recalibrating for every single query.  We compose queries that add incremental evidence, and check the time difference.\\
+\noindent results:\\
+\noindent \textit{incremental updates on:}\\
+time ./bayes-query-sp hw2-files/network-grid10x10-t10.txt hw2-files/cpd-grid10x10-t10.txt hw2-files/cliquetree-grid10x10-t10\_big.txt queries/queries-q5-grid10x10-t10.txt -s -i $>$ q5-results-inc-on.txt\\
+8.179u 1.204s 0:06.39 146.6\%    0+0k 0+80io 0pf+0w\\
+\noindent \textit{incremental updates off:}\\
+time ./bayes-query-sp hw2-files/network-grid10x10-t10.txt hw2-files/cpd-grid10x10-t10.txt hw2-files/cliquetree-grid10x10-t10\_big.txt queries/queries-q5-grid10x10-t10.txt -s -n  $>$ q5-results-inc-off.txt\\
+32.041u 1.232s 0:29.52 112.7\%   0+0k 0+112io 0pf+0w\\
+
+We can see that without the incremental updates, processing the queries takes longer.  This was using a 50-line query, on the smallest network, with each subsequent query adding one piece of incremental evidence.  One can imagine that with larger networks, the effect would be magnified.
+
 \end{problem}{}
 
 \begin{problem}{Bayesian Score for Bayesian Networks}
