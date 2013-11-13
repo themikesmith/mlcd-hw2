@@ -457,13 +457,16 @@ public class Bump {
 					passed =  false;
 					break;
 				}
+				one.normalize();
+				two.normalize();
 				for(int i = 0; i<one.data.size(); i++){
-					if(!one.data.get(i).equals(two.data.get(i))){
-						System.err.printf("data at index %d is not equal (%f = %f)",i,one.data.get(i).doubleValue(),two.data.get(i).doubleValue());
+					//if(!one.data.get(i).equals(two.data.get(i))){
+					if(one.data.get(i).floatValue() != two.data.get(i).floatValue()){
+						System.err.printf("data at index %d is not equal (%f = %f)\n",i,one.data.get(i).doubleValue(),two.data.get(i).doubleValue());
 						//System.err.println("Factor from clique:"+curEdge._one);
-						System.err.println(one);
+						System.err.println(one.toString());
 						//System.err.println("Factor from clique:"+curEdge._two);
-						System.err.println(two);
+						System.err.println(two.toString());
 						passed =  false;
 						break;
 					}
