@@ -462,6 +462,8 @@ public class Bump {
 				// check number of times edge was used:
 				if(curEdge._timesMessagesSentAcrossMe < 2) {
 					System.err.printf("'calibrated' edge used for messages:%d times", curEdge._timesMessagesSentAcrossMe);
+					passed = false; 
+					break;
 				}
 				if(one.data.size() != two.data.size()){
 					System.err.println("'calibrated' clique marginal factors not equal size");
@@ -477,12 +479,18 @@ public class Bump {
 				two.normalize();
 				for(int i = 0; i<one.data.size(); i++){
 					//if(!one.data.get(i).equals(two.data.get(i))){
-					if(one.data.get(i).floatValue() != two.data.get(i).floatValue()){
-						System.err.printf("data at index %d is not equal (%f = %f)\n",i,one.data.get(i).doubleValue(),two.data.get(i).doubleValue());
+					float a = ((Double)Math.exp(one.data.get(i))).floatValue(),
+						b = ((Double)Math.exp(two.data.get(i))).floatValue();
+					if(a != b) {
+						System.err.printf("data at index %d is not equal (%f = %f)\n",i,Math.exp(one.data.get(i)),Math.exp(two.data.get(i)));
 						//System.err.println("Factor from clique:"+curEdge._one);
+						System.err.println("one:");
 						System.err.println(one.toString());
 						//System.err.println("Factor from clique:"+curEdge._two);
+						System.err.println("two:");
 						System.err.println(two.toString());
+						System.err.println("edge:");
+						System.err.println(curEdge.getLongInfo());
 						passed =  false;
 						break;
 					}
