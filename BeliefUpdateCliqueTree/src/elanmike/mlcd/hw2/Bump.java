@@ -445,6 +445,10 @@ public class Bump {
 					passed = false;
 					break;
 				}
+				// check number of times edge was used:
+				if(curEdge._timesMessagesSentAcrossMe < 2) {
+					System.err.printf("'calibrated' edge used for messages:%d times", curEdge._timesMessagesSentAcrossMe);
+				}
 				if(one.data.size() != two.data.size()){
 					System.err.println("'calibrated' clique marginal factors not equal size");
 					passed =  false;
