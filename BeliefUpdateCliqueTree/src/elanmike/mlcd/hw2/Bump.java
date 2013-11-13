@@ -362,7 +362,7 @@ public class Bump {
 			return output.toString();
 		}
 	}
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	/**
 	 * true if we're on the upward pass, 
 	 * if we're going in increasing order id. 
@@ -415,7 +415,8 @@ public class Bump {
 			return false;
 		}
 		if(DEBUG) {
-			System.out.println("\n\n******\ntree is now calibrated:\n\n");
+			System.out.println("\n\n******\nis tree calibrated?\n\n");
+			System.out.println(isCalibrated());
 //			System.out.println(_tree.getLongInfo());
 		}
 		return true;
@@ -435,11 +436,10 @@ public class Bump {
 				for(int i = 0; i<one.data.size(); i++){
 					if(one.data.get(i) != two.data.get(i)){
 						System.err.println("data at index "+ i + " is not equal");
-						System.err.println("Factor from clique one");
+						System.err.println("Factor from clique:"+curEdge._one);
 						System.err.println(one);
+						System.err.println("Factor from clique:"+curEdge._two);
 						System.err.println(two);
-						
-						
 						return false;
 					}
 				}
