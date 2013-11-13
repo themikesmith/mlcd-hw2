@@ -616,16 +616,29 @@ public class Factor {
 	}
 
 	public void normalize(){
-		double Z = 0;
-		for(int i = 0; i<data.size(); i++){
-			Z += Math.exp(data.get(i));
+		// in prob space
+//		double Z = 0;
+//		for(int i = 0; i<data.size(); i++){
+//			Z += Math.exp(data.get(i));
+//		}
+//		double logZ = Math.log(Z);
+//		for(int i = 0; i<data.size(); i++){
+//			data.set(i,data.get(i)-logZ);
+//		}
+		// log prob space
+		double maxLog = Double.NEGATIVE_INFINITY;
+		for(int i = 0; i < data.size(); i++) {
+			if(data.get(i) > maxLog) maxLog = data.get(i);
 		}
-		
-		double logZ = Math.log(Z);
-		for(int i = 0; i<data.size(); i++){
-			data.set(i,data.get(i)-logZ);
+		double sum = 0;
+		for(int i = 0; i < data.size(); i++) {
+			sum += Math.exp(data.get(i) - maxLog);
 		}
-		
+		double logSum = Math.log(sum);
+		double Z = maxLog + logSum; 
+		for(int i = 0; i < data.size(); i++) {
+			data.set(i, data.get(i) - Z);
+		}
 	}
 	
 	public Factor reduce(ArrayList<Integer> heldVars, ArrayList<Integer> heldValues){
