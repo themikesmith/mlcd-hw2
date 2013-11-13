@@ -415,7 +415,8 @@ public class Bump {
 			return false;
 		}
 		if(DEBUG) {
-			System.out.println("\n\n******\ntree is now calibrated:\n\n");
+			System.out.println("\n\n******\nis tree calibrated?\n\n");
+			System.out.println(isCalibrated());
 //			System.out.println(_tree.getLongInfo());
 		}
 		return true;
@@ -435,10 +436,11 @@ public class Bump {
 					break;
 				}
 				for(int i = 0; i<one.data.size(); i++){
-					if(one.data.get(i).equals(two.data.get(i))){
-						System.err.println("data at index "+ i + " is not equal");
-						System.err.println("Factor from clique one");
+					if(!one.data.get(i).equals(two.data.get(i))){
+						System.err.printf("data at index %d is not equal (%f = %f)",i,one.data.get(i).doubleValue(),two.data.get(i).doubleValue());
+						//System.err.println("Factor from clique:"+curEdge._one);
 						System.err.println(one);
+						//System.err.println("Factor from clique:"+curEdge._two);
 						System.err.println(two);
 						passed =  false;
 						break;

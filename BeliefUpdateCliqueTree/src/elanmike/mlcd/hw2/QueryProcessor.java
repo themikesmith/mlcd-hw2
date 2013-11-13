@@ -32,8 +32,6 @@ public class QueryProcessor {
 			// set appropriate method, and run bump to calibrate
 			_bump.setUseSumProduct(useSumProduct);
 			_bump.runBump();
-			System.out.println("Calibrated? " + _bump.isCalibrated());
-			_calibrated = true;
 			resetTreeForQueries();
 		}
 		return query(lhs, contexts);
