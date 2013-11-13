@@ -102,7 +102,10 @@ public class Bump {
 			}
 			_outgoingEdges.clear();
 		}
-		void setOrderID() {this._orderID = ++nextOrderID;}
+		void setOrderID() {
+			this._orderID = ++nextOrderID;
+			if(DEBUG) System.out.println("marked "+this.toString() + " with id:"+_orderID);
+		}
 		void setUnmarked() {this._orderID = UNMARKED;}
 		/**
 		 * Adds a neighbor edge
@@ -148,7 +151,7 @@ public class Bump {
 			// belief j = belief j * (sigma ij / mu ij)
 			if(DEBUG) System.out.println("mu ItoJ:"+edgeItoJ.getLongInfo());
 			this.setFactorData(this.product(sigmaItoJ.divide(edgeItoJ)));
-			if(DEBUG) System.out.println("belief J:\n"+(Factor)this);
+			if(DEBUG) System.out.println("belief J:\n"+super.getLongInfo());
 			// check if I was informed when sending
 			Vertex i = edgeItoJ.getOtherVertex(this);
 			_recvdMsgStatus.put(edgeItoJ, i._isInformed);
@@ -156,6 +159,29 @@ public class Bump {
 				_isInformed = isInformed(); // recheck if we are informed
 			}
 //			if(DEBUG) System.out.println("informed status:\n"+_recvdMsgStatus);
+		}
+		/**
+		 * Return a list of all outgoing neighbors for the upward pass,
+		 * as defined by our vertex ordering.
+		 * @return the list of all outgoing neighbors for the upward pass
+		 */
+		Set<Edge> getDownwardOutgoingNeighborEdges() {
+			if(!_bumpOnUpwardPass) {
+				System.err.println("calling upward pass neighbor method on downward pass!");
+			}
+			if(_outgoingEdges.size() == 0) { // only compute if we have to
+				Set<Edge> outgoingEdges = new HashSet<Edge>();
+				Iterator<Edge> it = _recvdMsgStatus.keySet().iterator();
+				while(it.hasNext()) {
+					Edge e = it.next();
+					Vertex v = e.getOtherVertex(this);
+					if(this._orderID > v._orderID) {
+						outgoingEdges.add(e);
+					}
+				}
+				_outgoingEdges = outgoingEdges;
+			}
+			return _outgoingEdges;
 		}
 		/**
 		 * Return a list of all outgoing neighbors for the upward pass,
@@ -205,7 +231,7 @@ public class Bump {
 			// add clique string
 			sb.append(super.getLongInfo());
 			// add edge info
-			sb.append("recvdMsgStatus:").append(_recvdMsgStatus);
+			sb.append("\nrecvdMsgStatus:").append(_recvdMsgStatus);
 			return sb.toString();
 		}
 	}
@@ -336,7 +362,7 @@ public class Bump {
 			return output.toString();
 		}
 	}
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 	/**
 	 * true if we're on the upward pass, 
 	 * if we're going in increasing order id. 
@@ -380,7 +406,10 @@ public class Bump {
 		if(DEBUG) System.out.println("running bump!");
 		// note we initialize the clique tree by construction!
 		try {
-			upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
+			List<Vertex> ordering = assignBumpOrdering(_tree);
+			upwardPassBeliefUpdate(ordering);
+			downwardPassBeliefUpdate(ordering);
+//			upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
 		} catch (FactorException e) {
 			e.printStackTrace();
 			return false;
@@ -391,7 +420,79 @@ public class Bump {
 		}
 		return true;
 	}
-	
+	/**
+	 * Conducts one downward pass of belief update message passing
+	 * with a designated root.
+	 * Conducts depth-first or breadth-first search of the query tree, 
+	 * sends messages in that order.
+	 * 
+	 * @param t the tree in question.
+	 * @param root
+	 * @return a list of the order of this pass, so the upward pass can reverse it
+	 * @throws FactorException 
+	 */
+	List<Vertex> assignBumpOrdering(Tree t) throws FactorException {
+		return assignBumpOrdering(t, t._vertices.values().iterator().next());
+	}
+	/**
+	 * Conducts one downward pass of belief update message passing
+	 * with a designated root.
+	 * Conducts depth-first or breadth-first search of the query tree, 
+	 * sends messages in that order.
+	 * 
+	 * @param t the tree in question.
+	 * @param root
+	 * @return a list of the order of this pass, so the upward pass can reverse it
+	 * @throws FactorException 
+	 */
+	List<Vertex> assignBumpOrdering(Tree t, Vertex root) throws FactorException {
+		_bumpOnUpwardPass = false;
+		if(DEBUG) System.out.println("\n\nassign ordering\n\n");
+		nextOrderID = UNMARKED; // begin again at 0
+		List<Vertex> ordering = new ArrayList<Vertex>();
+		if(t._vertices.size() == 0) return ordering;
+		// mark all vertices unmarked
+		for(Vertex v : t._vertices.values()) {
+			v.setUnmarked();
+		}
+		Queue<Vertex> toProcess = new LinkedList<Vertex>();
+		toProcess.add(root);
+		// giving a number is equivalent to adding to ordering, giving index
+		// while all vertices don't have a number
+		while(ordering.size() != t._vertices.size()) {
+			if(toProcess.size() == 0) {
+				// find an unmarked node... expensive
+				for(Vertex v : t._vertices.values()) {
+					if(v._orderID == UNMARKED) {
+						toProcess.add(v); // add to queue when find unmarked
+					}
+				}
+			}
+			Vertex curr = toProcess.remove();
+			if(DEBUG) System.out.printf("curr vertex:%s\n",curr);
+			// mark
+			curr.setOrderID();
+			ordering.add(curr); // and add to our ordered list
+			if(curr._orderID != ordering.size()) {// verify
+				System.err.println("oops! order id incorrect");
+			}
+			// and then for each downstream child...
+			for(Edge e : curr._recvdMsgStatus.keySet()) {
+				Vertex k = e.getOtherVertex(curr);
+				if(DEBUG) System.out.println("check neighbor:"+k);
+				if(k._orderID == UNMARKED) {
+					if(DEBUG) System.out.println(k+" is unmarked - it's downstream");
+					// downstream if we haven't marked it yet
+					// send belief update message to the child
+//					curr.sendMessage(e);
+					// and add the child to our list to process
+					if(DEBUG) System.out.println("add "+k+" to list to process");
+					toProcess.add(k);
+				}
+			}
+		}
+		return ordering;
+	}
 	/**
 	 * Conducts one downward pass of belief update message passing
 	 * with a designated root.
@@ -420,7 +521,7 @@ public class Bump {
 	 */
 	List<Vertex> downwardPassBeliefUpdate(Tree t, Vertex root) throws FactorException {
 		_bumpOnUpwardPass = false;
-//		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
+		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
 		nextOrderID = UNMARKED; // begin again at 0
 		List<Vertex> ordering = new ArrayList<Vertex>();
 		if(t._vertices.size() == 0) return ordering;
@@ -442,7 +543,7 @@ public class Bump {
 				}
 			}
 			Vertex curr = toProcess.remove();
-//			if(DEBUG) System.out.printf("curr vertex:%s\n",curr);
+			if(DEBUG) System.out.printf("curr vertex:%s\n",curr);
 			// mark
 			curr.setOrderID();
 			ordering.add(curr); // and add to our ordered list
@@ -452,9 +553,9 @@ public class Bump {
 			// and then for each downstream child...
 			for(Edge e : curr._recvdMsgStatus.keySet()) {
 				Vertex k = e.getOtherVertex(curr);
-//				if(DEBUG) System.out.println("check neighbor:"+k);
+				if(DEBUG) System.out.println("check neighbor:"+k);
 				if(k._orderID == UNMARKED) {
-//					if(DEBUG) System.out.println("k is unmarked - it's downstream");
+					if(DEBUG) System.out.println("k is unmarked - it's downstream");
 					// downstream if we haven't marked it yet
 					// send belief update message to the child
 					curr.sendMessage(e);
@@ -464,6 +565,23 @@ public class Bump {
 			}
 		}
 		return ordering;
+	}
+	/**
+	 * Calibrate the tree with the upward pass of belief-update message passing.
+	 * Use the reverse of our ordering that we created in the downward pass.
+	 * @throws FactorException 
+	 */
+	void downwardPassBeliefUpdate(List<Vertex> orderedVertices) throws FactorException {
+		_bumpOnUpwardPass = true;
+//		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
+		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
+			Vertex v = orderedVertices.get(i);
+			// for each edge that is outgoing given our ordering
+			for(Edge e : v.getDownwardOutgoingNeighborEdges()) {
+				// send our message along that edge
+				v.sendMessage(e);
+			}
+		}
 	}
 	/**
 	 * Calibrate the tree with the upward pass of belief-update message passing.
@@ -822,12 +940,12 @@ public class Bump {
 		}
 		br.close();
 		
-//		if(DEBUG){
-//			System.out.println("==initialBeliefs==");
-//			for(String cliquesKeys:_tree._vertices.keySet()){
-//				System.out.println(_tree._vertices.get(cliquesKeys).getLongInfo());
-//			}
-//		}
+		if(DEBUG){
+			System.out.println("==initialBeliefs==");
+			for(String cliquesKeys:_tree._vertices.keySet()){
+				System.out.println(_tree._vertices.get(cliquesKeys).getLongInfo());
+			}
+		}
 	}
 	public static void main(String[] args) {
 		String[] newArgs = {
