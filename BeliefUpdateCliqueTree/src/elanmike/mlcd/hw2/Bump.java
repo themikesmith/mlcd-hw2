@@ -460,7 +460,7 @@ public class Bump {
 					break;
 				}
 				// check number of times edge was used:
-				if(curEdge._timesMessagesSentAcrossMe < 2) {
+				if(curEdge._timesMessagesSentAcrossMe != 2) {
 					System.err.printf("'calibrated' edge used for messages:%d times", curEdge._timesMessagesSentAcrossMe);
 					passed = false; 
 					break;
