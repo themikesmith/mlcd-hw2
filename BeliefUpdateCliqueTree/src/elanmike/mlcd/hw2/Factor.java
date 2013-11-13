@@ -698,7 +698,7 @@ public class Factor {
 		return result;
 	}
 	// p555
-	public Factor maximum(ArrayList<Integer> elimVar) throws FactorIndexException {
+	public Factor maxMarginalize(ArrayList<Integer> elimVar) throws FactorIndexException {
 		ArrayList<Integer> finalVars = difference(elimVar);
 //		System.out.println("my vars:"+_variables+" aka "+Factor.variableIndicesToNames(_variables));
 //		System.out.println("final vars:"+finalVars+" aka "+Factor.variableIndicesToNames(finalVars));
@@ -1028,13 +1028,31 @@ public class Factor {
 			
 			ArrayList<Integer> elimVar = new ArrayList<Integer>();
 			elimVar.add(1);
-			Factor result = fac1.maximum(elimVar);
+			Factor result = fac1.maxMarginalize(elimVar);
 			System.out.println("f1 maximized by B:");
 			System.out.println(result);
 			elimVar.add(2);
-			result = fac1.maximum(elimVar);
+			result = fac1.maxMarginalize(elimVar);
 			System.out.println("f1 maximized by B,C:");
 			System.out.println(result);
+			
+			String[] fac2_vars = {"C"}; 
+			Factor fac2 = new Factor(fac2_vars);
+			fac2.putProbByValues(.5, 0); //1 2 2
+			fac2.putProbByValues(.06, 1);  //2 2 2
+			System.out.println("fac2:");
+			System.out.println(fac2);
+			elimVar.clear();
+			elimVar.add(1);
+			System.out.println("f2 maximized by B:");
+			System.out.println(fac2.maxMarginalize(elimVar));
+			elimVar.clear();
+			elimVar.add(2);
+			System.out.println("f2 maximized by C:");
+			System.out.println(fac2.maxMarginalize(elimVar));
+			elimVar.clear();
+			System.out.println("f2 maximized by \\empty:");
+			System.out.println(fac2.maxMarginalize(elimVar));
 		}
 	}
 	
