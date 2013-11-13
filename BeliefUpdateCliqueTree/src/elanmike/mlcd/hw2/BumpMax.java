@@ -49,7 +49,10 @@ public class BumpMax extends Bump {
 			super(cliqueToCopy);
 			_initialBelief = new Factor(this);
 		}
-		
+		public void setInitialFactorData(Factor f) throws FactorScopeException {
+			this.setFactorData(f);
+			_initialBelief.setFactorData(f);
+		}
 		/**
 		 * Resets the current belief to the stored initial belief
 		 */
@@ -78,7 +81,7 @@ public class BumpMax extends Bump {
 			StringBuilder sb = new StringBuilder(toString());
 			// add factor result
 			sb.append("\n").append(super.toString());
-			sb.append("\ninitialbelief:\n").append(_initialBelief.toString());
+//			sb.append("\ninitialbelief:\n").append(_initialBelief.toString());
 			return sb.toString();
 		}
 		public String getLongInitialInfo() {
@@ -1102,7 +1105,7 @@ public class BumpMax extends Bump {
 			for(String cliquesKeys:_tree._vertices.keySet()){
 				if(_tree._vertices.get(cliquesKeys).contains(vars)){//we're a subset
 					//if(DEBUG) System.out.println(initFactors + " is a subset of "+cliquesKeys );
-					_tree._vertices.get(cliquesKeys).setFactorData(_tree._vertices.get(cliquesKeys).product(initialFactors.get(initFactors)));
+					_tree._vertices.get(cliquesKeys).setInitialFactorData(_tree._vertices.get(cliquesKeys).product(initialFactors.get(initFactors)));
 					foundSuperset = true;
 					break;
 				}
