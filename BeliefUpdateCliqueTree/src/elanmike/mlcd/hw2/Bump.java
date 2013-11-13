@@ -444,6 +444,42 @@ public class Bump {
 	
 	public boolean isCalibrated() {
 		boolean passed = true;
+		System.err.println("checking edges:");
+		for(Edge curEdge : _tree._edges.values()) {
+			try {
+				Factor one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
+				Factor two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
+				// check sets of variables
+				Set<Integer> sone = new TreeSet<Integer>(one._variables);
+				Set<Integer> stwo = new TreeSet<Integer>(two._variables);
+				Set<Integer> sedge = new TreeSet<Integer>(curEdge._variables);
+				if(!sone.equals(stwo) || !stwo.equals(sedge) || !sone.equals(sedge)) {
+					System.err.println("'calibrated' clique sepsets / edge sets not equal");
+					passed = false;
+					break;
+				}
+				// check number of times edge was used:
+				if(curEdge._timesMessagesSentAcrossMe != 2) {
+					System.err.printf("'calibrated' edge used for messages:%d times", curEdge._timesMessagesSentAcrossMe);
+					passed = false; 
+					break;
+				}
+				if(one.data.size() != two.data.size()){
+					System.err.println("'calibrated' clique marginal factors not equal size");
+					passed =  false;
+					break;
+				}
+				if(one.data.size() != curEdge.data.size()){
+					System.err.println("'calibrated' edge / clique factors not equal size");
+					passed =  false;
+					break;
+				}
+			}
+			catch(FactorException ex) {
+				ex.printStackTrace();
+			}
+		}
+		System.err.println("checking edge values:");
 		for(String e:_tree._edges.keySet()){
 			Edge curEdge = _tree._edges.get(e);
 			
