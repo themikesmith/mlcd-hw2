@@ -81,7 +81,6 @@ public class BumpMax extends Bump {
 			StringBuilder sb = new StringBuilder(toString());
 			// add factor result
 			sb.append("\n").append(super.toString());
-//			sb.append("\ninitialbelief:\n").append(_initialBelief.toString());
 			return sb.toString();
 		}
 		public String getLongInitialInfo() {
@@ -140,7 +139,7 @@ public class BumpMax extends Bump {
 		 * @throws FactorIndexException 
 		 */
 		void sendMessage(Edge edgeToJ) throws FactorException {
-			if(DEBUG) System.out.println(this.toString()+" sending message to:"+edgeToJ.getOtherVertexMax(this)+"\n via edge:"+edgeToJ);
+			if(DEBUG) System.out.println("\n"+this.toString()+" sending message to:"+edgeToJ.getOtherVertexMax(this)+"\n via edge:"+edgeToJ);
 			// calculate message: initial belief times the deltas from every upstream edge
 			Factor deltaItoJ = _initialBelief;
 			System.out.println("initial belief:\n"+deltaItoJ);
@@ -155,14 +154,14 @@ public class BumpMax extends Bump {
 			//TODO maxmarginalize
 //			deltaItoJ = deltaItoJ.maxMarginalize(this.difference(edgeToJ._variables));
 			deltaItoJ = deltaItoJ.marginalize(this.difference(edgeToJ._variables));
-			if(DEBUG) System.out.println("sending delta I,J:\n"+edgeToJ.getLongInfo());
+			if(DEBUG) System.out.println("sending delta I,J:\n"+deltaItoJ.toString());
 			// send: make J receive
 			edgeToJ.getOtherVertexMax(this).onReceiveMessage(edgeToJ, deltaItoJ);
 			// update edge potential
 			edgeToJ.setFactorData(deltaItoJ); //TODO add backpointers, assignment
 			// update edge message count
 			edgeToJ._timesMessagesSentAcrossMe++;
-			if(DEBUG) System.out.println("delta I,J:\n"+edgeToJ.getLongInfo());
+			if(DEBUG) System.out.println("delta I,J:\n"+deltaItoJ.toString());
 		}
 		/**
 		 * When we receive a message...
@@ -235,6 +234,7 @@ public class BumpMax extends Bump {
 				_outgoingEdges = outgoingEdges;
 //			}
 //			return _outgoingEdges;
+				System.out.println(this.toString()+"'s outgoing edges:\n"+ outgoingEdges);
 				return outgoingEdges;
 		}
 		/**
@@ -265,6 +265,7 @@ public class BumpMax extends Bump {
 				_outgoingEdges = outgoingEdges;
 //			}
 //			return outgoingEdges;
+				System.out.println(this.toString()+"'s outgoing edges:\n"+ outgoingEdges);
 				return outgoingEdges;
 		}
 		@Override
