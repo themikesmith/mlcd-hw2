@@ -13,7 +13,7 @@ import elanmike.mlcd.hw2.Factor.FactorIndexException;
 public class QueryProcessor {
 	public static final int NO_EVIDENCE = -1;
 	private static boolean USE_INCREMENTAL_UPDATES = true;
-	private static final boolean DEBUG = false;
+	private static boolean DEBUG = false;
 	private Bump _bump;
 	/**
 	 * Track if we have run bump at least once to calibrate
@@ -32,6 +32,11 @@ public class QueryProcessor {
 	
 	public static void setUseIncrementalUpdates(boolean u) {
 		USE_INCREMENTAL_UPDATES = u;
+		if(DEBUG) System.out.println((u?"":"not")+"using incremental updates");
+	}
+	public static void setDebug(boolean u) {
+		DEBUG = u;
+		if(DEBUG) System.out.println("using debug mode");
 	}
 
 	public void resetTreeForQueries() {
@@ -60,7 +65,6 @@ public class QueryProcessor {
 		}
 		ArrayList<Integer> vars, values;
 		if(USE_INCREMENTAL_UPDATES) {
-			if(DEBUG) System.out.println("using incremental updates.");
 			// check if evidence is incremental or retractive
 			boolean retractive = false;
 			// then take action
@@ -74,11 +78,9 @@ public class QueryProcessor {
 			// if it's the same number in rhs, check each variable
 			if (!retractive) {
 				try {
-					if(DEBUG) System.out.printf("checking for different variable values");
 					for (String s : contexts) {
 						String[] varValue = s.split("=");
 						String var = varValue[0], value = varValue[1];
-						if(DEBUG) System.out.printf("context: %s = %s\n", var,value);
 						int varInt = Factor.getVariableIndex(var), valueInt = Factor
 								.getVariableValueIndex(varInt, value);
 						if (_queryContexts.containsKey(varInt)
@@ -155,8 +157,7 @@ public class QueryProcessor {
 							.getVariableValueIndex(varInt, value);
 					if (!_queryContexts.containsKey(varInt)) {
 						// additional evidence - we've never seen it before
-//						if (DEBUG) {
-						if(true) {
+						if (DEBUG) {
 							System.out.printf("\ni:%d add'l evidence:%s=%s\n",
 									i, var, value);
 						}
@@ -165,8 +166,7 @@ public class QueryProcessor {
 						_queryContexts.put(varInt, valueInt);
 						numberNewEvidence++;
 					} else { // do nothing with repeat evidence
-//						if (DEBUG) {
-						if(true) {
+						if (DEBUG) {
 							System.out.printf("\ni:%d repeat evidence:%s=%s\n",
 									i, var, value);
 						}
@@ -249,7 +249,7 @@ public class QueryProcessor {
 			if (line.length() == 0) {
 				continue;
 			}
-			if(DEBUG) System.out.println("### query:\n\n'"+line+"'\n");
+			if(DEBUG) System.out.println("\nquery:\n'"+line+"'\n");
 			String[] stuff = line.split(" ");
 			String[] lhs = stuff[0].split(",");
 			String[] rhs = new String[0];

@@ -13,20 +13,47 @@ public class BayesQuery {
 	 */
 	public static void main(String[] args) {
 		// check arguments
-		if(args.length != 4 && args.length != 5) {
-			usage();
+		if(args.length < 4 || args.length > 7) {
+			usage(args);
 			return;
 		}
 		boolean useSumProduct = true;
-		if(args.length>4 && args[4].equals("-s")) {
-			useSumProduct = true;
-		}
-		else if(args.length>4 && args[4].equals("-m")) {
-			useSumProduct = false;
-		}
-		else if (args.length>4 ){
-			usage();
-			return;
+		boolean useIncrementalUpdates = true;
+		if(args.length>4) { // check our optional arguments.
+			// check the 5th argument
+			if(args[4].equals("-s")) {
+				useSumProduct = true;
+			}
+			else if(args[4].equals("-m")) {
+				useSumProduct = false;
+			}
+			else {
+				usage(args);
+				return;
+			}
+			// check the 6th argument
+			if(args.length > 5) {
+				if(args[5].equals("-i")) {
+					useIncrementalUpdates = true;
+				}
+				else if(args[5].equals("-n")) {
+					useIncrementalUpdates = false;
+				}
+				else {
+					usage(args);
+					return;
+				}
+				// check the 7th argument
+				if(args.length > 6) {
+					if(args[6].equals("-d")) {
+						QueryProcessor.setDebug(true);
+					}
+					else {
+						usage(args);
+						return;
+					}
+				}
+			}
 		}
 		// create and init clique tree
 		b = new Bump();
@@ -44,6 +71,7 @@ public class BayesQuery {
 		}
 		// make a query processor
 		QueryProcessor qp = new QueryProcessor(b);
+		QueryProcessor.setUseIncrementalUpdates(useIncrementalUpdates);
 		try {
 			// process the queries
 			qp.processQueries(args[3], useSumProduct);
@@ -57,10 +85,17 @@ public class BayesQuery {
 	/**
 	 * Prints an example of proper usage of the program
 	 */
-	private static void usage() {
-		System.err.println("usage: pass 4 arguments.\narg[0] = network_file\n" +
-				"arg[1] = cpd_file ; arg[2] = clique_tree_file\n" +
+	private static void usage(String[] args) {
+		System.err.println("usage: requires 4 arguments.\narg[0] = network_file\n" +
+				"arg[1] = cpd_file;\narg[2] = clique_tree_file\n" +
 				"arg[3] = query_file\n" +
-				"\nOne may specify an optional argument arg[4] = 's|m' (for sum- or max-product");
+				"Defaults to sum-product, but one may specify an optional 5th argument:\n" +
+				" arg[4] = 's' or 'm' for sum- or max-product\n" +
+				"Defaults to incremental updates on, but one may specify an optional 6th argument:\n" +
+				" arg[5] = '-i' or '-n' to enable or disable incremental updates.\n" +
+				"Defaults to off, but oe may specify an optional 7th argument:\n" +
+				" arg[6] = -d to enable debug mode.");
+		System.err.printf("\nyou submitted:\n");
+		for(String s : args) System.err.printf("%s\n",s);
 	}
 }
