@@ -157,7 +157,8 @@ public class Bump {
 			if(DEBUG) System.out.println("belief J:\n"+super.getLongInfo());
 			// check if I was informed when sending
 			Vertex i = edgeItoJ.getOtherVertex(this);
-			_recvdMsgStatus.put(edgeItoJ, i._isInformed);
+//			_recvdMsgStatus.put(edgeItoJ, i._isInformed);
+			_recvdMsgStatus.put(edgeItoJ, true);
 			if(i._isInformed) { // if vertex I was informed....
 				_isInformed = isInformed(); // recheck if we are informed
 			}
@@ -184,7 +185,7 @@ public class Bump {
 					if(v._orderID == UNMARKED) {
 						System.err.println("whoops neighbor unmarked");
 					}
-					if(this._orderID > v._orderID) {
+					if(this._orderID < v._orderID) {
 						outgoingEdges.add(e);
 					}
 				}
@@ -214,7 +215,7 @@ public class Bump {
 					if(v._orderID == UNMARKED) {
 						System.err.println("whoops neighbor unmarked");
 					}
-					if(this._orderID < v._orderID) {
+					if(this._orderID > v._orderID) {
 						outgoingEdges.add(e);
 					}
 				}
@@ -382,7 +383,7 @@ public class Bump {
 			return output.toString();
 		}
 	}
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	/**
 	 * true if we're on the upward pass, 
 	 * if we're going in increasing order id. 
@@ -427,9 +428,14 @@ public class Bump {
 		// note we initialize the clique tree by construction!
 		try {
 			List<Vertex> ordering = assignBumpOrdering(_tree);
+			if(DEBUG) System.out.printf("ordering:\n%s\n", ordering);
 			upwardPassBeliefUpdate(ordering);
 			downwardPassBeliefUpdate(ordering);
 //			upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
+			
+//			ordering = assignBumpOrdering(_tree);
+//			upwardPassBeliefUpdate(ordering);
+//			downwardPassBeliefUpdate(ordering);
 		} catch (FactorException e) {
 			e.printStackTrace();
 			return false;
@@ -493,23 +499,23 @@ public class Bump {
 				if(!sone.equals(stwo) || !stwo.equals(sedge) || !sone.equals(sedge)) {
 					System.err.println("'calibrated' clique sepsets / edge sets not equal");
 					passed = false;
-					break;
+//					break;
 				}
 				// check number of times edge was used:
 				if(curEdge._timesMessagesSentAcrossMe != 2) {
 					System.err.printf("'calibrated' edge used for messages:%d times", curEdge._timesMessagesSentAcrossMe);
 					passed = false; 
-					break;
+//					break;
 				}
 				if(one.data.size() != two.data.size()){
 					System.err.println("'calibrated' clique marginal factors not equal size");
 					passed =  false;
-					break;
+//					break;
 				}
 				if(one.data.size() != curEdge.data.size()){
 					System.err.println("'calibrated' edge / clique factors not equal size");
 					passed =  false;
-					break;
+//					break;
 				}
 				one.normalize();
 				two.normalize();
@@ -518,7 +524,7 @@ public class Bump {
 					float a = ((Double)Math.exp(one.data.get(i))).floatValue(),
 						b = ((Double)Math.exp(two.data.get(i))).floatValue();
 					if(a != b) {
-						System.err.printf("data at index %d is not equal (%f = %f)\n",i,Math.exp(one.data.get(i)),Math.exp(two.data.get(i)));
+						System.err.printf("\ndata at index %d is not equal (%f = %f)\n",i,Math.exp(one.data.get(i)),Math.exp(two.data.get(i)));
 						System.err.println("Factor from clique:"+curEdge._one);
 						System.err.println("one:");
 						System.err.println(one.toString());
@@ -528,7 +534,7 @@ public class Bump {
 						System.err.println("edge:");
 						System.err.println(curEdge.getLongInfo());
 						passed =  false;
-						break;
+//						break;
 					}
 				}
 			} catch (FactorIndexException e1) {
@@ -568,7 +574,7 @@ public class Bump {
 	 */
 	List<Vertex> assignBumpOrdering(Tree t, Vertex root) throws FactorException {
 		_bumpOnUpwardPass = false;
-		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
+		if(DEBUG) System.out.println("\n\nassigning ordering!\n\n");
 		nextOrderID = UNMARKED; // begin again at 0
 		List<Vertex> ordering = new ArrayList<Vertex>();
 		if(t._vertices.size() == 0) return ordering;
@@ -578,7 +584,7 @@ public class Bump {
 		}
 		Queue<Vertex> toProcess = new LinkedList<Vertex>();
 		toProcess.add(root);
-		System.out.println("root is "+root.getVariableNames());
+		if(DEBUG) System.out.println("root is "+root.getVariableNames());
 		
 		// giving a number is equivalent to adding to ordering, giving index
 		// while all vertices don't have a number
@@ -609,7 +615,7 @@ public class Bump {
 //					// send belief update message to the child
 //					curr.sendMessage(e);
 					// and add the child to our list to process
-					System.out.printf("adding %s to be processed\n",root.getVariableNames());
+					if(DEBUG) System.out.printf("adding %s to be processed\n",root.getVariableNames());
 					toProcess.add(k);
 				}
 			}
@@ -697,9 +703,10 @@ public class Bump {
 	 */
 	void downwardPassBeliefUpdate(List<Vertex> orderedVertices) throws FactorException {
 		_bumpOnUpwardPass = true;
-		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
-		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
+		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
+		for(int i = 0; i < orderedVertices.size(); i++) {
 			Vertex v = orderedVertices.get(i);
+			if(DEBUG) System.out.printf("i:%d vertex:%s\n",i,v);
 			// for each edge that is outgoing given our ordering
 			for(Edge e : v.getDownwardOutgoingNeighborEdges()) {
 				// send our message along that edge
@@ -717,6 +724,7 @@ public class Bump {
 		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
 		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
 			Vertex v = orderedVertices.get(i);
+			if(DEBUG) System.out.printf("i:%d vertex:%s\n",i,v);
 			// for each edge that is outgoing given our ordering
 			for(Edge e : v.getUpwardOutgoingNeighborEdges()) {
 				// send our message along that edge
