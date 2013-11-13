@@ -289,27 +289,66 @@ public class CreateNetworkCliqueTree {
 	private static List<Clique> assembleMaximalCliques() {
 		List<Clique> maximalCliques = new ArrayList<Clique>();
 		// forms of cliques:
+		// from 0 to t-1
 		for(int t = 0; t <= _biggestTimeStep; t++) {
-			// row n, col n, observation o n
-			for(DIR d : DIR.values()) {
-				// row t, col t, observe wall d t
-				Clique c = new Clique();
-				c.addVariable("PositionRow_"+t);
-				c.addVariable("PositionCol_"+t);
-				c.addVariable("ObserveWall_"+d.toString()+"_"+t);
-				maximalCliques.add(c);
-				for(int l = 1; l <= _numLandmarks; l++) {
-					// row t, col t, observe landmark L d t
-					c = new Clique();
+			// Observation model
+			// if time step < (t-1)
+			if(t < (_biggestTimeStep - 1)) {
+				// add one observation, current
+				// row n, col n, observation o n
+				for(DIR d : DIR.values()) {
+					// row t, col t, observe wall d t
+					Clique c = new Clique();
 					c.addVariable("PositionRow_"+t);
 					c.addVariable("PositionCol_"+t);
-					c.addVariable("ObserveLandmark"+l+"_"+d.toString()+"_"+t);
+					c.addVariable("ObserveWall_"+d.toString()+"_"+t);
 					maximalCliques.add(c);
+					for(int l = 1; l <= _numLandmarks; l++) {
+						// row t, col t, observe landmark L d t
+						c = new Clique();
+						c.addVariable("PositionRow_"+t);
+						c.addVariable("PositionCol_"+t);
+						c.addVariable("ObserveLandmark"+l+"_"+d.toString()+"_"+t);
+						maximalCliques.add(c);
+					}
 				}
 			}
-			// motion model:
-			// if time step not last one
-			if(t != _biggestTimeStep) {
+			else if(t == (_biggestTimeStep - 1)) {
+				// t == T-1 - add two observations, t-1 and t
+				// row n, col n, observation o n
+				for(DIR d : DIR.values()) {
+					// row t, col t, observe wall d t
+					Clique c = new Clique();
+					c.addVariable("PositionRow_"+t);
+					c.addVariable("PositionCol_"+t);
+					c.addVariable("ObserveWall_"+d.toString()+"_"+t);
+					maximalCliques.add(c);
+					// row t+1, col t+1, observe wall d t+1
+					c = new Clique();
+					c.addVariable("PositionRow_"+(t+1));
+					c.addVariable("PositionCol_"+(t+1));
+					c.addVariable("ObserveWall_"+d.toString()+"_"+(t+1));
+					maximalCliques.add(c);
+					for(int l = 1; l <= _numLandmarks; l++) {
+						// row t, col t, observe landmark L d t
+						c = new Clique();
+						c.addVariable("PositionRow_"+t);
+						c.addVariable("PositionCol_"+t);
+						c.addVariable("ObserveLandmark"+l+"_"+d.toString()+"_"+t);
+						maximalCliques.add(c);
+						// row t+1, col t+1, observe landmark L d t+1
+						c = new Clique();
+						c.addVariable("PositionRow_"+(t+1));
+						c.addVariable("PositionCol_"+(t+1));
+						c.addVariable("ObserveLandmark"+l+"_"+d.toString()+"_"+(t+1));
+						maximalCliques.add(c);
+					}
+				}
+			}
+			else {} // do nothing if t = T, we've added this case already
+			// motion model
+			// if t not last time step
+			if(t < _biggestTimeStep) {
 				// use cliques size 5 - too big, but at recommendation of suchi
 				Clique c = new Clique();
 				c.addVariable("PositionRow_"+t);
@@ -318,7 +357,6 @@ public class CreateNetworkCliqueTree {
 				c.addVariable("PositionCol_"+(t+1));
 				c.addVariable("Action_"+t);
 				maximalCliques.add(c);
-				
 //				// cliques size 4
 //				// at each time step we have 
 //				// blue:row n, row n+1, col n+1, action n
