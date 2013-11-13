@@ -84,6 +84,14 @@ public class Factor {
 //				varValues.size());
 	}
 	
+	
+	public String getVariableNames(){
+		String names = "";
+		for(int i:_variables){
+			names += _variableNames.get(i);
+		}
+		return names;
+	}
 	public static int getVariableIndex(String var){
 		if(_variableNames == null)
 			return -1;
