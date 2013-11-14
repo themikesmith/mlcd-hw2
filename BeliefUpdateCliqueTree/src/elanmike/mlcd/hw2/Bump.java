@@ -36,7 +36,7 @@ public class Bump {
 	 * @author mcs
 	 *
 	 */
-	private class Clique extends Factor {
+	protected class Clique extends Factor {
 		
 		Clique(String[] varNames) {
 			super(varNames);
@@ -67,7 +67,7 @@ public class Bump {
 			return sb.toString();
 		}
 	}
-	private class Vertex extends Clique {
+	protected class Vertex extends Clique {
 		private int _orderID;
 		private Set<Edge> _outgoingEdges;
 		/**
@@ -131,7 +131,15 @@ public class Bump {
 			if(DEBUG) System.out.println("elim:"+this.difference(edgeToJ._variables)+" aka "+Factor.variableIndicesToNames(this.difference(edgeToJ._variables)));
 			if(DEBUG) System.out.println("belief before marginalize:");
 			if(DEBUG) System.out.println(super.getLongInfo());
-			Factor sigmaItoJ = this.marginalize(this.difference(edgeToJ._variables));
+			Factor sigmaItoJ;
+			if(_useSumProduct) {
+				if(DEBUG) System.out.println("using sum product");
+				sigmaItoJ = this.marginalize(this.difference(edgeToJ._variables));
+			}
+			else {
+				if(DEBUG) System.out.println("using max product");
+				sigmaItoJ = this.maxMarginalize(this.difference(edgeToJ._variables));
+			}
 			if(DEBUG) System.out.println("sigma I,J:\n"+sigmaItoJ);
 			// send: make J receive
 			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ, sigmaItoJ);
@@ -396,7 +404,7 @@ public class Bump {
 	public Bump() {
 		_tree = new Tree();
 		_bumpOnUpwardPass = false;
-		_useSumProduct = true;
+		_useSumProduct = false;
 	}
 	
 	public void init(String networkFilename,String cliqueTreeFilename, String cpdFilename) throws IOException, ArrayIndexOutOfBoundsException, IllegalArgumentException, FactorException{
@@ -433,7 +441,8 @@ public class Bump {
 			upwardPassBeliefUpdate(ordering);
 			downwardPassBeliefUpdate(ordering);
 //			upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
-			
+//			upwardPassBeliefUpdate(ordering);
+//			downwardPassBeliefUpdate(ordering);
 //			ordering = assignBumpOrdering(_tree);
 //			upwardPassBeliefUpdate(ordering);
 //			downwardPassBeliefUpdate(ordering);
@@ -457,8 +466,16 @@ public class Bump {
 		if(DEBUG) System.out.println("checking edges:");
 		for(Edge curEdge : _tree._edges.values()) {
 			try {
-				Factor one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
-				Factor two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
+				Factor one,two;
+				if(_useSumProduct) {
+					one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
+					two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
+				}
+				else {
+					one = curEdge._one.maxMarginalize(curEdge._one.difference(curEdge._variables));
+					two = curEdge._two.maxMarginalize(curEdge._two.difference(curEdge._variables));	
+				}
+				
 				// check sets of variables
 				Set<Integer> sone = new TreeSet<Integer>(one._variables);
 				Set<Integer> stwo = new TreeSet<Integer>(two._variables);
@@ -494,8 +511,15 @@ public class Bump {
 			Edge curEdge = _tree._edges.get(e);
 			
 			try {
-				Factor one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
-				Factor two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
+				Factor one,two;
+				if(_useSumProduct) {
+					one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
+					two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
+				}
+				else {
+					one = curEdge._one.maxMarginalize(curEdge._one.difference(curEdge._variables));
+					two = curEdge._two.maxMarginalize(curEdge._two.difference(curEdge._variables));	
+				}
 				// check sets of variables
 				Set<Integer> sone = new TreeSet<Integer>(one._variables);
 				Set<Integer> stwo = new TreeSet<Integer>(two._variables);
@@ -624,6 +648,16 @@ public class Bump {
 				}
 			}
 		}
+		Vertex v = findVertexInTree(t, 3,2);
+		v.setOrderID();
+		ordering.clear();
+		ordering.add(v);
+		v = findVertexInTree(t, 2,0);
+		v.setOrderID();
+		ordering.add(v);
+		v = findVertexInTree(t, 1,0);
+		v.setOrderID();
+		ordering.add(v);
 		return ordering;
 	}
 	

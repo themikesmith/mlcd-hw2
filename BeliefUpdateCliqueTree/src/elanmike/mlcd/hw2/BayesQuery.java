@@ -7,7 +7,6 @@ import elanmike.mlcd.hw2.Factor.FactorException;
 public class BayesQuery {
 
 	private static Bump b;
-	private static BumpMax bmax;
 	/**
 	 * Runs bayes-query sum product or max product depending on arguments
 	 * @param args list of arguments
@@ -57,13 +56,9 @@ public class BayesQuery {
 			}
 		}
 		// create and init clique tree
-		bmax = new BumpMax();
 		b = new Bump();
 		try {
-			if(useSumProduct)
-				b.init(args[0],args[2],args[1]);
-			else
-				bmax.init(args[0],args[2],args[1]);
+			b.init(args[0],args[2],args[1]);
 		} catch (NumberFormatException e1) {
 			e1.printStackTrace();
 			return;
@@ -75,9 +70,7 @@ public class BayesQuery {
 			return;
 		}
 		// make a query processor
-		QueryProcessor qp;
-		if(useSumProduct) qp = new QueryProcessor(b);
-		else qp = new QueryProcessor(bmax);
+		QueryProcessor qp = new QueryProcessor(b);
 		QueryProcessor.setUseIncrementalUpdates(useIncrementalUpdates);
 		try {
 			// process the queries
