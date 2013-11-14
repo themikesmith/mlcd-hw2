@@ -274,7 +274,8 @@ public class Factor {
 
 	public void setFactorData(Factor f) throws FactorScopeException {
 		if(this._variables.equals(f._variables)){
-			this.data = f.data;
+			for(int i = 0; i<data.size(); i++)
+				this.data.set(i, f.data.get(i));
 		}else{
 			throw new FactorScopeException("can't see this factor, does not contain the same variables");
 		}
@@ -327,7 +328,7 @@ public class Factor {
 		return searchIndex;
 	}
 	
-	private ArrayList<Integer> valuesFromIndex(int datum_index) throws FactorIndexException {
+	public ArrayList<Integer> valuesFromIndex(int datum_index) throws FactorIndexException {
 		
 		
 		if(datum_index >= data.size()|| datum_index< 0)

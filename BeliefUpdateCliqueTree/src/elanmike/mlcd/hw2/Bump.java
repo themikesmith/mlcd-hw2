@@ -945,7 +945,23 @@ public class Bump {
 			// max margnial of this:
 			diff.clear();
 			diff.add(i);
-			f = f.maxMarginalize(diff);
+			//f = f.maxMarginalize(diff);
+			Double max = 0.0; 
+			int max_index = -1;
+			for(int idx = 0; idx<f.data.size(); idx++){
+				if ( f.data.get(idx) > max){
+					idx = max_index;
+					max = f.data.get(idx);
+				}
+			}
+			if( max_index != -1){
+				ArrayList<Integer> max_values = f.valuesFromIndex(max_index);
+				for(int m = 0; m < f._variables.size(); m++){
+					System.out.printf("Best value for %s = %d",f.getVariableName(f._variables.get(m)),f.getVariableName(f._variables.get(m), max_values.get(m)));
+				}
+				
+			}
+			
 			System.out.println("now:"+f);
 		}
 		return null;
