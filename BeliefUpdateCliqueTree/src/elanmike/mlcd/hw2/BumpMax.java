@@ -222,6 +222,7 @@ public class BumpMax extends Bump {
 				ready = ready && entry.getValue();
 			}
 			if(ready) {
+				System.out.println("updating belief!");
 				Factor b = new Factor(this._variables);
 				for(Edge e : _neighborEdges.keySet()) {
 					Factor msg;
@@ -273,8 +274,8 @@ public class BumpMax extends Bump {
 		 * @return the list of all outgoing neighbors for the upward pass
 		 */
 		Set<Edge> getDownwardOutgoingNeighborEdges() {
-			if(!_bumpOnUpwardPass) {
-				System.err.println("calling upward pass neighbor method on downward pass!");
+			if(_bumpOnUpwardPass) {
+				System.err.println("calling downward pass neighbor method on upward pass!");
 			}
 //			if(_outgoingEdges.size() == 0) { // only compute if we have to
 				Set<Edge> outgoingEdges = new HashSet<Edge>();
@@ -815,7 +816,7 @@ public class BumpMax extends Bump {
 	 * @throws FactorException 
 	 */
 	void downwardPassMaxBeliefUpdate(List<Vertex> orderedVertices) throws FactorException {
-		_bumpOnUpwardPass = true;
+		_bumpOnUpwardPass = false;
 		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
 		for(int i = 0; i < orderedVertices.size(); i++) {
 			Vertex v = orderedVertices.get(i);
