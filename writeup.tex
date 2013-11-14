@@ -263,12 +263,13 @@ Time = 10: The robot is most likely in the upper left hand corner, this was deci
 Time = 100/1000: Unfortunately we ran into the issue of underflow for that larger networks. We attempted to fix this by switching to log space but even then we would have problems. This led to our graphs being perfectly distributed in the final case.\\
 
 \noindent {\bf 2.}
+See our queries file.  We attempted to run these against the grid, but always ran out of heap space, even after increasing the heap size to 4GB on Elan's computer.
 
 \noindent {\bf 3.}
-Feed the query into the algorithm.  We need to make sure that the cliques that we create contain the variables (row t, col t, row t+1, col t+1).  Calibrate the tree, then whe algorithm will introduce indicator factors for each evidence given.  It will then recalibrate the tree, and then we can find the clique in question on the LHS and marginalize out the action variable.\\
+Feed the query into the algorithm.  See our queries files.  We need to make sure that the cliques that we create contain the variables (row t, col t, row t+1, col t+1).  Calibrate the tree, then whe algorithm will introduce indicator factors for each evidence given.  It will then recalibrate the tree, and then we can find the clique in question on the LHS and marginalize out the action variable.  Note that we had underflow when running these - we got the same result for all of them.  See discussion at end of \#1.  \\*
 
 \noindent {\bf 4.}
-To compute the log likelihood of the evidence, of a full trajectory, one must feed that evidence into the algorithm, which will then multiply in indicator factors for every single variable.  We then calibrate our tree.  To get the joint, ?? \\
+To compute the log likelihood of the evidence, of a full trajectory, one must feed that evidence into the algorithm, which will then multiply in indicator factors for every single variable.  We then calibrate our tree.  We then have the max marginals.  Now what?\\
 
 \noindent {\bf 5.}
 A design for an experiment about the time saved with our incremental update code is that it saves us passes of the algorithm.  We check if we need to calibrate.  If we do, we only need to do one pass.  Without this incremental update code, we would be adding in things and recalibrating for every single query.  We compose queries that add incremental evidence, and check the time difference.\\
@@ -283,7 +284,7 @@ time ./bayes-query-sp hw2-files/network-grid10x10-t10.txt hw2-files/cpd-grid10x1
 We can see that without the incremental updates, processing the queries takes longer.  This was using a 50-line query, on the smallest network, with each subsequent query adding one piece of incremental evidence.  One can imagine that with larger networks, the effect would be magnified.
 
 \subsection*{4.2.6. Max-Product Message Passing}
-We implemented Max-Product message passing in a 
+We implemented Max-Product message passing in a.  When we query, it finds the maximum probability assignment for each variable in the LHS by going to a clique with the variable in question and max marginalizing out all others.  We print this.  We did not implement back pointers due to time constraints, but had planned out how to do so.  Each edge would maintain back pointers to the variable settings that produced that max marginal.  Every time we computed with a max marginal, we would return both the factor assignment with the maximums, and the back pointers to the assignments of the marginalized variables that maximized.  If we had a query, we could then follow all these back pointers throughout the tree printing them as we go.
 
 \end{problem}{}
 
