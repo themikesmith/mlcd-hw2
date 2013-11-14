@@ -133,7 +133,7 @@ public class BumpMax extends Bump {
 			_orderID = UNMARKED;
 			_outgoingEdges.clear();
 			//TODO when do we call this? when should we mark all edges as received?
-			for(Edge e : getincomingNeighborEdges(preparingForUpwardPass)) {
+			for(Edge e : getIncomingNeighborEdges(preparingForUpwardPass)) {
 				_neighborEdges.put(e, false);
 			}
 		}
@@ -163,7 +163,7 @@ public class BumpMax extends Bump {
 			Factor message = _initialBelief;
 			System.out.println("initial belief:\n"+message);
 			// get upstream / incoming edges
-			Set<Edge> es = this.getincomingNeighborEdges(_bumpOnUpwardPass);
+			Set<Edge> es = this.getIncomingNeighborEdges(_bumpOnUpwardPass);
 			// for each upstream / incoming edge
 			for(Edge e : es) {
 				if(DEBUG) {
@@ -246,7 +246,7 @@ public class BumpMax extends Bump {
 		 * @param onUpwardPass true if uwpard pass, false if downward
 		 * @return the list of all outgoing neighbors for the upward pass
 		 */
-		Set<Edge> getincomingNeighborEdges(boolean onUpwardPass) {
+		Set<Edge> getIncomingNeighborEdges(boolean onUpwardPass) {
 //			if(_outgoingEdges.size() == 0) { // only compute if we have to
 				Set<Edge> outgoingEdges = new HashSet<Edge>();
 				Iterator<Edge> it = _neighborEdges.keySet().iterator();
@@ -755,7 +755,7 @@ public class BumpMax extends Bump {
 	/**
 	 * Conducts one downward pass of belief update message passing
 	 * with a designated root.
-	 * Conducts depth-first or breadth-first search of the query tree, 
+	 * Conducts breadth-first search of the query tree, 
 	 * sends messages in that order.
 	 * 
 	 * @param t the tree in question.
@@ -819,7 +819,7 @@ public class BumpMax extends Bump {
 		_bumpOnUpwardPass = false;
 		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
 		for(int i = 0; i < orderedVertices.size(); i++) {
-			Vertex v = orderedVertices.get(i);
+			Vertex v = (Vertex) orderedVertices.get(i);
 			if(DEBUG) System.out.printf("i:%d VertexMax:%s\n",i,v);
 			// for each edge that is outgoing given our ordering
 			for(Edge e : v.getDownwardOutgoingNeighborEdges()) {
@@ -930,13 +930,18 @@ public class BumpMax extends Bump {
 			if(numNewEvidence == 1) {
 				// run only one pass of bump
 				if(DEBUG) System.out.println(+numNewEvidence+" new var-> run one pass");
-				downwardPassBeliefUpdate(_queryTree,v);
+				List<Vertex> ordering = assignBumpOrdering(_queryTree);
+				if(DEBUG) System.out.printf("\nordering:\n%s\n", ordering);
+				downwardPassMaxBeliefUpdate(ordering);
 				return;
 			} // else run two passes...
 		}
 		// ...since we need at most two to recalibrate
 		if(DEBUG) System.out.println(+numNewEvidence+" new var-> run two passes");
-		upwardPassMaxBeliefUpdate(downwardPassBeliefUpdate(_queryTree));
+		List<Vertex> ordering = assignBumpOrdering(_queryTree);
+		if(DEBUG) System.out.printf("ordering:\n%s\n", ordering);
+		upwardPassMaxBeliefUpdate(ordering);
+		downwardPassMaxBeliefUpdate(ordering);
 //		runBump();
 		if(DEBUG) {
 			if(DEBUG) System.out.println("\n\n******\nis tree calibrated?\n\n");
