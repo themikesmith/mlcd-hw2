@@ -392,7 +392,7 @@ public class Bump {
 			return output.toString();
 		}
 	}
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	/**
 	 * true if we're on the upward pass, 
 	 * if we're going in increasing order id. 
@@ -648,16 +648,16 @@ public class Bump {
 				}
 			}
 		}
-		Vertex v = findVertexInTree(t, 3,2);
-		v.setOrderID();
-		ordering.clear();
-		ordering.add(v);
-		v = findVertexInTree(t, 2,0);
-		v.setOrderID();
-		ordering.add(v);
-		v = findVertexInTree(t, 1,0);
-		v.setOrderID();
-		ordering.add(v);
+//		Vertex v = findVertexInTree(t, 3,2);
+//		v.setOrderID();
+//		ordering.clear();
+//		ordering.add(v);
+//		v = findVertexInTree(t, 2,0);
+//		v.setOrderID();
+//		ordering.add(v);
+//		v = findVertexInTree(t, 1,0);
+//		v.setOrderID();
+//		ordering.add(v);
 		return ordering;
 	}
 	
