@@ -390,7 +390,7 @@ public class Bump {
 	 * if we're going in increasing order id. 
 	 * false otherwise
 	 */
-	private boolean _bumpOnUpwardPass;
+	protected boolean _bumpOnUpwardPass;
 	private Tree _tree, _queryTree;
 	private boolean _useSumProduct;
 	public Bump() {
