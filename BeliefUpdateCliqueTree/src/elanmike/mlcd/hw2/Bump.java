@@ -921,6 +921,36 @@ public class Bump {
 		return f;
 	}
 	/**
+	 * Get a query result given a LHS of a query.
+	 * At each index of the input lists, we have variable = value pairs.
+	 * Note that to keep the format consistent, 
+	 * we pass NO_EVIDENCE if no evidence specified.
+	 * @param vars
+	 * @param values
+	 * @return the factor result, or null if query is out of clique inference
+	 * @throws FactorIndexException 
+	 */
+	public Factor getQueryResultMaxProduct(ArrayList<Integer> vars, ArrayList<Integer> values) 
+			throws FactorIndexException {
+		// for each variable find a clique and take the max marginal
+		for(int i = 0; i < vars.size(); i++) {
+			System.out.printf("var:%d aka %s\n", i, Factor.variableIndicesToNames(i));
+			Vertex target = findVertexInTree(_queryTree, vars.get(i));
+			System.out.println("at clique:"+target);
+			// marginalize out all variables not current
+			ArrayList<Integer> diff = new ArrayList<Integer>();
+			diff.add(i);
+			Factor f = target.maxMarginalize(target.difference(diff));
+			System.out.println("have factor:\n"+f);
+			// max margnial of this:
+			diff.clear();
+			diff.add(i);
+			f = f.maxMarginalize(diff);
+			System.out.println("now:"+f);
+		}
+		return null;
+	}
+	/**
 	 * Reads in the tree from the clique file.
 	 * Builds the tree
 	 * @param cliqueTreeFilename
