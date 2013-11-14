@@ -934,35 +934,39 @@ public class Bump {
 			throws FactorIndexException {
 		// for each variable find a clique and take the max marginal
 		for(int i = 0; i < vars.size(); i++) {
-			System.out.printf("var:%d aka %s\n", i, Factor.variableIndicesToNames(i));
+//			System.out.printf("var:%d aka %s\n", i, Factor.variableIndicesToNames(i));
 			Vertex target = findVertexInTree(_queryTree, vars.get(i));
-			System.out.println("at clique:"+target);
+//			System.out.println("at clique:"+target);
 			// marginalize out all variables not current
 			ArrayList<Integer> diff = new ArrayList<Integer>();
 			diff.add(i);
 			Factor f = target.maxMarginalize(target.difference(diff));
-			System.out.println("have factor:\n"+f);
-			// max margnial of this:
+//			System.out.println("have factor:\n"+f);
+			// max marginal of this:
 			diff.clear();
 			diff.add(i);
-			//f = f.maxMarginalize(diff);
+			Factor g = f.maxMarginalize(diff);
 			Double max = 0.0; 
 			int max_index = -1;
 			for(int idx = 0; idx<f.data.size(); idx++){
-				if ( f.data.get(idx) > max){
-					idx = max_index;
+				if ( Math.exp(f.data.get(idx)) > max){
+					max_index = idx;
 					max = f.data.get(idx);
 				}
 			}
 			if( max_index != -1){
+				boolean printed = false;
 				ArrayList<Integer> max_values = f.valuesFromIndex(max_index);
 				for(int m = 0; m < f._variables.size(); m++){
-					System.out.printf("Best value for %s = %d",f.getVariableName(f._variables.get(m)),f.getVariableName(f._variables.get(m), max_values.get(m)));
-				}
-				
+					if(!printed) {
+						System.out.printf("Best value for ");
+						printed = true;
+					}
+					System.out.printf("%s = %s -> %s\n",Factor.getVariableName(f._variables.get(m))
+							,Factor.getVariableName(f._variables.get(m),
+									max_values.get(m)), g);
+				}	
 			}
-			
-			System.out.println("now:"+f);
 		}
 		return null;
 	}
