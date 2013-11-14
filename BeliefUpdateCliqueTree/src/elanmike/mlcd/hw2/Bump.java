@@ -36,7 +36,7 @@ public class Bump {
 	 * @author mcs
 	 *
 	 */
-	private class Clique extends Factor {
+	protected class Clique extends Factor {
 		
 		Clique(String[] varNames) {
 			super(varNames);
@@ -67,7 +67,7 @@ public class Bump {
 			return sb.toString();
 		}
 	}
-	private class Vertex extends Clique {
+	protected class Vertex extends Clique {
 		private int _orderID;
 		private Set<Edge> _outgoingEdges;
 		/**
@@ -131,7 +131,15 @@ public class Bump {
 			if(DEBUG) System.out.println("elim:"+this.difference(edgeToJ._variables)+" aka "+Factor.variableIndicesToNames(this.difference(edgeToJ._variables)));
 			if(DEBUG) System.out.println("belief before marginalize:");
 			if(DEBUG) System.out.println(super.getLongInfo());
-			Factor sigmaItoJ = this.marginalize(this.difference(edgeToJ._variables));
+			Factor sigmaItoJ;
+			if(_useSumProduct) {
+				if(DEBUG) System.out.println("using sum product");
+				sigmaItoJ = this.marginalize(this.difference(edgeToJ._variables));
+			}
+			else {
+				if(DEBUG) System.out.println("using max product");
+				sigmaItoJ = this.maxMarginalize(this.difference(edgeToJ._variables));
+			}
 			if(DEBUG) System.out.println("sigma I,J:\n"+sigmaItoJ);
 			// send: make J receive
 			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ, sigmaItoJ);
@@ -384,7 +392,7 @@ public class Bump {
 			return output.toString();
 		}
 	}
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	/**
 	 * true if we're on the upward pass, 
 	 * if we're going in increasing order id. 
@@ -396,7 +404,7 @@ public class Bump {
 	public Bump() {
 		_tree = new Tree();
 		_bumpOnUpwardPass = false;
-		_useSumProduct = true;
+		_useSumProduct = false;
 	}
 	
 	public void init(String networkFilename,String cliqueTreeFilename, String cpdFilename) throws IOException, ArrayIndexOutOfBoundsException, IllegalArgumentException, FactorException{
@@ -433,7 +441,8 @@ public class Bump {
 			upwardPassBeliefUpdate(ordering);
 			downwardPassBeliefUpdate(ordering);
 //			upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
-			
+//			upwardPassBeliefUpdate(ordering);
+//			downwardPassBeliefUpdate(ordering);
 //			ordering = assignBumpOrdering(_tree);
 //			upwardPassBeliefUpdate(ordering);
 //			downwardPassBeliefUpdate(ordering);
@@ -457,8 +466,16 @@ public class Bump {
 		if(DEBUG) System.out.println("checking edges:");
 		for(Edge curEdge : _tree._edges.values()) {
 			try {
-				Factor one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
-				Factor two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
+				Factor one,two;
+				if(_useSumProduct) {
+					one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
+					two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
+				}
+				else {
+					one = curEdge._one.maxMarginalize(curEdge._one.difference(curEdge._variables));
+					two = curEdge._two.maxMarginalize(curEdge._two.difference(curEdge._variables));	
+				}
+				
 				// check sets of variables
 				Set<Integer> sone = new TreeSet<Integer>(one._variables);
 				Set<Integer> stwo = new TreeSet<Integer>(two._variables);
@@ -494,8 +511,15 @@ public class Bump {
 			Edge curEdge = _tree._edges.get(e);
 			
 			try {
-				Factor one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
-				Factor two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
+				Factor one,two;
+				if(_useSumProduct) {
+					one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
+					two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
+				}
+				else {
+					one = curEdge._one.maxMarginalize(curEdge._one.difference(curEdge._variables));
+					two = curEdge._two.maxMarginalize(curEdge._two.difference(curEdge._variables));	
+				}
 				// check sets of variables
 				Set<Integer> sone = new TreeSet<Integer>(one._variables);
 				Set<Integer> stwo = new TreeSet<Integer>(two._variables);
@@ -624,6 +648,16 @@ public class Bump {
 				}
 			}
 		}
+//		Vertex v = findVertexInTree(t, 3,2);
+//		v.setOrderID();
+//		ordering.clear();
+//		ordering.add(v);
+//		v = findVertexInTree(t, 2,0);
+//		v.setOrderID();
+//		ordering.add(v);
+//		v = findVertexInTree(t, 1,0);
+//		v.setOrderID();
+//		ordering.add(v);
 		return ordering;
 	}
 	
@@ -885,6 +919,36 @@ public class Bump {
 		f = f.reduce(eVars, eValues);
 		if(DEBUG) System.out.println("after reduce:\n"+f);
 		return f;
+	}
+	/**
+	 * Get a query result given a LHS of a query.
+	 * At each index of the input lists, we have variable = value pairs.
+	 * Note that to keep the format consistent, 
+	 * we pass NO_EVIDENCE if no evidence specified.
+	 * @param vars
+	 * @param values
+	 * @return the factor result, or null if query is out of clique inference
+	 * @throws FactorIndexException 
+	 */
+	public Factor getQueryResultMaxProduct(ArrayList<Integer> vars, ArrayList<Integer> values) 
+			throws FactorIndexException {
+		// for each variable find a clique and take the max marginal
+		for(int i = 0; i < vars.size(); i++) {
+			System.out.printf("var:%d aka %s\n", i, Factor.variableIndicesToNames(i));
+			Vertex target = findVertexInTree(_queryTree, vars.get(i));
+			System.out.println("at clique:"+target);
+			// marginalize out all variables not current
+			ArrayList<Integer> diff = new ArrayList<Integer>();
+			diff.add(i);
+			Factor f = target.maxMarginalize(target.difference(diff));
+			System.out.println("have factor:\n"+f);
+			// max margnial of this:
+			diff.clear();
+			diff.add(i);
+			f = f.maxMarginalize(diff);
+			System.out.println("now:"+f);
+		}
+		return null;
 	}
 	/**
 	 * Reads in the tree from the clique file.

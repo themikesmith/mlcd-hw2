@@ -27,7 +27,7 @@ import elanmike.mlcd.hw2.Factor.FactorIndexException;
  * @author mcs
  *
  */
-public class BumpMax extends Bump {
+public class Remax extends Bump {
 	public static final int UNMARKED = 0;
 	public static int nextOrderID = UNMARKED;
 	/**
@@ -156,24 +156,26 @@ public class BumpMax extends Bump {
 		 * @throws FactorIndexException 
 		 */
 		void sendMessage(Edge edgeToJ) throws FactorException {
+			System.out.printf("sending message from %s to %s, upward? %s\n", this.toString(), edgeToJ.getOtherVertex(this), _bumpOnUpwardPass);
 			// compose the message
 			Factor message = new Factor(_initialBelief);
 			// multiply initial belief with all incoming messages.
 			// each incoming message is on a neighboring edge
-			Set<Edge> incomingEdges = getIncomingNeighborEdges(_bumpOnUpwardPass);
-			for(Edge e : incomingEdges) {
-				message = message.product(e);
-			}
+//			Set<Edge> incomingEdges = getIncomingNeighborEdges(_bumpOnUpwardPass);
+//			for(Edge e : incomingEdges) {
+//				message = message.product(e);
+//			}
 			// marginalize out all variables but what's in the sepset
 			ArrayList<Integer> elimVar = this.difference(edgeToJ._variables);
-			message = message.marginalize(elimVar);
+			message = message.maxMarginalize(elimVar);
 			if(_bumpOnUpwardPass) {
 				edgeToJ.setUpwardMessage(message);
 			}
 			else {
 				edgeToJ.setDownwardMessage(message);
 			}
-			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ);			
+			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ);
+			edgeToJ._timesMessagesSentAcrossMe++;
 		}
 		/**
 		 * When we receive a message...
@@ -182,6 +184,7 @@ public class BumpMax extends Bump {
 		 * @param deltaItoJ
 		 */
 		private void onReceiveMessage(Edge edgeItoJ) throws FactorException {
+			System.out.printf("%s receiving message from %s, upward? %s\n", this.toString(), edgeItoJ.getOtherVertex(this), _bumpOnUpwardPass);
 			if(!_neighborEdges.containsKey(edgeItoJ)) {
 				System.err.println("hello check");
 			}
@@ -198,22 +201,24 @@ public class BumpMax extends Bump {
 			if(ready) {
 				if(DEBUG) System.out.println("updating belief!");
 				Factor b = new Factor(_initialBelief);
+				System.out.println("initial belief before product:\n"+_initialBelief);
 				for(Edge e : _neighborEdges.keySet()) {
 					Factor msg;
-					if(DEBUG) System.out.printf("my id:%d sender id:%d\n", this._orderID, e.getOtherVertex(this)._orderID);
+					if(DEBUG) System.out.printf("\nmy id:%d neighbor id:%d\n", this._orderID, e.getOtherVertex(this)._orderID);
 					if(DEBUG) System.out.println("edge info:"+e.getLongInfo());
 					if(this._orderID < e.getOtherVertex(this)._orderID) {
-						if(DEBUG) System.out.println("upward: getting msg from i to j");
+						if(DEBUG) System.out.println("getting upward msg from "+e.getOtherVertex(this));
 						msg = e.getUpwardMessage();
 					}
 					else {
-						if(DEBUG) System.out.println("downward: getting msg from j to i");
+						if(DEBUG) System.out.println("getting downward msg from "+e.getOtherVertex(this));
 						msg = e.getDownwardMessage();
 					}
 					System.out.println("multiply by msg:\n"+msg);
 					b = b.product(msg);
 				}
 				this.setFactorData(b);
+				System.out.println("belief now updated:\n"+this.getLongInfo());
 			}
 		}
 		/**
@@ -386,8 +391,9 @@ public class BumpMax extends Bump {
 			sb.append(Factor.variableIndicesToNames(_one._variables));
 			sb.append(" --").append(Factor.variableIndicesToNames(_variables)).append("-- ");
 			sb.append(Factor.variableIndicesToNames(_two._variables));
-			sb.append("\ndelta i to j:\n").append(super.toString());
-			sb.append("\ndelta j to i:\n").append(_deltaJtoI.toString());
+			sb.append("\nupward:\n").append(super.toString());
+			sb.append("\ndownward:\n").append(_deltaJtoI.toString());
+			sb.append("mu:\n").append(this.product(_deltaJtoI).toString());
 			return sb.toString();
 		}
 		/**
@@ -416,11 +422,13 @@ public class BumpMax extends Bump {
 		/** Set the message in the downward slot */
 		void setDownwardMessage(Factor f) {
 			_deltaJtoI = f;
+			System.out.println("downward message now:\n"+this.getLongInfo());
 		}
 		/** Set the message in the upward slot 
 		 * @throws FactorScopeException */
 		void setUpwardMessage(Factor f) throws FactorScopeException {
 			this.setFactorData(f);
+			System.out.println("upward message now:\n"+this.getLongInfo());
 		}
 	}
 	private class Tree {
@@ -501,7 +509,7 @@ public class BumpMax extends Bump {
 	private boolean _bumpOnUpwardPass;
 	private Tree _tree, _queryTree;
 	private static boolean _useSumProduct;
-	public BumpMax() {
+	public Remax() {
 		_tree = new Tree();
 		_bumpOnUpwardPass = false;
 		_useSumProduct = true;
@@ -685,50 +693,61 @@ public class BumpMax extends Bump {
 		if(DEBUG) System.out.println("\n\nassigning ordering!\n\n");
 		nextOrderID = UNMARKED; // begin again at 0
 		List<Vertex> ordering = new ArrayList<Vertex>();
-		if(t._vertices.size() == 0) return ordering;
-		// mark all vertices unmarked
-		for(Vertex v : t._vertices.values()) {
-			v.setUnmarked();
-		}
-		Queue<Vertex> toProcess = new LinkedList<Vertex>();
-		toProcess.add(root);
-		if(DEBUG) System.out.println("root is "+root.getVariableNames());
-		
-		// giving a number is equivalent to adding to ordering, giving index
-		// while all vertices don't have a number
-		while(ordering.size() != t._vertices.size()) {
-			if(toProcess.size() == 0) {
-				// find an unmarked node... expensive
-				for(Vertex v : t._vertices.values()) {
-					if(v._orderID == UNMARKED) {
-						toProcess.add(v); // add to queue when find unmarked
-					}
-				}
-			}
-			Vertex curr = toProcess.remove();
-			if(DEBUG) System.out.printf("curr VertexMax:%s\n",curr);
-			// mark
-			curr.setOrderID();
-			ordering.add(curr); // and add to our ordered list
-			if(curr._orderID != ordering.size()) {// verify
-				System.err.println("oops! order id incorrect");
-			}
-			// and then for each downstream child...
-			for(Edge e : curr._neighborEdges.keySet()) {
-				Vertex k = e.getOtherVertex(curr);
-				if(DEBUG) System.out.println("check neighbor:"+k);
-				if(k._orderID == UNMARKED) {
-					if(DEBUG) System.out.println(k+" is unmarked - it's downstream");
-					// downstream if we haven't marked it yet
-//					// send belief update message to the child
-//					curr.sendMessage(e);
-					// and add the child to our list to process
-					if(DEBUG) System.out.printf("adding %s to be processed\n",root.getVariableNames());
-					toProcess.add(k);
-				}
-			}
-		}
+//		if(t._vertices.size() == 0) return ordering;
+//		// mark all vertices unmarked
+//		for(Vertex v : t._vertices.values()) {
+//			v.setUnmarked();
+//		}
+//		Queue<Vertex> toProcess = new LinkedList<Vertex>();
+//		toProcess.add(root);
+//		if(DEBUG) System.out.println("root is "+root.getVariableNames());
+//		
+//		// giving a number is equivalent to adding to ordering, giving index
+//		// while all vertices don't have a number
+//		while(ordering.size() != t._vertices.size()) {
+//			if(toProcess.size() == 0) {
+//				// find an unmarked node... expensive
+//				for(Vertex v : t._vertices.values()) {
+//					if(v._orderID == UNMARKED) {
+//						toProcess.add(v); // add to queue when find unmarked
+//					}
+//				}
+//			}
+//			Vertex curr = toProcess.remove();
+//			if(DEBUG) System.out.printf("curr VertexMax:%s\n",curr);
+//			// mark
+//			curr.setOrderID();
+//			ordering.add(curr); // and add to our ordered list
+//			if(curr._orderID != ordering.size()) {// verify
+//				System.err.println("oops! order id incorrect");
+//			}
+//			// and then for each downstream child...
+//			for(Edge e : curr._neighborEdges.keySet()) {
+//				Vertex k = e.getOtherVertex(curr);
+//				if(DEBUG) System.out.println("check neighbor:"+k);
+//				if(k._orderID == UNMARKED) {
+//					if(DEBUG) System.out.println(k+" is unmarked - it's downstream");
+//					// downstream if we haven't marked it yet
+////					// send belief update message to the child
+////					curr.sendMessage(e);
+//					// and add the child to our list to process
+//					if(DEBUG) System.out.printf("adding %s to be processed\n",root.getVariableNames());
+//					toProcess.add(k);
+//				}
+//			}
+//		}
+//		return ordering;
+		Vertex v = findVertexInTree(t, 3,2);
+		v.setOrderID();
+		ordering.add(v);
+		v = findVertexInTree(t, 2,0);
+		v.setOrderID();
+		ordering.add(v);
+		v = findVertexInTree(t, 1,0);
+		v.setOrderID();
+		ordering.add(v);
 		return ordering;
+//		[[G, I], [I, J], [G, H]]
 	}
 	/**
 	 * Calibrate the tree with the upward pass of belief-update message passing.
@@ -786,7 +805,7 @@ public class BumpMax extends Bump {
 	 * @param vars the variable integers
 	 * @return a suitable VertexMax, or null otherwise.  should always return a VertexMax.
 	 */
-	Vertex findVertexMaxInTree(Tree t, int... vars) {
+	Vertex findVertexInTree(Tree t, int... vars) {
 		for(Vertex v : t._vertices.values()) {
 			boolean containsAll = true;
 			for(int i : vars) {
@@ -806,7 +825,7 @@ public class BumpMax extends Bump {
 	 * @param vars the variable integers
 	 * @return a suitable VertexMax, or null otherwise.  should always return a VertexMax.
 	 */
-	Vertex findVertexMaxInTree(Tree t, ArrayList<Integer> vars) {
+	Vertex findVertexInTree(Tree t, ArrayList<Integer> vars) {
 		for(Vertex v : t._vertices.values()) {
 			boolean containsAll = true;
 			for(int i : vars) {
@@ -842,7 +861,7 @@ public class BumpMax extends Bump {
 		for(int i = 0; i < vars.size(); i++) {
 			int var = vars.get(i), value = values.get(i);
 			// Find a clique with the variable, C, in the query tree
-			Vertex v = findVertexMaxInTree(_queryTree, var);
+			Vertex v = findVertexInTree(_queryTree, var);
 			if(v == null) {
 				System.err.println("can't find VertexMax - whoops!");
 			}
@@ -886,7 +905,7 @@ public class BumpMax extends Bump {
 	 */
 	public Factor getQueryResult(ArrayList<Integer> vars, ArrayList<Integer> values) 
 			throws FactorIndexException {
-		Vertex target = findVertexMaxInTree(_queryTree, vars);
+		Vertex target = findVertexInTree(_queryTree, vars);
 		if(target == null) {
 			System.err.println("uh oh! we can't do out-of-clique inference!");
 			return null;
@@ -1137,7 +1156,7 @@ public class BumpMax extends Bump {
 				"/home/mcs/Dropbox/mlcd/assignment2/hw2-files/cliquetree-10.8.txt",
 		};
 		newArgs = args;
-		BumpMax b = new BumpMax();
+		Remax b = new Remax();
 		// calibrate on our tree
 			try {
 				for(int i = 0; i < newArgs.length; i++) {

@@ -212,7 +212,12 @@ public class QueryProcessor {
 		}
 		Factor result;
 		try {
-			result = _bump.getQueryResult(vars, values);
+			if(_bump.useSumProduct()) {
+				result = _bump.getQueryResult(vars, values);
+			}
+			else {
+				result = _bump.getQueryResultMaxProduct(vars, values);
+			}
 			if (DEBUG) {
 				System.out.println("\n******result!!!******\n");
 			}
