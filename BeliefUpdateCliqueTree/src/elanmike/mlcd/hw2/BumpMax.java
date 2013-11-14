@@ -90,21 +90,21 @@ public class BumpMax extends Bump {
 			return sb.toString();
 		}
 	}
-	private class VertexMax extends Clique {
+	private class Vertex extends Clique {
 		private int _orderID;
 		private Set<Edge> _outgoingEdges;
 		/**
 		 * Stores each neighboring edge
 		 */
 		private Set<Edge> _neighborEdges;
-		VertexMax(String[] varsContained){
+		Vertex(String[] varsContained){
 			super(varsContained);
 			_outgoingEdges = new HashSet<Edge>();
 			_neighborEdges = new HashSet<Edge>();
 			reset();
 		}
 		
-		protected VertexMax(VertexMax VertexMaxToCopy) {
+		protected Vertex(Vertex VertexMaxToCopy) {
 			super(VertexMaxToCopy);
 			_outgoingEdges = new HashSet<Edge>();
 			_neighborEdges = new HashSet<Edge>();
@@ -147,13 +147,22 @@ public class BumpMax extends Bump {
 			Set<Edge> es = this.getincomingNeighborEdges(_bumpOnUpwardPass);
 			// for each upstream / incoming edge
 			for(Edge e : es) {
+				if(DEBUG) {
+					System.out.printf("edge used %d times\n", e._timesMessagesSentAcrossMe);
+					if(_bumpOnUpwardPass) {
+						System.out.printf("upward should have odd number of usage:\n%d\n",(e._timesMessagesSentAcrossMe % 2 ));
+					}
+					else {
+						System.out.printf("downward should have even number of usage:\n%d\n",(e._timesMessagesSentAcrossMe % 2 ));
+					}
+				}
 				deltaItoJ = deltaItoJ.product(e);
 			}
 			// and max marginalize out the variables not in the sepset
 			if(DEBUG) System.out.println("marginalize out variables not in sepset...");
 			//TODO maxmarginalize
-//			deltaItoJ = deltaItoJ.maxMarginalize(this.difference(edgeToJ._variables));
-			deltaItoJ = deltaItoJ.marginalize(this.difference(edgeToJ._variables));
+//			deltaItoJ = deltaItoJ.maxMarginalize(_initialBelief.difference(edgeToJ._variables));
+			deltaItoJ = deltaItoJ.marginalize(_initialBelief.difference(edgeToJ._variables));
 			if(DEBUG) System.out.println("sending delta I,J:\n"+deltaItoJ.toString());
 			// send: make J receive
 			edgeToJ.getOtherVertexMax(this).onReceiveMessage(edgeToJ, deltaItoJ);
@@ -161,21 +170,23 @@ public class BumpMax extends Bump {
 			edgeToJ.setFactorData(deltaItoJ); //TODO add backpointers, assignment
 			// update edge message count
 			edgeToJ._timesMessagesSentAcrossMe++;
-			if(DEBUG) System.out.println("delta I,J:\n"+deltaItoJ.toString());
+			if(DEBUG) System.out.printf("edge I to J:%s\n holds delta I,J:\n%s\n", edgeToJ, deltaItoJ.toString());
 		}
 		/**
 		 * When we receive a message...
 		 * (called by our 'send message' function when our neighbor sends
 		 * @param edgeItoJ
-		 * @param sigmaItoJ
+		 * @param deltaItoJ
 		 */
-		private void onReceiveMessage(Edge edgeItoJ, Factor sigmaItoJ) throws FactorException {
+		private void onReceiveMessage(Edge edgeItoJ, Factor deltaItoJ) throws FactorException {
 			if(DEBUG) System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertexMax(this));
-			if(DEBUG) System.out.println("old belief beta:");
+			if(DEBUG) System.out.println("initial unchanged belief of J:");
+			if(DEBUG) System.out.println(super.getLongInitialInfo());
+			if(DEBUG) System.out.println("old belief beta J:");
 			if(DEBUG) System.out.println(super.getLongInfo());
 			// belief j = initial belief j * product of all incoming messages
-			if(DEBUG) System.out.println("delta ItoJ:"+edgeItoJ.getLongInfo());
-			this.setFactorData(this.product(edgeItoJ));
+			if(DEBUG) System.out.printf("delta ItoJ via edge %s:\n%s\n", edgeItoJ, deltaItoJ);
+			this.setFactorData(this.product(deltaItoJ));
 			if(DEBUG) System.out.println("belief J now:\n"+super.getLongInfo());
 		}
 		/**
@@ -190,7 +201,7 @@ public class BumpMax extends Bump {
 				Iterator<Edge> it = _neighborEdges.iterator();
 				while(it.hasNext()) {
 					Edge e = it.next();
-					VertexMax v = e.getOtherVertexMax(this);
+					Vertex v = e.getOtherVertexMax(this);
 					if(this._orderID == UNMARKED) {
 						System.err.println("whoops i am unmarked");
 					}
@@ -220,7 +231,7 @@ public class BumpMax extends Bump {
 				Iterator<Edge> it = _neighborEdges.iterator();
 				while(it.hasNext()) {
 					Edge e = it.next();
-					VertexMax v = e.getOtherVertexMax(this);
+					Vertex v = e.getOtherVertexMax(this);
 					if(this._orderID == UNMARKED) {
 						System.err.println("whoops i am unmarked");
 					}
@@ -251,7 +262,7 @@ public class BumpMax extends Bump {
 				Iterator<Edge> it = _neighborEdges.iterator();
 				while(it.hasNext()) {
 					Edge e = it.next();
-					VertexMax v = e.getOtherVertexMax(this);
+					Vertex v = e.getOtherVertexMax(this);
 					if(this._orderID == UNMARKED) {
 						System.err.println("whoops i am unmarked");
 					}
@@ -270,8 +281,8 @@ public class BumpMax extends Bump {
 		}
 		@Override
 		public boolean equals(Object o) {
-			if(o instanceof VertexMax) {
-				VertexMax v = (VertexMax) o;
+			if(o instanceof Vertex) {
+				Vertex v = (Vertex) o;
 				return v._variables == this._variables;
 			}
 			return false;
@@ -287,16 +298,16 @@ public class BumpMax extends Bump {
 	}
 	private class Edge extends Factor{
 		public static final String EDGE = " -- ";
-		VertexMax _one, _two;
+		Vertex _one, _two;
 		private int _timesMessagesSentAcrossMe;
-		Edge(VertexMax one, VertexMax two) {
+		Edge(Vertex one, Vertex two) {
 			super(one.intersection(two._variables));
 			this._one = one;
 			this._two = two;
 			_timesMessagesSentAcrossMe = 0;
 		}
 		
-		protected Edge(Edge edgeToCopy, VertexMax newOne, VertexMax newTwo) {
+		protected Edge(Edge edgeToCopy, Vertex newOne, Vertex newTwo) {
 			super(edgeToCopy);
 			this._one = newOne;
 			this._two = newTwo;
@@ -338,25 +349,25 @@ public class BumpMax extends Bump {
 		 * @param v
 		 * @return
 		 */
-		VertexMax getOtherVertexMax(VertexMax v) {
+		Vertex getOtherVertexMax(Vertex v) {
 			if(v.equals(_one)) return _two;
 			else if(v.equals(_two)) return _one;
 			else return null;
 		}
 	}
 	private class Tree {
-		private HashMap<String,VertexMax> _vertices;
+		private HashMap<String,Vertex> _vertices;
 		private HashMap<String,Edge> _edges;
 		Tree() {
-			_vertices = new HashMap<String,VertexMax>();
+			_vertices = new HashMap<String,Vertex>();
 			_edges = new HashMap<String,Edge>();
 		}
 		protected Tree(Tree other) {
-			_vertices = new HashMap<String,VertexMax>();
-			Iterator<Entry<String, VertexMax>> itv = other._vertices.entrySet().iterator();
+			_vertices = new HashMap<String,Vertex>();
+			Iterator<Entry<String, Vertex>> itv = other._vertices.entrySet().iterator();
 			while(itv.hasNext()) {
-				Entry<String,VertexMax> entry = itv.next();
-				_vertices.put(entry.getKey(), new VertexMax(entry.getValue()));
+				Entry<String,Vertex> entry = itv.next();
+				_vertices.put(entry.getKey(), new Vertex(entry.getValue()));
 			}
 			_edges = new HashMap<String,Edge>();
 			Iterator<Entry<String, Edge>> ite = other._edges.entrySet().iterator();
@@ -370,7 +381,7 @@ public class BumpMax extends Bump {
 					_vertices.get(keyOne), _vertices.get(keyTwo)));
 			}
 		}
-		void addVertexMax(VertexMax v) {
+		void addVertexMax(Vertex v) {
 			_vertices.put(v.makeKey(),v);
 			//System.out.println("adding vertice with key: "+ v._variables.toString());
 		}
@@ -460,7 +471,7 @@ public class BumpMax extends Bump {
 		if(DEBUG) System.out.println("running bump!");
 		// note we initialize the clique tree by construction!
 		try {
-			List<VertexMax> ordering = assignBumpOrdering(_tree);
+			List<Vertex> ordering = assignBumpOrdering(_tree);
 			if(DEBUG) System.out.printf("ordering:\n%s\n", ordering);
 			upwardPassMaxBeliefUpdate(ordering);
 			downwardPassMaxBeliefUpdate(ordering);
@@ -594,7 +605,7 @@ public class BumpMax extends Bump {
 	 * @return a list of the order of this pass, so we can reverse it in the upward pass
 	 * @throws FactorException 
 	 */
-	List<VertexMax> assignBumpOrdering(Tree t) throws FactorException {
+	List<Vertex> assignBumpOrdering(Tree t) throws FactorException {
 		return assignBumpOrdering(t, t._vertices.values().iterator().next());
 	}
 	/**
@@ -608,17 +619,17 @@ public class BumpMax extends Bump {
 	 * @return a list of the order of this pass, so the upward pass can reverse it
 	 * @throws FactorException 
 	 */
-	List<VertexMax> assignBumpOrdering(Tree t, VertexMax root) throws FactorException {
+	List<Vertex> assignBumpOrdering(Tree t, Vertex root) throws FactorException {
 		_bumpOnUpwardPass = false;
 		if(DEBUG) System.out.println("\n\nassigning ordering!\n\n");
 		nextOrderID = UNMARKED; // begin again at 0
-		List<VertexMax> ordering = new ArrayList<VertexMax>();
+		List<Vertex> ordering = new ArrayList<Vertex>();
 		if(t._vertices.size() == 0) return ordering;
 		// mark all vertices unmarked
-		for(VertexMax v : t._vertices.values()) {
+		for(Vertex v : t._vertices.values()) {
 			v.setUnmarked();
 		}
-		Queue<VertexMax> toProcess = new LinkedList<VertexMax>();
+		Queue<Vertex> toProcess = new LinkedList<Vertex>();
 		toProcess.add(root);
 		if(DEBUG) System.out.println("root is "+root.getVariableNames());
 		
@@ -627,13 +638,13 @@ public class BumpMax extends Bump {
 		while(ordering.size() != t._vertices.size()) {
 			if(toProcess.size() == 0) {
 				// find an unmarked node... expensive
-				for(VertexMax v : t._vertices.values()) {
+				for(Vertex v : t._vertices.values()) {
 					if(v._orderID == UNMARKED) {
 						toProcess.add(v); // add to queue when find unmarked
 					}
 				}
 			}
-			VertexMax curr = toProcess.remove();
+			Vertex curr = toProcess.remove();
 			if(DEBUG) System.out.printf("curr VertexMax:%s\n",curr);
 			// mark
 			curr.setOrderID();
@@ -643,7 +654,7 @@ public class BumpMax extends Bump {
 			}
 			// and then for each downstream child...
 			for(Edge e : curr._neighborEdges) {
-				VertexMax k = e.getOtherVertexMax(curr);
+				Vertex k = e.getOtherVertexMax(curr);
 				if(DEBUG) System.out.println("check neighbor:"+k);
 				if(k._orderID == UNMARKED) {
 					if(DEBUG) System.out.println(k+" is unmarked - it's downstream");
@@ -671,7 +682,7 @@ public class BumpMax extends Bump {
 	 * @return a list of the order of this pass, so we can reverse it in the upward pass
 	 * @throws FactorException 
 	 */
-	List<VertexMax> downwardPassBeliefUpdate(Tree t) throws FactorException {
+	List<Vertex> downwardPassBeliefUpdate(Tree t) throws FactorException {
 		return downwardPassBeliefUpdate(t, t._vertices.values().iterator().next());
 	}
 	/**
@@ -685,30 +696,30 @@ public class BumpMax extends Bump {
 	 * @return a list of the order of this pass, so the upward pass can reverse it
 	 * @throws FactorException 
 	 */
-	List<VertexMax> downwardPassBeliefUpdate(Tree t, VertexMax root) throws FactorException {
+	List<Vertex> downwardPassBeliefUpdate(Tree t, Vertex root) throws FactorException {
 		_bumpOnUpwardPass = false;
 		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
 		nextOrderID = UNMARKED; // begin again at 0
-		List<VertexMax> ordering = new ArrayList<VertexMax>();
+		List<Vertex> ordering = new ArrayList<Vertex>();
 		if(t._vertices.size() == 0) return ordering;
 		// mark all vertices unmarked
-		for(VertexMax v : t._vertices.values()) {
+		for(Vertex v : t._vertices.values()) {
 			v.setUnmarked();
 		}
-		Queue<VertexMax> toProcess = new LinkedList<VertexMax>();
+		Queue<Vertex> toProcess = new LinkedList<Vertex>();
 		toProcess.add(root);
 		// giving a number is equivalent to adding to ordering, giving index
 		// while all vertices don't have a number
 		while(ordering.size() != t._vertices.size()) {
 			if(toProcess.size() == 0) {
 				// find an unmarked node... expensive
-				for(VertexMax v : t._vertices.values()) {
+				for(Vertex v : t._vertices.values()) {
 					if(v._orderID == UNMARKED) {
 						toProcess.add(v); // add to queue when find unmarked
 					}
 				}
 			}
-			VertexMax curr = toProcess.remove();
+			Vertex curr = toProcess.remove();
 			if(DEBUG) System.out.printf("curr VertexMax:%s\n",curr);
 			// mark
 			curr.setOrderID();
@@ -718,7 +729,7 @@ public class BumpMax extends Bump {
 			}
 			// and then for each downstream child...
 			for(Edge e : curr._neighborEdges) {
-				VertexMax k = e.getOtherVertexMax(curr);
+				Vertex k = e.getOtherVertexMax(curr);
 				if(DEBUG) System.out.println("check neighbor:"+k);
 				if(k._orderID == UNMARKED) {
 					if(DEBUG) System.out.println("k is unmarked - it's downstream");
@@ -737,11 +748,11 @@ public class BumpMax extends Bump {
 	 * Use the reverse of our ordering that we created in the downward pass.
 	 * @throws FactorException 
 	 */
-	void downwardPassMaxBeliefUpdate(List<VertexMax> orderedVertices) throws FactorException {
+	void downwardPassMaxBeliefUpdate(List<Vertex> orderedVertices) throws FactorException {
 		_bumpOnUpwardPass = true;
 		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
 		for(int i = 0; i < orderedVertices.size(); i++) {
-			VertexMax v = orderedVertices.get(i);
+			Vertex v = orderedVertices.get(i);
 			if(DEBUG) System.out.printf("i:%d VertexMax:%s\n",i,v);
 			// for each edge that is outgoing given our ordering
 			for(Edge e : v.getDownwardOutgoingNeighborEdges()) {
@@ -755,11 +766,11 @@ public class BumpMax extends Bump {
 	 * Use the reverse of our ordering that we created in the downward pass.
 	 * @throws FactorException 
 	 */
-	void upwardPassMaxBeliefUpdate(List<VertexMax> orderedVertices) throws FactorException {
+	void upwardPassMaxBeliefUpdate(List<Vertex> orderedVertices) throws FactorException {
 		_bumpOnUpwardPass = true;
 		if(DEBUG) System.out.println("\n\nupward pass!\n\n");
 		for(int i = orderedVertices.size() - 1; i >= 0; i--) {
-			VertexMax v = orderedVertices.get(i);
+			Vertex v = orderedVertices.get(i);
 			if(DEBUG) System.out.printf("i:%d VertexMax:%s\n",i,v);
 			// for each edge that is outgoing given our ordering
 			for(Edge e : v.getUpwardOutgoingNeighborEdges()) {
@@ -786,8 +797,8 @@ public class BumpMax extends Bump {
 	 * @param vars the variable integers
 	 * @return a suitable VertexMax, or null otherwise.  should always return a VertexMax.
 	 */
-	VertexMax findVertexMaxInTree(Tree t, int... vars) {
-		for(VertexMax v : t._vertices.values()) {
+	Vertex findVertexMaxInTree(Tree t, int... vars) {
+		for(Vertex v : t._vertices.values()) {
 			boolean containsAll = true;
 			for(int i : vars) {
 				if(!v._variables.contains(i)) {
@@ -806,8 +817,8 @@ public class BumpMax extends Bump {
 	 * @param vars the variable integers
 	 * @return a suitable VertexMax, or null otherwise.  should always return a VertexMax.
 	 */
-	VertexMax findVertexMaxInTree(Tree t, ArrayList<Integer> vars) {
-		for(VertexMax v : t._vertices.values()) {
+	Vertex findVertexMaxInTree(Tree t, ArrayList<Integer> vars) {
+		for(Vertex v : t._vertices.values()) {
 			boolean containsAll = true;
 			for(int i : vars) {
 				if(!v._variables.contains(i)) {
@@ -842,7 +853,7 @@ public class BumpMax extends Bump {
 		for(int i = 0; i < vars.size(); i++) {
 			int var = vars.get(i), value = values.get(i);
 			// Find a clique with the variable, C, in the query tree
-			VertexMax v = findVertexMaxInTree(_queryTree, var);
+			Vertex v = findVertexMaxInTree(_queryTree, var);
 			if(v == null) {
 				System.err.println("can't find VertexMax - whoops!");
 			}
@@ -881,7 +892,7 @@ public class BumpMax extends Bump {
 	 */
 	public Factor getQueryResult(ArrayList<Integer> vars, ArrayList<Integer> values) 
 			throws FactorIndexException {
-		VertexMax target = findVertexMaxInTree(_queryTree, vars);
+		Vertex target = findVertexMaxInTree(_queryTree, vars);
 		if(target == null) {
 			System.err.println("uh oh! we can't do out-of-clique inference!");
 			return null;
@@ -948,7 +959,7 @@ public class BumpMax extends Bump {
 			if((line = br.readLine()) != null){
 				String[] containedVars = line.split(",");
 //				if(DEBUG) System.out.println("Adding VertexMax: " + Factor.variableNamesToIndicies(containedVars) );
-				VertexMax v = new VertexMax(containedVars);
+				Vertex v = new Vertex(containedVars);
 				_tree.addVertexMax(v);
 			}else{
 				br.close();
