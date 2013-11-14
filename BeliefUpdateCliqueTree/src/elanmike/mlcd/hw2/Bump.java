@@ -384,7 +384,7 @@ public class Bump {
 			return output.toString();
 		}
 	}
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 	/**
 	 * true if we're on the upward pass, 
 	 * if we're going in increasing order id. 
@@ -444,7 +444,7 @@ public class Bump {
 		if(DEBUG) {
 			if(DEBUG) System.out.println("\n\n******\nis tree calibrated?\n\n");
 			if(DEBUG) System.out.println(isCalibrated());
-//			if(DEBUG) System.out.println(_tree.getLongInfo());
+			if(DEBUG) System.out.println(_tree.getLongInfo());
 		}
 		else {
 			isCalibrated();
@@ -743,9 +743,9 @@ public class Bump {
 	 */
 	void resetTreeForQueries() {
 		_queryTree = new Tree(_tree);
-//		if(DEBUG) {
-//			System.out.printf("\nquery tree structure:\n%s\n",_queryTree.toString());
-//		}
+		if(DEBUG) {
+			System.out.printf("\nquery tree structure:\n%s\n",_queryTree.toString());
+		}
 	}
 	/**
 	 * find a vertex with a clique containing the given set of variables

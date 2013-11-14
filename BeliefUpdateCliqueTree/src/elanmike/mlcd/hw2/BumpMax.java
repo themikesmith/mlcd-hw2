@@ -18,8 +18,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.sun.xml.internal.stream.Entity;
-
 import elanmike.mlcd.hw2.Factor.FactorException;
 import elanmike.mlcd.hw2.Factor.FactorIndexException;
 
@@ -49,7 +47,7 @@ public class BumpMax extends Bump {
 		
 		protected Clique(Clique cliqueToCopy) {
 			super(cliqueToCopy);
-			_initialBelief = new Factor(this);
+			_initialBelief = new Factor(cliqueToCopy._initialBelief);
 		}
 		public void setInitialFactorData(Factor f) throws FactorScopeException {
 			this.setFactorData(f);
@@ -82,13 +80,13 @@ public class BumpMax extends Bump {
 		public String getLongInfo() {
 			StringBuilder sb = new StringBuilder(toString());
 			// add factor result
-			sb.append("\n").append(super.toString());
+			sb.append("belief:\n").append(super.toString());
 			return sb.toString();
 		}
 		public String getLongInitialInfo() {
 			StringBuilder sb = new StringBuilder(toString());
 			// add factor result
-			sb.append("\n").append(_initialBelief.toString());
+			sb.append("initial belief:\n").append(_initialBelief.toString());
 			return sb.toString();
 		}
 	}
@@ -158,43 +156,24 @@ public class BumpMax extends Bump {
 		 * @throws FactorIndexException 
 		 */
 		void sendMessage(Edge edgeToJ) throws FactorException {
-			if(DEBUG) System.out.println("\n"+this.toString()+" sending message to:"+edgeToJ.getOtherVertexMax(this)+"\n via edge:"+edgeToJ);
-			// calculate message: initial belief times the deltas from every upstream edge
-			Factor message = _initialBelief;
-			System.out.println("initial belief:\n"+message);
-			// get upstream / incoming edges
-			Set<Edge> es = this.getIncomingNeighborEdges(_bumpOnUpwardPass);
-			// for each upstream / incoming edge
-			for(Edge e : es) {
-				if(DEBUG) {
-					System.out.printf("edge used %d times\n", e._timesMessagesSentAcrossMe);
-					if(_bumpOnUpwardPass) {
-						System.out.printf("upward should have odd number of usage:\n%d\n",(e._timesMessagesSentAcrossMe % 2 ));
-					}
-					else {
-						System.out.printf("downward should have even number of usage:\n%d\n",(e._timesMessagesSentAcrossMe % 2 ));
-					}
-				}
+			// compose the message
+			Factor message = new Factor(_initialBelief);
+			// multiply initial belief with all incoming messages.
+			// each incoming message is on a neighboring edge
+			Set<Edge> incomingEdges = getIncomingNeighborEdges(_bumpOnUpwardPass);
+			for(Edge e : incomingEdges) {
 				message = message.product(e);
 			}
-			// and max marginalize out the variables not in the sepset
-			if(DEBUG) System.out.println("marginalize out variables not in sepset...");
-			//TODO maxmarginalize
-//			deltaItoJ = deltaItoJ.maxMarginalize(_initialBelief.difference(edgeToJ._variables));
-			message = message.marginalize(_initialBelief.difference(edgeToJ._variables));
-			if(DEBUG) System.out.println("sending delta I,J:\n"+message.toString());
-			// send: make J receive
-			edgeToJ.getOtherVertexMax(this).onReceiveMessage(edgeToJ, message);
-			// update edge potential
+			// marginalize out all variables but what's in the sepset
+			ArrayList<Integer> elimVar = this.difference(edgeToJ._variables);
+			message = message.marginalize(elimVar);
 			if(_bumpOnUpwardPass) {
-				edgeToJ.setFactorData(message); //TODO add backpointers, assignment
+				edgeToJ.setUpwardMessage(message);
 			}
 			else {
-				edgeToJ._deltaJtoI.setFactorData(message);
+				edgeToJ.setDownwardMessage(message);
 			}
-			// update edge message count
-			edgeToJ._timesMessagesSentAcrossMe++;
-			if(DEBUG) System.out.printf("edge I to J:%s\n holds delta %s:\n%s\n", edgeToJ, (_bumpOnUpwardPass?"I,J":"J,I") ,message.toString());
+			edgeToJ.getOtherVertex(this).onReceiveMessage(edgeToJ);			
 		}
 		/**
 		 * When we receive a message...
@@ -202,39 +181,36 @@ public class BumpMax extends Bump {
 		 * @param edgeItoJ
 		 * @param deltaItoJ
 		 */
-		private void onReceiveMessage(Edge edgeItoJ, Factor deltaItoJ) throws FactorException {
-			if(DEBUG) System.out.println(this.toString()+" receiving msg from:"+edgeItoJ.getOtherVertexMax(this));
-			if(DEBUG) System.out.println("initial unchanged belief of J:");
-			if(DEBUG) System.out.println(super.getLongInitialInfo());
-			if(DEBUG) System.out.println("old belief beta J:");
-			if(DEBUG) System.out.println(super.getLongInfo());
-			if(DEBUG) System.out.printf("delta ItoJ via edge %s:\n%s\n", edgeItoJ, deltaItoJ);
+		private void onReceiveMessage(Edge edgeItoJ) throws FactorException {
+			if(!_neighborEdges.containsKey(edgeItoJ)) {
+				System.err.println("hello check");
+			}
 			_neighborEdges.put(edgeItoJ, true);
-			// have we received messages from all edges?
 			computeBeliefIfReady();
-			if(DEBUG) System.out.println("belief J now:\n"+super.getLongInfo());
 		}
 		private void computeBeliefIfReady() throws FactorScopeException {
 			// belief j = initial belief j * product of all incoming messages
 			boolean ready = true;
 			for(Entry<Edge, Boolean> entry : _neighborEdges.entrySet()) {
-				System.out.printf("edge:%s\nready?%s\n", entry.getKey(), entry.getValue());
+				if(DEBUG) System.out.printf("edge:%s\nready?%s\n", entry.getKey(), entry.getValue());
 				ready = ready && entry.getValue();
 			}
 			if(ready) {
-				System.out.println("updating belief!");
-				Factor b = new Factor(this._variables);
+				if(DEBUG) System.out.println("updating belief!");
+				Factor b = new Factor(_initialBelief);
 				for(Edge e : _neighborEdges.keySet()) {
 					Factor msg;
-					System.out.printf("my id:%d sender id:%d\n", this._orderID, e.getOtherVertexMax(this)._orderID);
-					if(_bumpOnUpwardPass) {
-						System.out.println("getting msg from i to j");
-						msg = e.getMessageItoJ();
+					if(DEBUG) System.out.printf("my id:%d sender id:%d\n", this._orderID, e.getOtherVertex(this)._orderID);
+					if(DEBUG) System.out.println("edge info:"+e.getLongInfo());
+					if(this._orderID < e.getOtherVertex(this)._orderID) {
+						if(DEBUG) System.out.println("upward: getting msg from i to j");
+						msg = e.getUpwardMessage();
 					}
 					else {
-						System.out.println("getting msg from j to i");
-						msg = e.getMessageJtoI();
+						if(DEBUG) System.out.println("downward: getting msg from j to i");
+						msg = e.getDownwardMessage();
 					}
+					System.out.println("multiply by msg:\n"+msg);
 					b = b.product(msg);
 				}
 				this.setFactorData(b);
@@ -252,7 +228,7 @@ public class BumpMax extends Bump {
 				Iterator<Edge> it = _neighborEdges.keySet().iterator();
 				while(it.hasNext()) {
 					Edge e = it.next();
-					Vertex v = e.getOtherVertexMax(this);
+					Vertex v = e.getOtherVertex(this);
 					if(this._orderID == UNMARKED) {
 						System.err.println("whoops i am unmarked");
 					}
@@ -282,7 +258,7 @@ public class BumpMax extends Bump {
 				Iterator<Edge> it = _neighborEdges.keySet().iterator();
 				while(it.hasNext()) {
 					Edge e = it.next();
-					Vertex v = e.getOtherVertexMax(this);
+					Vertex v = e.getOtherVertex(this);
 					if(this._orderID == UNMARKED) {
 						System.err.println("whoops i am unmarked");
 					}
@@ -313,7 +289,7 @@ public class BumpMax extends Bump {
 				Iterator<Edge> it = _neighborEdges.keySet().iterator();
 				while(it.hasNext()) {
 					Edge e = it.next();
-					Vertex v = e.getOtherVertexMax(this);
+					Vertex v = e.getOtherVertex(this);
 					if(this._orderID == UNMARKED) {
 						System.err.println("whoops i am unmarked");
 					}
@@ -339,9 +315,20 @@ public class BumpMax extends Bump {
 			return false;
 		}
 		public String getLongInfo() {
-			StringBuilder sb = new StringBuilder("VertexMax:\n");
+			StringBuilder sb = new StringBuilder("Vertex:\nbelief:\n");
 			// add clique string
 			sb.append(super.getLongInfo());
+			// add edge info
+			sb.append("\nneighborEdges:").append(_neighborEdges);
+			return sb.toString();
+		}
+		public String getLongInitialInfo() {
+			StringBuilder sb = new StringBuilder("Vertex:\n");
+			// add clique string
+			sb.append("belief:\n");
+			sb.append(super.getLongInfo());
+			sb.append("initial belief:\n");
+			sb.append(super.getLongInitialInfo());
 			// add edge info
 			sb.append("\nneighborEdges:").append(_neighborEdges);
 			return sb.toString();
@@ -357,7 +344,12 @@ public class BumpMax extends Bump {
 			this._one = one;
 			this._two = two;
 			_timesMessagesSentAcrossMe = 0;
-			_deltaJtoI = new Factor(this);
+			_deltaJtoI = new Factor(_variables, 0);
+			try {
+				this.setFactorData(_deltaJtoI);
+			} catch (FactorScopeException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		protected Edge(Edge edgeToCopy, Vertex newOne, Vertex newTwo) {
@@ -404,7 +396,7 @@ public class BumpMax extends Bump {
 		 * @param v
 		 * @return
 		 */
-		Vertex getOtherVertexMax(Vertex v) {
+		Vertex getOtherVertex(Vertex v) {
 			if(v.equals(_one)) return _two;
 			else if(v.equals(_two)) return _one;
 			else return null;
@@ -412,14 +404,23 @@ public class BumpMax extends Bump {
 		/**
 		 * @return the message from i to j
 		 */
-		Factor getMessageItoJ() {
+		Factor getUpwardMessage() {
 			return this;
 		}
 		/**
 		 * @return the message from j to i
 		 */
-		Factor getMessageJtoI() {
+		Factor getDownwardMessage() {
 			return _deltaJtoI;
+		}
+		/** Set the message in the downward slot */
+		void setDownwardMessage(Factor f) {
+			_deltaJtoI = f;
+		}
+		/** Set the message in the upward slot 
+		 * @throws FactorScopeException */
+		void setUpwardMessage(Factor f) throws FactorScopeException {
+			this.setFactorData(f);
 		}
 	}
 	private class Tree {
@@ -448,7 +449,7 @@ public class BumpMax extends Bump {
 					_vertices.get(keyOne), _vertices.get(keyTwo)));
 			}
 		}
-		void addVertexMax(Vertex v) {
+		void addVertex(Vertex v) {
 			_vertices.put(v.makeKey(),v);
 			//System.out.println("adding vertice with key: "+ v._variables.toString());
 		}
@@ -459,10 +460,7 @@ public class BumpMax extends Bump {
 		 */
 		void addEdge(Edge e) {
 			if(!_edges.containsKey(e.makeKey())) {
-				//_vertices.put(e._one._variables.toString(),e._one);
-				//_vertices.put(e._two._variables.toString(),e._two);
 				_edges.put(e.makeKey(),e);
-				// for each involved VertexMax V, add the edge to its 'informed' check
 				e._one.addNeighborEdge(e);
 				e._two.addNeighborEdge(e);
 			}
@@ -481,12 +479,12 @@ public class BumpMax extends Bump {
 			return output.toString();
 		}
 		public String getLongInfo() {
-			StringBuilder output = new StringBuilder("=== Vertices ===\n");
+			StringBuilder output = new StringBuilder("\n=== Vertices ===\n");
 			Set<String> keys = _vertices.keySet();
 			for(String k:keys){
-				output.append(_vertices.get(k).getLongInfo()).append("\n\n");
+				output.append(_vertices.get(k).getLongInitialInfo()).append("\n\n");
 			}
-			output.append("=== Edges ===\n");
+			output.append("\n=== Edges ===\n");
 			keys = _edges.keySet();
 			for(String k:keys){
 				output.append(_edges.get(k).getLongInfo()).append("\n");
@@ -542,11 +540,6 @@ public class BumpMax extends Bump {
 			if(DEBUG) System.out.printf("ordering:\n%s\n", ordering);
 			upwardPassMaxBeliefUpdate(ordering);
 			downwardPassMaxBeliefUpdate(ordering);
-//			upwardPassBeliefUpdate(downwardPassBeliefUpdate(_tree));
-			
-//			ordering = assignBumpOrdering(_tree);
-//			upwardPassBeliefUpdate(ordering);
-//			downwardPassBeliefUpdate(ordering);
 		} catch (FactorException e) {
 			e.printStackTrace();
 			return false;
@@ -554,7 +547,7 @@ public class BumpMax extends Bump {
 		if(DEBUG) {
 			if(DEBUG) System.out.println("\n\n******\nis tree calibrated?\n\n");
 			if(DEBUG) System.out.println(isCalibrated());
-//			if(DEBUG) System.out.println(_tree.getLongInfo());
+			if(DEBUG) System.out.println(_tree.getLongInfo());
 		}
 		else {
 			isCalibrated();
@@ -566,6 +559,7 @@ public class BumpMax extends Bump {
 		boolean passed = true;
 		if(DEBUG) System.out.println("checking edges:");
 		for(Edge curEdge : _tree._edges.values()) {
+			System.out.println("curEdge:"+curEdge);
 			try {
 				Factor one = curEdge._one.marginalize(curEdge._one.difference(curEdge._variables));
 				Factor two = curEdge._two.marginalize(curEdge._two.difference(curEdge._variables));
@@ -721,7 +715,7 @@ public class BumpMax extends Bump {
 			}
 			// and then for each downstream child...
 			for(Edge e : curr._neighborEdges.keySet()) {
-				Vertex k = e.getOtherVertexMax(curr);
+				Vertex k = e.getOtherVertex(curr);
 				if(DEBUG) System.out.println("check neighbor:"+k);
 				if(k._orderID == UNMARKED) {
 					if(DEBUG) System.out.println(k+" is unmarked - it's downstream");
@@ -730,80 +724,6 @@ public class BumpMax extends Bump {
 //					curr.sendMessage(e);
 					// and add the child to our list to process
 					if(DEBUG) System.out.printf("adding %s to be processed\n",root.getVariableNames());
-					toProcess.add(k);
-				}
-			}
-		}
-		return ordering;
-	}
-	
-	/**
-	 * Conducts one downward pass of belief update message passing
-	 * with a designated root.
-	 * Conducts breadth-first search of the query tree, 
-	 * and sends messages in that order.
-	 * 
-	 * Chooses an arbitrary root.
-	 * 
-	 * @param t the tree in question
-	 * @return a list of the order of this pass, so we can reverse it in the upward pass
-	 * @throws FactorException 
-	 */
-	List<Vertex> downwardPassBeliefUpdate(Tree t) throws FactorException {
-		return downwardPassBeliefUpdate(t, t._vertices.values().iterator().next());
-	}
-	/**
-	 * Conducts one downward pass of belief update message passing
-	 * with a designated root.
-	 * Conducts breadth-first search of the query tree, 
-	 * sends messages in that order.
-	 * 
-	 * @param t the tree in question.
-	 * @param root
-	 * @return a list of the order of this pass, so the upward pass can reverse it
-	 * @throws FactorException 
-	 */
-	List<Vertex> downwardPassBeliefUpdate(Tree t, Vertex root) throws FactorException {
-		_bumpOnUpwardPass = false;
-		if(DEBUG) System.out.println("\n\ndownward pass!\n\n");
-		nextOrderID = UNMARKED; // begin again at 0
-		List<Vertex> ordering = new ArrayList<Vertex>();
-		if(t._vertices.size() == 0) return ordering;
-		// mark all vertices unmarked
-		for(Vertex v : t._vertices.values()) {
-			v.setUnmarked();
-		}
-		Queue<Vertex> toProcess = new LinkedList<Vertex>();
-		toProcess.add(root);
-		// giving a number is equivalent to adding to ordering, giving index
-		// while all vertices don't have a number
-		while(ordering.size() != t._vertices.size()) {
-			if(toProcess.size() == 0) {
-				// find an unmarked node... expensive
-				for(Vertex v : t._vertices.values()) {
-					if(v._orderID == UNMARKED) {
-						toProcess.add(v); // add to queue when find unmarked
-					}
-				}
-			}
-			Vertex curr = toProcess.remove();
-			if(DEBUG) System.out.printf("curr VertexMax:%s\n",curr);
-			// mark
-			curr.setOrderID();
-			ordering.add(curr); // and add to our ordered list
-			if(curr._orderID != ordering.size()) {// verify
-				System.err.println("oops! order id incorrect");
-			}
-			// and then for each downstream child...
-			for(Edge e : curr._neighborEdges.keySet()) {
-				Vertex k = e.getOtherVertexMax(curr);
-				if(DEBUG) System.out.println("check neighbor:"+k);
-				if(k._orderID == UNMARKED) {
-					if(DEBUG) System.out.println("k is unmarked - it's downstream");
-					// downstream if we haven't marked it yet
-					// send belief update message to the child
-					curr.sendMessage(e);
-					// and add the child to our list to process
 					toProcess.add(k);
 				}
 			}
@@ -823,6 +743,7 @@ public class BumpMax extends Bump {
 			if(DEBUG) System.out.printf("i:%d VertexMax:%s\n",i,v);
 			// for each edge that is outgoing given our ordering
 			for(Edge e : v.getDownwardOutgoingNeighborEdges()) {
+				if(DEBUG) System.out.println("sending msg over edge:"+e);
 				// send our message along that edge
 				v.sendMessage(e);
 			}
@@ -841,6 +762,7 @@ public class BumpMax extends Bump {
 			if(DEBUG) System.out.printf("i:%d VertexMax:%s\n",i,v);
 			// for each edge that is outgoing given our ordering
 			for(Edge e : v.getUpwardOutgoingNeighborEdges()) {
+				if(DEBUG) System.out.println("sending msg over edge:"+e);
 				// send our message along that edge
 				v.sendMessage(e);
 			}
@@ -853,9 +775,9 @@ public class BumpMax extends Bump {
 	 */
 	void resetTreeForQueries() {
 		_queryTree = new Tree(_tree);
-//		if(DEBUG) {
-//			System.out.printf("\nquery tree structure:\n%s\n",_queryTree.toString());
-//		}
+		if(DEBUG) {
+			System.out.printf("\nquery tree structure:\n%s\n",_queryTree.getLongInfo());
+		}
 	}
 	/**
 	 * find a VertexMax with a clique containing the given set of variables
@@ -1032,7 +954,7 @@ public class BumpMax extends Bump {
 				String[] containedVars = line.split(",");
 //				if(DEBUG) System.out.println("Adding VertexMax: " + Factor.variableNamesToIndicies(containedVars) );
 				Vertex v = new Vertex(containedVars);
-				_tree.addVertexMax(v);
+				_tree.addVertex(v);
 			}else{
 				br.close();
 				throw new IOException("inconsistent network file.");
@@ -1215,9 +1137,7 @@ public class BumpMax extends Bump {
 				"/home/mcs/Dropbox/mlcd/assignment2/hw2-files/cliquetree-10.8.txt",
 		};
 		newArgs = args;
-		Bump b;
-		if(_useSumProduct) b= new Bump();
-		else b = new BumpMax();
+		BumpMax b = new BumpMax();
 		// calibrate on our tree
 			try {
 				for(int i = 0; i < newArgs.length; i++) {
